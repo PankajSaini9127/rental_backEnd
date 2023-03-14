@@ -19,7 +19,7 @@ router.route('/userRegistration').post(async(req,res)=>{
             res.send({message:"Email Has already Register"})
           }else if(code && name && email && password && role && supervisor){
             const user = await db("users").insert(req.body)
-            res.status(201).send({success:true,message:"User regidterd succsessful"})
+            res.status(201).send({success:true,message:"User register succsessful"})
           }else{
             throw new Error({success:false,message:"All filds are required"})
           }
@@ -27,7 +27,7 @@ router.route('/userRegistration').post(async(req,res)=>{
         // const user = await db('users').insert(req.body)
         // res.send(user)
     } catch (error) {
-        res.status(422).send({success:false,message:"All filds are required"})
+        res.status(422).send(error)
     }
    
     

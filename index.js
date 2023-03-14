@@ -12,7 +12,9 @@ const cors = require("cors");
 app.use(cors());
 app.use(express.json());
 
-app.post('/admin',)
+app.get("/",(req,res)=>{
+  res.send("hello api is live")
+})
 
 
 app.use('/api/admin',require('./Routes/AdminPanel'))
@@ -21,6 +23,6 @@ app.use('/api/admin',require('./Routes/AdminPanel'))
 
 
 
-app.listen(8080,()=>{
-  console.log('server is host on Port No 8080')
+app.listen(Port,()=>{
+  console.log(`server is host on Port No ${Port}`)
 });
