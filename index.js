@@ -18,6 +18,7 @@ app.get("/",(req,res)=>{
 
 
 app.use('/api/admin',require('./Routes/AdminPanel'))
+app.use('/api',require('./Routes/ManagerPanel'))
 
 
 

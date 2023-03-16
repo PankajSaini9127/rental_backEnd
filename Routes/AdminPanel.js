@@ -2,36 +2,16 @@ const express = require('express')
 
 const db = require('../data/db')
 
-const hashPassword = require('password-hash')
+const hashPassword = require('password-hash');
+const {userRegistration,testMail} = require('../controller/UserRegistration');
 
 
 const router = express.Router();
 
 //add User
 //path /api/admin/userRegistration
-router.route('/userRegistration').post(async(req,res)=>{
-    const {code,name,email,password,role,supervisor} = req.body
-
-    try {
-          const checkEmail = await db.from('users').select("email").where({email})
-
-          if(checkEmail.length == 1){
-            res.send({message:"Email Has already Register"})
-          }else if(code && name && email && password && role && supervisor){
-            const user = await db("users").insert(req.body)
-            res.status(201).send({success:true,message:"User register succsessful"})
-          }else{
-            throw new Error({success:false,message:"All filds are required"})
-          }
-
-        // const user = await db('users').insert(req.body)
-        // res.send(user)
-    } catch (error) {
-        res.status(422).send(error)
-    }
-   
-    
- })
+router.route('/userRegistration').post(userRegistration)
+router.route('/test').post(testMail)
 
 
 //get all user users
@@ -70,14 +50,20 @@ router.route('/edit/:id').put(async(req,res)=>{
 
 //admin signup
 //path /api/admin/signup
-//body email and password
+//body email and password && role
 
 router.route('/signup').post(async(req,res)=>{
+    const {email, password, role} = req.body;
      try {
-        const user = await db('login').insert(req.body)
-        res.status(201).send(user)
+        if(email && password && role){
+            const user = await db('login').insert(req.body)
+            res.status(201).send(user)
+        }else{
+            throw new Error({success:false,message:"All Fields Are Require"})
+        }
+        
      } catch (error) {
-             res.send(error)
+             res.send({success:false,message:"All Fields Are Require"})
      }
 })
 
