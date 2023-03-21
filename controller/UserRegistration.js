@@ -34,7 +34,6 @@ const user = await db("users").insert(req.body)
           }
 
     } catch (error) {
-        console.log(error)
        return res.status(422).send({success:false,message:"All filds are required"})
     }
    
