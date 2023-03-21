@@ -27,6 +27,7 @@ exports.up = function(knex) {
     t.string('benificiaryName').notNullable(),
     t.string('accountNo').notNullable(),
     t.string('ifscCode').notNullable(),
+    t.string('status').defaultTo('Pending'),
     t.timestamp('time')
   })
 };

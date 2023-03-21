@@ -12,15 +12,21 @@ const userRegistration = async(req,res)=>{
 
     try {
           const checkEmail = await db.from('users').select("email").where({email})
-
+           
           if(checkEmail.length == 1){
            return res.status(208).send({message:"Email Has already Register"})
-          }else if(code && name && email && password && role && supervisor){
-            const user = await db("users").insert(req.body)
+          }else
+           if(code && name && email && password && role && supervisor){
+            
+            req.body.role= JSON.stringify(req.body.role)
+const user = await db("users").insert(req.body)
 
-           const sendMail = await sendMail(req.body)
+            //for sending mail call sendMail
+           const mail = await sendMail(req.body).catch(error=>{
+            console.log(error)
+           })
            
-           return res.status(201).send({success:true,message:"User register succsessful",user})
+           return res.status(201).send({success:true,message:"User register succsessful & Login Details Send To Your Email Address",user})
 
            
           }else{
@@ -28,6 +34,7 @@ const userRegistration = async(req,res)=>{
           }
 
     } catch (error) {
+        console.log(error)
        return res.status(422).send({success:false,message:"All filds are required"})
     }
    
@@ -59,16 +66,61 @@ const sendMail = async (user)=>{
         product:{
             name:"ANDROMEDA",
             dec:"India's Largest Load Distributer",
-            link:"https://mailGen.com/"
+            link:"https://rental-system-bitwit.netlify.app/",
+            copyright: 'Copyright © 2023 Andromeda. All rights reserved.',
         }
     })
 
 const response = {
     body:{
         name:user.name,
-        intro:`User Register Successfully UserName: ${user.email},Password:${user.password}`,
+        intro:`User Added Successfully`,
         title: "Welcome to ANDROMEDA India's Largest Lone Distributor",
-        outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
+        outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.',
+        table:[{
+            data:[
+                {
+                    Name: user.name,
+                    UserName: user.email,
+                    Mobile : user.mobile
+                }
+            ],
+            columns:{
+                customWidth:{
+                    Name:'25%',
+                    UserName:'50%',
+                    Mobile:'25%'
+                },
+                customAlignment:{
+                    Name:'center',
+                    UserName:'center',
+                    Mobile:"center"
+                }
+            }
+        },
+        {
+            data:[
+                {
+                    Password: user.password,
+                    Role: user.role,
+                    Supervisor:user.supervisor
+                }
+            ],
+            columns:{
+                customWidth:{
+                    Password:'25%',
+                    Role:'50%',
+                    Supervisor:'25%'
+                },
+                customAlignment:{
+                    Password:'center',
+                    Role:'center',
+                    Supervisor:"center"
+                }
+            }
+        }
+    
+    ]
     }
 }
 

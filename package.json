@@ -9,8 +9,7 @@
     "make": "knex migrate:make",
     "seed:make": "knex seed:make",
     "seed:run": " knex seed:run",
-    "migrate:latest": "knex migrate:latest",
-    "build": "netlify deploy --prod"
+    "migrate:latest": "knex migrate:latest"
   },
   "author": "",
   "license": "ISC",

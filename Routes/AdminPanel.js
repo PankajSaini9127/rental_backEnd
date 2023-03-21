@@ -11,7 +11,55 @@ const router = express.Router();
 //add User
 //path /api/admin/userRegistration
 router.route('/userRegistration').post(userRegistration)
-router.route('/test').post(testMail)
+
+
+
+// update Status
+// path /api/admin/updateStatus/:id
+router.route('/updateStatus/:id').put(async(req,res)=>{
+     try {
+        const update = await db('users').where('id',req.params.id).update(req.body)
+        res.send({success:true})
+     } catch (error) {
+        
+     }
+})
+
+
+//  /api/admin/forgotPassword
+router.route('/forgotPassword').post(async(req,res)=>{
+    try {
+        if(req.body.email === "" || req.body.email === undefined){
+         return   res.status(204).send({success:"false",message:"Email Not Provided"})
+        }
+        const email_ID = await db.from("users").select("id").where("email",'=',req.body.email)
+        // console.log(email_ID)
+        if(email_ID){
+            res.send(email_ID)
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(message="somethng went wrong")
+    }
+})
+
+
+
+//api/admin/selectRole
+router.route('/selectRole').post(async(req,res)=>{
+    console.log(req.body)
+
+    try {
+        const user = await db.from('users').select('name').whereLike('role',`%${req.body}%`)
+        
+        if(user){
+      return res.send(user)
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send()
+    }
+})
 
 
 //get all user users
@@ -37,6 +85,7 @@ router.route('/user').post( async(req,res)=>{
 //path /api/admin/edit/${id}
 router.route('/edit/:id').put(async(req,res)=>{
    try {
+    req.body.role= JSON.stringify(req.body.role)
     const update = await db("users").where("id",req.params.id).update(req.body)
     if(update){
         res.status(200).send({success:true,message:"User Updated."})
@@ -48,44 +97,10 @@ router.route('/edit/:id').put(async(req,res)=>{
 })
 
 
-//admin signup
-//path /api/admin/signup
-//body email and password && role
-
-router.route('/signup').post(async(req,res)=>{
-    const {email, password, role} = req.body;
-     try {
-        if(email && password && role){
-            const user = await db('login').insert(req.body)
-            res.status(201).send(user)
-        }else{
-            throw new Error({success:false,message:"All Fields Are Require"})
-        }
-        
-     } catch (error) {
-             res.send({success:false,message:"All Fields Are Require"})
-     }
-})
-
 // admin login
 //path /api/admin/login
 //req body email
-router.route('/login').post(async(req,res)=>{
-    try {
-        const result = await db.from('login').select('*').where(req.body)
-        if(result.length <1){
-            res.status(200).send({message:"User Not Registered!"})
-        }else{
-            res.send(result)
-        }
-
-
-    
-        
-    } catch (error) {
-        //  res.send({message:'Something Went Rong'})
-    }
-})
+router.route('/login').post()
 
 
 //edit user details
