@@ -1,13 +1,9 @@
 const express = require('express');
 const { managerApproval, getAgreements, getAgreementSRM } = require('../controller/SRMControllers');
-const db = require('../data/db');
+
 
 const router = express.Router();
 
-
-router.route('/').get((req,res)=>{
-    res.send('senior manager route')
-})
 
 
 //Approved by manager & send to manager

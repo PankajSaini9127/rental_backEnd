@@ -1,46 +1,21 @@
 const express = require('express');
+const { SRMApproval, getAllAgreements, getagreement } = require('../controller/OperationsControls');
 
 const router = express.Router();
 
 const db = require("../data/db");
 
-router.route('/').get((req,res)=>{
-    res.send('operations')
-})
 
-router.route('/agreement/:id').post(async(req,res)=>{
-    try {
-        const result = await db('opr_greements').insert(req.body)
-       if(result.length == 1){
-        const status = await db('srm_greements').where('id',req.params.id).update({"status":"Approved"})
-        console.log(status,req.params.id)
-          res.status(201).send({success:true,message:"Agreement Approved And Sent To Operations Successfully"})
-       }
-       else{
-          throw new Error({success:false,message:"Something went wrong Please Try After Some Time"})
-       }
-        
-    } catch (error) {
-        res.send({success:false,message:"Something went wrong Please Try After Some Time",})
-    }
-})
+// path /api/operations/agreement/:id
+//srManager Approval & data Send to Operations
+router.route('/agreement/:id').post(SRMApproval)
 
-router.route('/get-agreements').get(async(req,res)=>{
-    try {
-        const agreements = await db.from('opr_greements').select("code",'id','leeseName','location','manager','srmanager','monthlyRent')
-        res.send({success:true,agreements})
-    } catch (error) {
-        res.send(error)        
-    }
-})
+// path /api/operations/get-agreements
+router.route('/get-agreements').get(getAllAgreements)
 
-router.route("/getagreement/:id").get(async(req,res)=>{
-    try {
-        const agreements = await db.from('opr_greements').select('*').where('id',req.params.id)
-        res.send({success:true,agreements})
-    } catch (error) {
-res.send({success:false,message:"something Went Wrong please try again later"})
-    }
-})
+
+// path /api/operations/getagreement/:id
+//get agreement by id
+router.route("/getagreement/:id").get(getagreement)
 
 module.exports = router
