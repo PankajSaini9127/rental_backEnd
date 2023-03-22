@@ -31,7 +31,7 @@ router.route('/selectRole').post(selectRole)
 //get all user users
 //path /api/admin/user
 
-router.route('/user').post(getAllUser)
+router.route('/user').get(getAllUser)
 
 
 

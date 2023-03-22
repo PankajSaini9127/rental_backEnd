@@ -3,8 +3,10 @@ const db = require("../data/db");
 async function LoginCred(req, res) {
   try {
     const result = await db.from("users").select("*").where(req.body);
+    console.log(result.length)
+   
 
-    if (result.length < 1) {
+    if (result.length < 1){
       return res
         .status(200)
         .send({
@@ -19,6 +21,7 @@ async function LoginCred(req, res) {
       }
     }
   } catch (error) {
+    console.log(error)
     return res
       .status(500)
       .send({
