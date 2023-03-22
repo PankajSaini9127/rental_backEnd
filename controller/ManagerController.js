@@ -6,7 +6,7 @@ const newAgreement = async (req, res) => {
   
       const agreement = await db("agreements").insert(req.body);
        if(agreement.length == 1){
-          res.status(201).send({success:true,message:"Agreement Submit Successfully"})
+          res.status(201).send({success:true,message:"Agreement Submit Successfully",agreement})
        }
        else{
           throw new Error({success:false,message:"Something went wrong Please"})
@@ -16,6 +16,17 @@ const newAgreement = async (req, res) => {
     }
   };
 
+
+ async function add_landlord (req,res){
+  // console.log(req.body)
+  try {
+    const lanloard = await db("landlords").insert(req.body)
+    console.log(lanloard)
+  } catch (error) {
+    console.log(error)
+  }
+
+}
 
 const getAllAgreement  = async(req,res)=>{
     try {
@@ -78,4 +89,4 @@ const deleteAgreement = async(req,res)=>{
     }
 }  
 
-module.exports = {newAgreement,getAllAgreement,getAgreementById,updateAgreement,deleteAgreement}  
+module.exports = {newAgreement,getAllAgreement,getAgreementById,updateAgreement,deleteAgreement,add_landlord}  

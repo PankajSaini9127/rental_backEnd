@@ -5,6 +5,7 @@ const {
   getAgreementById,
   updateAgreement,
   deleteAgreement,
+  add_landlord,
 } = require("../controller/ManagerController");
 
 
@@ -14,6 +15,9 @@ const router = express.Router();
 // Post request in agreements table
 // path /api/newAgreement
 router.route("/newAgreement").post(newAgreement);
+
+
+router.route("/add_landlord").post(add_landlord)
 
 //get request in agreements table
 // path /api/agreements
