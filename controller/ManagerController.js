@@ -54,10 +54,11 @@ async function getAgreementById (req,res){
       console.log(req.params.id)
       const agreement = await db.from('agreements').select("*").where('id',req.params.id)
   
+      console.log(agreement)
       res.send(agreement)
   
     } catch (error) {
-       console.log(error)
+      console.log(error)
     }
 }
 
