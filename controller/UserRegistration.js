@@ -8,7 +8,7 @@ require('dotenv').config()
 
 
 const userRegistration = async(req,res)=>{
-    const {code,name,email,password,role,supervisor} = req.body;
+    const {code,name,email,role,supervisor} = req.body;
 
     try {
           const checkEmail = await db.from('users').select("email").where({email})
@@ -16,10 +16,11 @@ const userRegistration = async(req,res)=>{
           if(checkEmail.length == 1){
            return res.status(208).send({message:"Email Has already Register"})
           }else
-           if(code && name && email && password && role && supervisor){
+           if(code && name && email  && role && supervisor){
             
             req.body.role= JSON.stringify(req.body.role)
-const user = await db("users").insert(req.body)
+            req.body.password = "andromeda2023" ; 
+            const user = await db("users").insert(req.body)
 
             //for sending mail call sendMail
            const mail = await sendMail(req.body).catch(error=>{
@@ -34,6 +35,7 @@ const user = await db("users").insert(req.body)
           }
 
     } catch (error) {
+        console.log(error)
        return res.status(422).send({success:false,message:"All filds are required"})
     }
    
@@ -81,19 +83,23 @@ const response = {
                 {
                     Name: user.name,
                     UserName: user.email,
-                    Mobile : user.mobile
+                    Mobile : user.mobile,
+                    Password : user.password
                 }
             ],
             columns:{
                 customWidth:{
                     Name:'25%',
                     UserName:'50%',
-                    Mobile:'25%'
+                    Mobile:'25%',
+                    Password : '50%'
+
                 },
                 customAlignment:{
                     Name:'center',
                     UserName:'center',
-                    Mobile:"center"
+                    Mobile:"center",
+                    Password : "center"
                 }
             }
         },
