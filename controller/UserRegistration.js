@@ -8,7 +8,7 @@ require('dotenv').config()
 
 
 const userRegistration = async(req,res)=>{
-    const {code,name,email,password,role,supervisor} = req.body;
+    const {code,name,email,password,role} = req.body;
 
     try {
           const checkEmail = await db.from('users').select("email").where({email})
@@ -16,7 +16,7 @@ const userRegistration = async(req,res)=>{
           if(checkEmail.length == 1){
            return res.status(208).send({message:"Email Has already Register"})
           }else
-           if(code && name && email && password && role && supervisor){
+           if(code && name && email && password && role ){
             
             req.body.role= JSON.stringify(req.body.role)
 const user = await db("users").insert(req.body)

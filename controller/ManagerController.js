@@ -5,7 +5,7 @@ const newAgreement = async (req, res) => {
  
     try {
   
-      const agreement = await db("agreements").insert(req.body);
+      const agreement = await db("agreements").insert({...req.body,status:"Send To Manager"});
        if(agreement.length == 1){
           res.status(201).send({success:true,message:"Agreement Submit Successfully",agreement})
        }
@@ -48,17 +48,19 @@ res.send({success:false,message:"something Went Wrong please try again later"})
     }
 }
 
-const getAgreementById = async(req,res)=>{
+async function getAgreementById (req,res){
+  console.log("first")
     try {
-      
+      console.log(req.params.id)
       const agreement = await db.from('agreements').select("*").where('id',req.params.id)
   
       res.send(agreement)
   
     } catch (error) {
-      
+       console.log(error)
     }
-  }
+}
+
 
  
 // const UpdateStatus = async(req,res)=>{

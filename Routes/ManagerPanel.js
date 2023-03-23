@@ -73,7 +73,7 @@ router.route("/add_landlord").post(add_landlord)
 router.route("/agreements").get(getAllAgreement);
 
 //post request in agreements table get agreemennt by id
-// path /api/agreement
+// path /api/agreement/:id
 router.route("/agreement/:id").post(getAgreementById);
 
 //Update API

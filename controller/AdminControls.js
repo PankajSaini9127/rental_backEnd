@@ -6,7 +6,7 @@
        const update = await db('users').where('id',req.params.id).update(req.body)
        if(update === 0) throw new Error("Something Went Wrong Please try again later")
 
-        return res.send({success:true,message:"User Updated"})
+        return res.send({success:true,message:"User status Updated"})
     } catch (error) {
        return res.status(500).send({success:false,message:"Something Went Wrong Please try again later"})
     }
@@ -67,9 +67,19 @@ async function updateUser (req,res){
         throw new Error()
      }
     } catch (error) {
+        console.log(error)
      return res.status(500).send({success:false,message:"Somethng went Wrong please try again later"})
     }
      
  }
 
-module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser}
+async function get_user (req,res){
+    try {
+        const user = await db('users').where('id',req.params.id).select("*")
+      return  res.send(user)
+    } catch (error) {
+      return res.status(500).send()        
+    }
+}
+
+module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser,get_user}
