@@ -22,18 +22,28 @@ const newAgreement = async (req, res) => {
   // console.log(req.body)
   try {
     const lanloard = await db("landlords").insert(req.body)
-    console.log(lanloard)
+    
+    if(lanloard)
+    {
+      res.send({message : 'Landlord Added.'})
+    }
   } catch (error) {
     console.log(error)
+    res.status(500).send({message : 'Something went wrong !!!'})
+
   }
 
 }
 
 const getAllAgreement  = async(req,res)=>{
     try {
-        const agreements = await db.from('agreements').select('*')
-        res.send({success:true,agreements})
+      const data = await db('agreements')
+              .join('landlords', 'agreements.id', '=', 'landlords.agreement_id')
+              .select('*')
+
+        res.send({success:true,data})
     } catch (error) {
+      console.log(error)
 res.send({success:false,message:"something Went Wrong please try again later"})
     }
 }
