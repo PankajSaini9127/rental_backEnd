@@ -24,6 +24,8 @@ exports.up = function(knex) {
         t.string("accountNo"),
         t.string("ifscCode"),
         t.string('agreement_id'),
+        t.string('aadhar_card'),
+        t.string('pan_card'),
         t.timestamp("time")
     })
   

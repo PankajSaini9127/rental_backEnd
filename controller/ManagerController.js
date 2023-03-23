@@ -1,3 +1,4 @@
+require("dotenv").config();
 const db = require("../data/db");
 
 const newAgreement = async (req, res) => {
@@ -89,4 +90,20 @@ const deleteAgreement = async(req,res)=>{
     }
 }  
 
-module.exports = {newAgreement,getAllAgreement,getAgreementById,updateAgreement,deleteAgreement,add_landlord}  
+const uploadDoc = async(req,res)=>{
+    try {
+      if(req.files['photo'])
+      {
+        res.send({link : `${process.env.IMAGE_LINK_O+req.files['photo'][0].path}`,message : 'Document Uploaded'})
+      }
+      else{
+        res.status(203).send({message : 'Pleae Provide the document.'})
+      }
+    } catch (error) {
+      console.log(error)
+      res.send({message:"Something went Wrong !!!"})
+    }
+}  
+
+
+module.exports = {newAgreement,getAllAgreement,getAgreementById,updateAgreement,deleteAgreement,add_landlord,uploadDoc}  

@@ -12,6 +12,14 @@ exports.up = function(knex) {
     t.string('monthlyRent'),
     t.string('yearlyIncrement'),
     t.string('status').defaultTo('Pending'),
+    t.string('gst_certificate'),
+    t.string('draft_agreement'),
+    t.string('electricity_bill'),
+    t.string('poa'),
+    t.string('maintaince_bill'),
+    t.string('cheque'),
+    t.string('tax_receipt'),
+    t.string('noc'),
     t.timestamp('time')
   })
 };
