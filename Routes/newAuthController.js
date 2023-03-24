@@ -45,7 +45,7 @@ router.get('/resetPassword', async (req, res) => {
             subject: "Password reset link", // Subject line
             text: `Password reset link for `, // plain text body
             html: `<h1>Thanks for choosing us !!!</h1>
-              <p>Hello ${check[0].name}, please <a href = ${process.env.LINK+check[0].email} >Click Here</a> to login Woodshala.</p>
+              <p>Hello ${check[0].name}, please <a href = ${process.env.LINK+check[0].email} >Click Here</a> to login Andromeda.</p>
               <h5>Note :- This link is valid for one time use only.</h5>
               `, // html body
         }
@@ -63,7 +63,7 @@ router.patch('/reset',async(req,res)=>{
     try {
         if(req.body.password)
         {
-            let response = await db.table('users').where('email',req.body.email).update({'password':req.body.password, 'password_flag':1})
+            let response = await db.table('users').where('email',req.body.email).update({'password':req.body.password, 'is_auth':1})
             return res.send({message : "Passwword has been reset successfully !!!"})
         }
     } catch (error) {

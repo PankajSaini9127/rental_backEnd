@@ -13,6 +13,7 @@ exports.up = function(knex) {
         table.json('role'),
         table.string('supervisor').notNullable(),
         table.string('status').defaultTo('Active'),
+        table.boolean('is_auth').defaultTo(false)
         table.timestamp('time')
     })
 };

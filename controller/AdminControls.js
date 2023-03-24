@@ -29,15 +29,20 @@ async function forgotPassword (req,res){
     }
 }
 
-
 async function selectRole (req,res){
+    
     try {
-        const user = await db.from('users').select('name').whereLike('role',`%${req.body}%`)
         
-        if(user){
-      return res.send(user)
+
+             req.body = JSON.stringify(req.body)
+
+        let user = await db.from('users').select('name',"role").whereLike('role',`%${req.body}%`);
+        console.log(user)
+        res.send((user))
+        
+      
         }
-    } catch (error) {
+     catch (error) {
         console.log(error)
         return res.status(500).send()
     }
@@ -79,6 +84,17 @@ async function get_user (req,res){
       return  res.send(user)
     } catch (error) {
       return res.status(500).send()        
+    }
+}
+
+
+async function get_emp_code (req,res){
+    try {
+        const users = await db.from('users').select("*")
+        console.log(users)
+        // res.send()
+    } catch (error) {
+        console.log(error)
     }
 }
 

@@ -19,7 +19,7 @@ const userRegistration = async(req,res)=>{
            if(code && name && email && password && role ){
             
             req.body.role= JSON.stringify(req.body.role)
-            req.body.password = "andromeda2023" ; 
+            // req.body.password = "andromeda2023" ; 
             const user = await db("users").insert(req.body)
 
             //for sending mail call sendMail
