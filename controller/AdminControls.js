@@ -33,12 +33,14 @@ async function selectRole (req,res){
     
     try {
         
-
-             req.body = JSON.stringify(req.body)
-
-        let user = await db.from('users').select('name',"role").whereLike('role',`%${req.body}%`);
-        console.log(user)
-        res.send((user))
+        let user = await db.from('users').select('name',"role").where(cb=>{
+            req.body.map((row,i)=>{
+              return  cb.orWhereILike('role',`%${row}%`)
+            })
+        })
+        
+        
+       return  res.send((user))
         
       
         }
@@ -90,12 +92,34 @@ async function get_user (req,res){
 
 async function get_emp_code (req,res){
     try {
-        const users = await db.from('users').select("*")
-        console.log(users)
+        const users = await db.from('users').select("code").orderBy("id","desc").limit(1)
+        console.log(users, "line no 94")
+        if(users.length === 0){
+            const code = "EMP-1"
+            return   res.send({code})
+        }else{
+            
+            const empCode ="EMP-"+ (parseInt(users[0].code.split("-")[1])+1)
+          return res.send({success:true,code:empCode})
+        }
+        // res.send(users)
         // res.send()
     } catch (error) {
         console.log(error)
+       return res.status(500).send()
     }
 }
 
-module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser,get_user}
+
+async function user_search (req,res){
+    try {
+        const user = await db('users').select("*").whereILike('name',`%${req.body.name}%`)
+      return  res.send(user)
+    } catch (error) {
+        console.log(error)
+      return  res.status(500).send()
+        
+    }
+}
+
+module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser,get_user,get_emp_code,user_search}

@@ -7,7 +7,9 @@ const {
   updateAgreement,
   deleteAgreement,
   add_landlord,
-  uploadDoc
+  uploadDoc,
+  get_tenure,
+  get_monthly_rent
 } = require("../controller/ManagerController");
 
 // setting up multer for file transport 
@@ -49,7 +51,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 1024 * 1024 * 50,
+    fileSize: 1024 * 1024 * 100,
   },
   fileFilter: fileFilter,
 }).fields([
@@ -84,5 +86,11 @@ router.route("/updateAgreement/:id").put(updateAgreement);
 // delete agreemenet in agreemenets table
 // path /api/delAgreement/:id
 router.route("/delAgreement/:id").delete(deleteAgreement);
+
+//   /api/list_tenure
+router.route('/list_teure').get(get_tenure)
+
+// /api/list_monthly
+router.route('/list_monthly').get(get_monthly_rent)
 
 module.exports = router;

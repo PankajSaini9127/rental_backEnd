@@ -18,7 +18,7 @@ const userRegistration = async(req,res)=>{
           }else
            if(code && name && email && password && role ){
             
-            req.body.role= JSON.stringify(req.body.role)
+            // req.body.role= JSON.stringify(req.body.role)
             // req.body.password = "andromeda2023" ; 
             const user = await db("users").insert(req.body)
 
