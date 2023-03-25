@@ -9,7 +9,8 @@
     "make": "knex migrate:make",
     "seed:make": "knex seed:make",
     "seed:run": " knex seed:run",
-    "migrate:latest": "knex migrate:latest"
+    "migrate:latest": "knex migrate:latest",
+    "migrate:rollback":"knex migrate:rollback"
   },
   "author": "",
   "license": "ISC",

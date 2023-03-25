@@ -8,7 +8,7 @@
 
         return res.send({success:true,message:"User status Updated"})
     } catch (error) {
-       return res.status(500).send({success:false,message:"Something Went Wrong Please try again later"})
+       return res.status(203).send({success:false,message:"Something Went Wrong Please try again later"})
     }
 }
 
@@ -32,12 +32,13 @@ async function forgotPassword (req,res){
 async function selectRole (req,res){
     
     try {
-        
+        console.log(req.body)
         let user = await db.from('users').select('name',"role").where(cb=>{
             req.body.map((row,i)=>{
               return  cb.orWhereILike('role',`%${row}%`)
             })
         })
+        // console.log(user)
         
         
        return  res.send((user))
