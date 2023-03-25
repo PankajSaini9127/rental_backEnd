@@ -2,7 +2,7 @@ const express = require('express')
 
 
 const {userRegistration} = require('../controller/UserRegistration');
-const { updateUser, forgotPassword, selectRole, getAllUser, updateStatus, get_user, get_emp_code, user_search } = require('../controller/AdminControls');
+const { updateUser, forgotPassword, selectRole, getAllUser, updateStatus, get_user, get_emp_code, user_search, getMetaData } = require('../controller/AdminControls');
 
 
 const router = express.Router();
@@ -50,5 +50,8 @@ router.route('/user/:id').post(get_user)
 //update user users
 //path /api/admin/edit/${id}
 router.route('/edit/:id').put(updateUser)
+
+// meta data 
+router.route('/meta').get(getMetaData)
 
 module.exports = router

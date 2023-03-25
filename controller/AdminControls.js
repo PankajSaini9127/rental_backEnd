@@ -69,14 +69,13 @@ async function updateUser (req,res){
     try {
      req.body.role= JSON.stringify(req.body.role)
      const update = await db("users").where("id",req.params.id).update(req.body)
-     if(update){
+ 
+    if(update){
         return res.status(200).send({success:true,message:"User Updated."})
-     }else{
-        throw new Error()
-     }
+    }
     } catch (error) {
         console.log(error)
-     return res.status(500).send({success:false,message:"Somethng went Wrong please try again later"})
+     return res.status(203).send({success:false,message:"May be the emaill is occupied."})
     }
      
  }
@@ -123,4 +122,47 @@ async function user_search (req,res){
     }
 }
 
-module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser,get_user,get_emp_code,user_search}
+//  meta data of user counts 
+
+
+async function getMetaData (req,res){
+    try{
+        let user = await db('users').select('role')
+
+        let meta = {
+            BHU : 0,
+            Senior_Manager : 0,
+            Manager : 0,
+            Finance : 0,
+            Operations : 0,
+        }
+
+        if(user){
+            user.map(row=>{
+                row.role = JSON.parse(row.role)
+                if(row.role.includes('BHU'))
+                meta.BHU += 1
+                else if(row.role.includes('Senior Manager'))
+                meta.Senior_Manager += 1
+                else if(row.role.includes('Manager'))
+                meta.Manager += 1
+                else if(row.role.includes('Finance'))
+                meta.Finance += 1
+                else if(row.role.includes('Operations'))
+                meta.Operations += 1
+            })
+        }
+
+        console.log(meta)
+
+        res.send(meta)
+
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).send('something went wrong');
+    }
+
+}
+
+module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser,get_user,get_emp_code,user_search, getMetaData}
