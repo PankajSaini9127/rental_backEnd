@@ -233,7 +233,7 @@ async function getStateList(req,res){
     if(req.query.search)
     {
       let {search} = req.query
-      let stateList = await db.table('states').select('name','id').whereILike('name',`%${search}%`).limit(10);
+      let stateList = await db.table('state').select('name','id').whereILike('name',`%${search}%`).limit(10);
 
       if(stateList)
       {
@@ -256,7 +256,7 @@ async function getCityList(req,res){
     if(req.query.search)
     {
       let {search} = req.query
-      let cityList = await db.table('cities').select('city','state_id').where('state_id',`${search}`).limit(10);
+      let cityList = await db.table('city').select('city','state_id').where('state_id',`${search}`).limit(10);
 
       if(cityList)
       {
