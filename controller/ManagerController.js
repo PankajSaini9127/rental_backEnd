@@ -227,4 +227,51 @@ async function get_monthly_rent (req,res){
 }
 
 
-module.exports = {get_monthly_rent,get_tenure,newAgreement,getAllAgreement,getAgreementById,updateAgreement,deleteAgreement,add_landlord,uploadDoc}  
+async function getStateList(req,res){
+  try {
+
+    if(req.query.search)
+    {
+      let {search} = req.query
+      let stateList = await db.table('states').select('name','id').whereILike('name',`%${search}%`).limit(10);
+
+      if(stateList)
+      {
+        return res.send(stateList)
+      }
+    }
+    else return res.send([])
+
+    
+  } catch (error) {
+    console.log(error)
+    res.status(500).send('Error')
+  }
+
+}
+
+async function getCityList(req,res){
+  try {
+
+    if(req.query.search)
+    {
+      let {search} = req.query
+      let cityList = await db.table('cities').select('city','state_id').where('state_id',`${search}`).limit(10);
+
+      if(cityList)
+      {
+        return res.send(cityList)
+      }
+    }
+    else return res.send([])
+
+    
+  } catch (error) {
+    console.log(error)
+    res.status(500).send('Error')
+  }
+
+}
+
+
+module.exports = {getCityList,getStateList,get_monthly_rent,get_tenure,newAgreement,getAllAgreement,getAgreementById,updateAgreement,deleteAgreement,add_landlord,uploadDoc}  

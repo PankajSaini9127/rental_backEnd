@@ -9,7 +9,9 @@ const {
   add_landlord,
   uploadDoc,
   get_tenure,
-  get_monthly_rent
+  get_monthly_rent,
+  getStateList,
+  getCityList
 } = require("../controller/ManagerController");
 
 // setting up multer for file transport 
@@ -92,5 +94,12 @@ router.route('/list_teure').get(get_tenure)
 
 // /api/list_monthly
 router.route('/list_monthly').get(get_monthly_rent)
+
+// /api/stateList 
+// Api for getting state list
+router.route('/stateList').get(getStateList)
+
+// Api for getting state list
+router.route('/cityList').get(getCityList)
 
 module.exports = router;
