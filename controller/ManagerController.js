@@ -41,8 +41,8 @@ async function add_landlord(req, res) {
 const getAllAgreement = async (req, res) => {
   try {
     const data = await db('agreements')
-      .select('landlords.name', 'landlords.agreement_id', 'landlords.location', 'landlords.id', 'agreements.*')
-      .join('landlords', 'agreements.id', '=', 'landlords.agreement_id')
+      .select('landlords.name', 'landlords.agreement_id', 'landlords.id', 'agreements.*') 
+    .join('landlords', 'agreements.id', '=', 'landlords.agreement_id')
 
 
     let ids = [];
@@ -139,19 +139,6 @@ async function getAgreementById(req, res) {
 }
 
 
-
-// const UpdateStatus = async(req,res)=>{
-//   try {
-//     const update = await db('agreements').where('id',req.params.id).update(req.body)
-//     if(update === 1){
-//       res.send({success:true,message:"Agreement Update Successfully"})
-//     }else{
-//       throw new Error({success:false,message:"Something went wrong please try again later"})
-//     }
-//   } catch (error) {
-//     res.send({success:false,message:"Something went wrong please try again later"})
-//   }
-// }  
 
 const updateAgreement = async (req, res) => {
   try {
@@ -315,11 +302,6 @@ async function getAgreementById(req, res) {
             name: row.name,
             percentageShare: row.percentageShare,
             leeseName: row.leeseName,
-            state: row.state,
-            city: row.city,
-            location: row.location,
-            pincode: row.pincode,
-            address: row.address,
             aadharNo: row.aadharNo,
             panNo: row.panNo,
             gstNo: row.gstNo,
@@ -346,11 +328,6 @@ async function getAgreementById(req, res) {
               name: row.name,
               percentageShare: row.percentageShare,
               leeseName: row.leeseName,
-              state: row.state,
-              city: row.city,
-              location: row.location,
-              pincode: row.pincode,
-              address: row.address,
               aadharNo: row.aadharNo,
               panNo: row.panNo,
               gstNo: row.gstNo,
@@ -382,7 +359,12 @@ async function editAgreement(req, res) {
     // console.log(req.body)
 
     let { id,
-      code
+      code,
+       pincode,
+      state,
+      address,
+      location,
+      city
       , lockInYear
       , monthlyRent
       , noticePeriod
@@ -406,7 +388,11 @@ async function editAgreement(req, res) {
 
 
     let saveAgreement = await db('agreements').where('id', '=', id).update({
-      code
+         pincode,
+      state,
+      address,
+      location,
+      city
       , lockInYear
       , monthlyRent
       , noticePeriod
@@ -438,11 +424,6 @@ async function editAgreement(req, res) {
           name,
           percentageShare,
           leeseName,
-          state,
-          city,
-          location,
-          pincode,
-          address,
           aadharNo,
           panNo,
           gstNo,
@@ -458,11 +439,6 @@ async function editAgreement(req, res) {
           pan_card
         } = row
         return await await db('landlords').where('id', '=', row.landlord_id).update({name, percentageShare,
-          state,
-          city,
-          location,
-          pincode,
-          address,
           aadharNo,
           panNo,
           gstNo,
