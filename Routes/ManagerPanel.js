@@ -4,6 +4,8 @@ const {
   newAgreement,
   getAllAgreement,
   getAgreementById,
+  detailsAgreement,
+  editAgreement,
   updateAgreement,
   deleteAgreement,
   add_landlord,
@@ -68,8 +70,6 @@ router.route("/newAgreement").post(newAgreement);
 
 router.post("/uploadDoc",upload,uploadDoc)
 
-
-
 router.route("/add_landlord").post(add_landlord)
 
 //get request in agreements table
@@ -78,7 +78,8 @@ router.route("/agreements").get(getAllAgreement);
 
 //post request in agreements table get agreemennt by id
 // path /api/agreement/:id
-router.route("/agreement/:id").post(getAgreementById);
+// router.route("/agreement/:id").post(getAgreementById);
+router.route("/getDetails").get(getAgreementById);
 
 //Update API
 //Update Request in agreement table
@@ -101,5 +102,8 @@ router.route('/stateList').get(getStateList)
 
 // Api for getting state list
 router.route('/cityList').get(getCityList)
+
+// edit agreement API
+router.route('/editAgreement').patch(editAgreement)
 
 module.exports = router;
