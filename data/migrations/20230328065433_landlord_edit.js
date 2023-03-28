@@ -4,9 +4,9 @@
  */
 exports.up = function(knex) {
     // return knex.table('landlords').renameColumn('percentageShare','percentage');
-    return knex.schema.table ('landlords', function(table) {
-        table.renameColumn('percentageShare', 'percentage')
-    })
+    // return knex.schema.table ('landlords', function(table) {
+    //     table.renameColumn('percentageShare', 'percentage')
+    // })
 };
 
 /**
@@ -14,5 +14,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-  return knex.schema.table('landlords')
+  // return knex.schema.table('landlords')
 };

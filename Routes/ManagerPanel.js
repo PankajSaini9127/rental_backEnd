@@ -13,7 +13,9 @@ const {
   get_tenure,
   get_monthly_rent,
   getStateList,
-  getCityList
+  getCityList,
+  user_search_manager,
+  get_agreement_details
 } = require("../controller/ManagerController");
 
 // setting up multer for file transport 
@@ -81,6 +83,12 @@ router.route("/agreements").get(getAllAgreement);
 // router.route("/agreement/:id").post(getAgreementById);
 router.route("/getDetails").get(getAgreementById);
 
+
+
+router.route("/agreement/:id").post(get_agreement_details);
+
+
+
 //Update API
 //Update Request in agreement table
 // path /api/updateAgreement/:id
@@ -105,5 +113,8 @@ router.route('/cityList').get(getCityList)
 
 // edit agreement API
 router.route('/editAgreement').patch(editAgreement)
+
+//search value 
+router.route('/search/manager').post(user_search_manager)
 
 module.exports = router;

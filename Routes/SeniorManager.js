@@ -1,24 +1,18 @@
 const express = require('express');
-const { managerApproval, getAgreements, getAgreementSRM } = require('../controller/SRMControllers');
+const { user_search_srmanager, getAllAgreement } = require('../controller/SRMControllers');
 
 
 const router = express.Router();
 
 
-
-//Approved by manager & send to manager
-//path /api/srmanager/:id
-router.route('/srmanger/agreement/:id').post(managerApproval)
-
-
-//getAll the agreements in srmanager listing
-// path /api/srmanager/agreement
-router.route('/srmanager/agreement').get(getAgreements)
+//get all agreements for listing
+// path /api/srmanger/getagreement/:id
+router.route('/srmanager/get-agreement/:id').get(getAllAgreement)
 
 
-//srm get agreement by id
-// path /api/srmanager/agreement/id
-router.route('/srmanager/agreement/:id').get(getAgreementSRM)
+router.route('/srmanager-search/:id').post(user_search_srmanager)
+
+
 
 
 module.exports = router

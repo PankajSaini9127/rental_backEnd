@@ -6,7 +6,7 @@ const newAgreement = async (req, res) => {
 
   try {
 
-    const agreement = await db("agreements").insert({ ...req.body, status: "Send To Manager" });
+    const agreement = await db("agreements").insert(req.body);
 
 
     if (agreement.length == 1) {
@@ -16,6 +16,7 @@ const newAgreement = async (req, res) => {
       throw new Error({ success: false, message: "Something went wrong Please" })
     }
   } catch (error) {
+    console.log(error)
     res.send({ success: false, message: "Something went wrong Please", error });
   }
 };
@@ -154,13 +155,17 @@ async function getAgreementById(req, res) {
 
 const updateAgreement = async (req, res) => {
   try {
-    const update = await db('agreements').where('id', req.params.id).update(req.body)
+    console.log(req.body)
+    console.log(req.params.id)
+    const update = await db('agreements').where('id','=', req.params.id).update({status:req.body.status,srm_id:req.body.srm_id})
     if (update === 1) {
       res.send({ success: true, message: "Agreement Update Successfully" })
     } else {
-      throw new Error({ success: false, message: "Something went wrong please try again later" })
+      console.log(update)
+      // throw new Error({ success: false, message: "Something went wrong please try again later" })
     }
   } catch (error) {
+    console.log(error)
     res.send({ success: false, message: "Something went wrong please try again later" })
   }
 }
@@ -493,16 +498,138 @@ async function editAgreement(req, res) {
 
 }
 
+//search use by field name
+async function user_search_manager (req,res){
+  try {
+      const data = await db('agreements').select("*")
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .whereILike('name',`%${req.body.name}%`)
+   
+      let ids = [];
+      let agreement = {};
+      data.map((row) => {
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
+        }
+      });
+  
+      // console.log(data)
+  
+      res.send({ success: true, agreement, ids });
 
-// async function editAgreement(req, res) {
-//   try {
-    
-//     // get list 
-//     let users = 
+  } catch (error) {
+      console.log(error)
+    return  res.status(500).send()
+      
+  }
+  
+}
 
-//   } catch (error) {
-    
-//   }
-// }
 
-module.exports = { editAgreement, detailsAgreement, getCityList, getStateList, get_monthly_rent, get_tenure, newAgreement, getAllAgreement, getAgreementById, updateAgreement, deleteAgreement, add_landlord, uploadDoc }  
+async function get_agreement_details(req, res) {
+  try {
+  
+
+    const data = await db("agreements")
+      .select(
+        "landlords.*",
+        "agreements.*",
+        "landlords.id as landlord_id"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where('agreement_id',req.params.id)
+
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            landlord_id: [...agreement[row.id].landlord_id, row.landlord_id],
+            name: [...agreement[row.id].name, row.name],
+            percentageShare: [
+              ...agreement[row.id].percentageShare,
+              row.percentageShare,
+            ],
+            leeseName: [...agreement[row.id].leeseName, row.leeseName],
+            state: [...agreement[row.id].state, row.state],
+            city: [...agreement[row.id].city, row.city],
+            location: [...agreement[row.id].location, row.location],
+            pincode: [...agreement[row.id].pincode, row.pincode],
+            address: [...agreement[row.id].address, row.address],
+            aadharNo: [...agreement[row.id].aadharNo, row.aadharNo],
+            panNo: [...agreement[row.id].panNo, row.panNo],
+            gstNo: [...agreement[row.id].gstNo, row.gstNo],
+            mobileNo: [...agreement[row.id].mobileNo, row.mobileNo],
+            alternateMobile: [
+              ...agreement[row.id].alternateMobile,
+              row.alternateMobile,
+            ],
+            email: [...agreement[row.id].email, row.email],
+            bankName: [...agreement[row.id].bankName, row.bankName],
+            benificiaryName: [
+              ...agreement[row.id].benificiaryName,
+              row.benificiaryName,
+            ],
+            accountNo: [...agreement[row.id].accountNo, row.accountNo],
+            ifscCode: [...agreement[row.id].ifscCode, row.ifscCode],
+            agreement_id: [...agreement[row.id].agreement_id, row.agreement_id],
+            aadhar_card: [...agreement[row.id].aadhar_card, row.aadhar_card],
+            pan_card: [...agreement[row.id].pan_card, row.pan_card],
+        
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...row,
+            landlord_id: [row.landlord_id],
+            name: [row.name],
+            percentageShare: [row.percentageShare],
+            leeseName: [row.leeseName],
+            state: [row.state],
+            city: [row.city],
+            location: [row.location],
+            pincode: [row.pincode],
+            address: [row.address],
+            aadharNo: [row.aadharNo],
+            panNo: [row.panNo],
+            gstNo: [row.gstNo],
+            mobileNo: [row.mobileNo],
+            alternateMobile: [row.alternateMobile],
+            email: [row.email],
+            bankName: [row.bankName],
+            benificiaryName: [row.benificiaryName],
+            accountNo: [row.accountNo],
+            ifscCode: [row.ifscCode],
+            agreement_id: [row.agreement_id],
+            aadhar_card: [row.aadhar_card],
+            pan_card: [row.pan_card],
+          },
+        };
+      }
+    });
+
+    return res.status(200).send({ agreement, ids });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send();
+  }
+}
+
+
+module.exports = {get_agreement_details,user_search_manager, editAgreement, detailsAgreement, getCityList, getStateList, get_monthly_rent, get_tenure, newAgreement, getAllAgreement, getAgreementById, updateAgreement, deleteAgreement, add_landlord, uploadDoc }  

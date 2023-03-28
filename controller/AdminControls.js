@@ -33,12 +33,12 @@ async function selectRole (req,res){
     
     try {
         console.log(req.body)
-        let user = await db.from('users').select('name',"role").where(cb=>{
+        let user = await db.from('users').select('name',"role","id").where(cb=>{
             req.body.map((row,i)=>{
               return  cb.orWhereILike('role',`%${row}%`)
             })
         })
-        // console.log(user)
+        console.log(user)
         
         
        return  res.send((user))

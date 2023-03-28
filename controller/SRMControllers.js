@@ -1,44 +1,99 @@
 const db = require("../data/db");
 
-
-const managerApproval = async(req,res)=>{
+const getAllAgreement = async (req, res) => {
     try {
-        const result = await db('srm_greements').insert(req.body)
-       if(result.length == 1){
-        
-        const status = await db('agreements').where('id',req.params.id).update({"status":"Approved"})
-        console.log(status,req.params.id)
+        const supervisor = await db('users').select('*').where('supervisor',req.params.id)
+       
+      const data = await db("agreements")
+        .select(
+          "landlords.name",
+          "landlords.agreement_id",
+          "landlords.location",
+          "landlords.id",
+          "agreements.*"
+        )
+        .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+        .where('manager_id',supervisor[0].id).whereNot('status','=',"Hold")
 
-          res.status(201).send({success:true,message:"Agreement Approved And Sent To Sr Manager Successfully"})
-          
-       }
-       else{
-          throw new Error({success:false,message:"Something went wrong Please"})
-       }
-        
+      let ids = [];
+      let agreement = {};
+      data.map((row) => {
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              manager:supervisor[0].name
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager:supervisor[0].name} };
+        }
+      });
+
+    
+  
+    
+     return res.send({ success: true, agreement, ids });
     } catch (error) {
-        res.send({success:false,message:"Something went wrong Please"})
+      console.log(error);
+    return  res.send({
+        success: false,
+        message: "something Went Wrong please try again later",
+      });
     }
+  };
+
+
+//search use by field name
+async function user_search_srmanager (req,res){
+  try {
+    
+
+    const supervisor = await db('users').select('*').where('supervisor',req.params.id)
+
+
+       
+      const data = await db('agreements').select("*")
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where('manager_id',supervisor[0].id).whereNot('status','=',"Hold")
+      .whereILike('name',`%${req.body.name}%`)
+      console.log(data)
+      
+   
+      let ids = [];
+      let agreement = {};
+      data.map((row) => {
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              manager:supervisor[0].name
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager:supervisor[0].name} };
+        }
+      });
+  
+      // console.log(data)
+  
+      res.send({ success: true, agreement, ids });
+
+  } catch (error) {
+      console.log(error)
+    return  res.status(500).send()
+      
+  }
 }
 
 
-const getAgreements = async(req,res)=>{
-    try {
-        const agreements = await db.from('srm_greements').select('*')
-        res.send({success:true,agreements})
-    } catch (error) {
-res.send({success:false,message:"something Went Wrong please try again later"})
-    }
-}
 
 
-const getAgreementSRM = async(req,res)=>{
-    try {
-        const agreements = await db.from('srm_greements').select('*').where('id',req.params.id)
-        res.send({success:true,agreements})
-    } catch (error) {
-res.send({success:false,message:"something Went Wrong please try again later"})
-    }
-}
 
-module.exports = {managerApproval,getAgreements,getAgreementSRM}
+module.exports = {getAllAgreement,user_search_srmanager}
