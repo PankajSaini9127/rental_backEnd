@@ -248,7 +248,7 @@ async function getCityList(req, res) {
 
     if (req.query.search) {
       let { search } = req.query
-      let cityList = await db.table('city').select('city', 'state_id').where('state_id', `${search}`).limit(10);
+      let cityList = await db.table('city').select('city', 'state_id').where('state_id', `${search}`)
 
       if (cityList) {
         return res.send(cityList)
