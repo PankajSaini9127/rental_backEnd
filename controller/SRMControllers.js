@@ -2,13 +2,12 @@ const db = require("../data/db");
 
 const getAllAgreement = async (req, res) => {
     try {
-        const supervisor = await db('users').select('*').where('supervisor',req.params.id)
-       
+        const supervisor = await db('users').select('*').where('supervisor','=',req.params.id)
+       console.log(supervisor)
       const data = await db("agreements")
         .select(
           "landlords.name",
           "landlords.agreement_id",
-          "landlords.location",
           "landlords.id",
           "agreements.*"
         )
