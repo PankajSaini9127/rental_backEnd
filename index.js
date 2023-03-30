@@ -22,6 +22,7 @@ app.use('/api/auth',require('./Routes/Auth'))
 app.use('/api/admin',require('./Routes/AdminPanel'))
 app.use('/api',require('./Routes/ManagerPanel'))
 app.use('/api',require('./Routes/SeniorManager'))
+app.use('/api/BHU',require('./Routes/BHU'))
 app.use('/api',require('./Routes/newAuthController'))
 app.use('/api/operations',require('./Routes/Operations'))
 

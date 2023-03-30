@@ -1,46 +1,3 @@
-// const db = require('../data/db');
-
-// async function SRMApproval (req,res){
-//     try {
-//         const result = await db('opr_greements').insert(req.body)
-//        if(result.length == 1){
-//         const status = await db('srm_greements').where('id',req.params.id).update({"status":"Approved"})
-//          return res.status(201).send({success:true,message:"Agreement Approved And Sent To Operations Successfully"})
-//        }
-//        else{
-//           throw new Error({success:false,message:"Something went wrong Please Try After Some Time"})
-//        }
-        
-//     } catch (error) {
-//       return res.send({success:false,message:"Something went wrong Please Try After Some Time",})
-//     }
-// }
-
-
-// async function getAllAgreements (req,res){
-//     try {
-//         const agreements = await db.from('opr_greements').select("code",'id','leeseName','location','manager','srmanager','monthlyRent')
-//         if(!agreements) throw new Error()
-//       return  res.send({success:true,agreements})
-//     } catch (error) {
-//        return res.status(500).send({message:"Something went Wrong please try again later!"})        
-//     }
-// }
-
-
-// async function getagreement (req,res){
-//     try {
-//         const agreements = await db.from('opr_greements').select('*').where('id',req.params.id)
-//         if(!agreements) throw new Error()
-
-//         return res.send({success:true,agreements})
-//     } catch (error) {
-//       return res.status(500).send({success:false,message:"something Went Wrong please try again later"})
-//     }
-// }
-
-// module.exports= {SRMApproval,getAllAgreements,getagreement}
-
 const db = require("../data/db");
 
 const getAllAgreement = async (req, res) => {
@@ -55,7 +12,7 @@ const getAllAgreement = async (req, res) => {
 
     })
 
-    console.log(Sr_names)
+    console.log()
 
        let data = await Promise.allSettled(supervisor.map(async (row)=>{ console.log(row); return await db("agreements")
         .select(
@@ -65,17 +22,19 @@ const getAllAgreement = async (req, res) => {
           "agreements.*"
         )
         .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-        .where('bhu_id',row.id)    
+        .where('srm_id',row.id)    
     }))
-    
-    data = data.map((row)=>row.status === 'fulfilled' && row.value[0]  ) 
-    
-    // console.log(">>>data" ,data)
-    
-          let ids = [];
-          let agreement = {};
+        
+        data = data.map((row)=>row.status === 'fulfilled' && row.value[0])
+        
+        // console.log(">>>",data)
 
+      let ids = [];
+      let agreement = {};
 
+      // if(data[0] === undefined) 
+      // return res.send({ success: true, agreement  , ids });
+  
 
       data.map((row) => {
         if (ids.includes(row.id)) {
@@ -89,11 +48,11 @@ const getAllAgreement = async (req, res) => {
           };
         } else {
           ids.push(row.id);
-          agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager: Sr_names[row.bhu_id]} };
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager: Sr_names[row.srm_id]} };
         }
       });
 
-      // console.log('>>>',ids,agreement)
+      console.log('>>>',ids,agreement)
 
 
 
@@ -154,7 +113,23 @@ async function user_search_bhu (req,res){
 }
 
 
+const updateAgreement = async (req, res) => {
+  try {
+    console.log(req.body)
+    console.log(req.params.id)
+    const update = await db('agreements').where('id','=', req.params.id).update({status:req.body.status,bhu_id:req.body.srm_id})
+    if (update === 1) {
+      res.send({ success: true, message: "Agreement Update Successfully" })
+    } else {
+      console.log(update)
+      // throw new Error({ success: false, message: "Something went wrong please try again later" })
+    }
+  } catch (error) {
+    console.log(error)
+    res.send({ success: false, message: "Something went wrong please try again later" })
+  }
+}
 
 
 
-module.exports = {getAllAgreement,user_search_bhu}
+module.exports = {getAllAgreement,user_search_bhu,updateAgreement}

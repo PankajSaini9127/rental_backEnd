@@ -1,5 +1,5 @@
 const express = require('express');
-const { user_search_bhu, getAllAgreement } = require('../controller/OperationsControls');
+const { user_search_bhu, getAllAgreement, updateAgreement } = require('../controller/BHUControls');
 
 
 const router = express.Router();
@@ -8,6 +8,8 @@ const router = express.Router();
 //get all agreements for listing
 // path /api/srmanger/getagreement/:id
 router.route('/get-agreement/:id').get(getAllAgreement)
+
+router.route('/updateAgreement/:id').put(updateAgreement)
 
 
 router.route('/search/:id').post(user_search_bhu)
