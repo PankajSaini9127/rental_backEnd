@@ -4,7 +4,7 @@
  */
 exports.up = function(knex) {
     return knex.schema.table('agreements',t=>{
-        
+        t.integer('srm_id')
     })
 };
 

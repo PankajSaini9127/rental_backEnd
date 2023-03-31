@@ -7,6 +7,7 @@ const newAgreement = async (req, res) => {
   try {
 
     const agreement = await db("agreements").insert(req.body);
+    console.log(req.body)
 
 
     if (agreement.length == 1) {
@@ -116,27 +117,6 @@ const get_tenure = async (req, res) => {
   }
 }
 
-async function getAgreementById(req, res) {
-  try {
-    const agreement = await db('landlords')
-      .join('agreements', 'agreements.id', '=', 'landlords.agreement_id')
-      .select('*')
-
-
-    agreement.map((row, i) => {
-      console.log(row.id, req.params.id)
-      if (row.agreement_id == req.params.id) {
-        return res.send(row)
-      }
-    })
-
-    return res.send(agreement)
-
-  } catch (error) {
-    console.log(error)
-    return res.status(500).send()
-  }
-}
 
 
 
@@ -259,7 +239,7 @@ async function getCityList(req, res) {
 async function detailsAgreement(req, res) {
   try {
     console.log(req.query.id)
-    const agreement = await db('agreements').where('')
+    const agreement = await db('agreements')
       .join('landlords', 'agreements.id', '=', 'landlords.agreement_id')
 
 
@@ -524,6 +504,7 @@ async function get_agreement_details(req, res) {
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .where('agreement_id',req.params.id)
 
+     
 
     let ids = [];
     let agreement = {};
@@ -535,16 +516,7 @@ async function get_agreement_details(req, res) {
             ...agreement[row.id],
             landlord_id: [...agreement[row.id].landlord_id, row.landlord_id],
             name: [...agreement[row.id].name, row.name],
-            percentageShare: [
-              ...agreement[row.id].percentageShare,
-              row.percentageShare,
-            ],
             leeseName: [...agreement[row.id].leeseName, row.leeseName],
-            state: [...agreement[row.id].state, row.state],
-            city: [...agreement[row.id].city, row.city],
-            location: [...agreement[row.id].location, row.location],
-            pincode: [...agreement[row.id].pincode, row.pincode],
-            address: [...agreement[row.id].address, row.address],
             aadharNo: [...agreement[row.id].aadharNo, row.aadharNo],
             panNo: [...agreement[row.id].panNo, row.panNo],
             gstNo: [...agreement[row.id].gstNo, row.gstNo],
@@ -564,6 +536,7 @@ async function get_agreement_details(req, res) {
             agreement_id: [...agreement[row.id].agreement_id, row.agreement_id],
             aadhar_card: [...agreement[row.id].aadhar_card, row.aadhar_card],
             pan_card: [...agreement[row.id].pan_card, row.pan_card],
+            percentage: [...agreement[row.id].percentage, row.percentage],
         
           },
         };
@@ -575,7 +548,7 @@ async function get_agreement_details(req, res) {
             ...row,
             landlord_id: [row.landlord_id],
             name: [row.name],
-            percentageShare: [row.percentageShare],
+            percentage: [ row.percentage],
             leeseName: [row.leeseName],
             state: [row.state],
             city: [row.city],

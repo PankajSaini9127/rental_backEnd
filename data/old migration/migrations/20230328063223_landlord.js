@@ -3,8 +3,8 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-    return knex.schema.table('agreements',t=>{
-        
+    return knex.schema.table('landlords',(t)=>{
+      //  t.string('gst').defaultTo('')
     })
 };
 
@@ -13,6 +13,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-  return knex.schema.table('agreements')
+  // return knex.schema.table('landlords')
 };
-

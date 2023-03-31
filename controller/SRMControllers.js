@@ -3,39 +3,65 @@ const db = require("../data/db");
 const getAllAgreement = async (req, res) => {
     try {
         const supervisor = await db('users').select('*').where('supervisor','=',req.params.id)
-       console.log(supervisor)
-      const data = await db("agreements")
-        .select(
-          "landlords.name",
-          "landlords.agreement_id",
-          "landlords.id",
-          "agreements.*"
-        )
-        .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-        .where('manager_id',supervisor[0].id).whereNot('status','=',"Hold")
+           
+        if(supervisor.length === 0 ) throw new Error()
 
-      let ids = [];
-      let agreement = {};
-      data.map((row) => {
-        if (ids.includes(row.id)) {
-          agreement = {
-            ...agreement,
-            [row.id]: {
-              ...agreement[row.id],
-              name: [...agreement[row.id].name, row.name],
-              manager:supervisor[0].name
-            },
-          };
-        } else {
-          ids.push(row.id);
-          agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager:supervisor[0].name} };
-        }
-      });
+         // for getting the name for Sr manager 
+    let manager_name = {} 
+    supervisor.map(row=>{
+    manager_name = {...manager_name, [row.id] : row.name} 
 
+    })
+
+    let data = await Promise.allSettled(supervisor.map(async (row)=>{ console.log(row.id); return await db("agreements")
+    .select(
+      "landlords.name",
+      "landlords.agreement_id",
+      "landlords.id ",
+      "agreements.*"
+    )
+    .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+    .where('manager_id','=',row.id).whereNot('status','=',"Hold")    
+}))
     
+    
+    // console.log(">>up>",data)
+    data = data[0].status === 'fulfilled' ? data[0].value.map((row,i)=>row) : []
+
   
-    
-     return res.send({ success: true, agreement, ids });
+        
+    // console.log(">>down>",data)
+
+  let ids = [];
+  let agreement = {};
+
+  // if(data[0] === undefined) 
+  // return res.send({ success: true, agreement  , ids });
+
+
+  data.map((row) => {
+    if (ids.includes(row.id)) {
+      agreement = {
+        ...agreement,
+        [row.id]: {
+          ...agreement[row.id],
+          name: [...agreement[row.id].name, row.name],
+          manager:supervisor[0].name
+        },
+      };
+    } else {
+      ids.push(row.id);
+      agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager: manager_name[row.srm_id]} };
+    }
+  });
+
+  console.log('>>>',ids,agreement)
+
+
+
+ return res.send({ success: true, agreement, ids });
+
+
     } catch (error) {
       console.log(error);
     return  res.send({
@@ -48,41 +74,61 @@ const getAllAgreement = async (req, res) => {
 
 //search use by field name
 async function user_search_srmanager (req,res){
-  try {
+  try {         // for getting the name for Sr manager 
+    let manager_name = {} 
+    supervisor.map(row=>{
+    manager_name = {...manager_name, [row.id] : row.name} 
+
+    })
+
+    let data = await Promise.allSettled(supervisor.map(async (row)=>{ console.log(row.id); return await db("agreements")
+    .select(
+      "landlords.name",
+      "landlords.agreement_id",
+      "landlords.id ",
+      "agreements.*"
+    )
+    .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+    .where('manager_id','=',row.id).whereNot('status','=',"Hold")    
+    .whereLike('name','=',req.body.name)
+}))
     
+    
+    // console.log(">>up>",data)
+    data = data[0].status === 'fulfilled' ? data[0].value.map((row,i)=>row) : []
 
-    const supervisor = await db('users').select('*').where('supervisor',req.params.id)
-
-
-       
-      const data = await db('agreements').select("*")
-      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .where('manager_id',supervisor[0].id).whereNot('status','=',"Hold")
-      .whereILike('name',`%${req.body.name}%`)
-      console.log(data)
-      
-   
-      let ids = [];
-      let agreement = {};
-      data.map((row) => {
-        if (ids.includes(row.id)) {
-          agreement = {
-            ...agreement,
-            [row.id]: {
-              ...agreement[row.id],
-              name: [...agreement[row.id].name, row.name],
-              manager:supervisor[0].name
-            },
-          };
-        } else {
-          ids.push(row.id);
-          agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager:supervisor[0].name} };
-        }
-      });
   
-      // console.log(data)
-  
-      res.send({ success: true, agreement, ids });
+        
+    // console.log(">>down>",data)
+
+  let ids = [];
+  let agreement = {};
+
+  // if(data[0] === undefined) 
+  // return res.send({ success: true, agreement  , ids });
+
+
+  data.map((row) => {
+    if (ids.includes(row.id)) {
+      agreement = {
+        ...agreement,
+        [row.id]: {
+          ...agreement[row.id],
+          name: [...agreement[row.id].name, row.name],
+          manager:supervisor[0].name
+        },
+      };
+    } else {
+      ids.push(row.id);
+      agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager: manager_name[row.srm_id]} };
+    }
+  });
+
+  console.log('>>>',ids,agreement)
+
+
+
+ return res.send({ success: true, agreement, ids });
 
   } catch (error) {
       console.log(error)
