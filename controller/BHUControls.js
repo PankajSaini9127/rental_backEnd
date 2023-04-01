@@ -67,7 +67,7 @@ const getAllAgreement = async (req, res) => {
       
     // console.log("lineno 73",ids,agreement)
   });
-  console.log("lineno 75",ids,agreement)
+  // console.log("lineno 75",ids,agreement)
 
   return res.send({success:true,ids,agreement})
   } catch (error) {

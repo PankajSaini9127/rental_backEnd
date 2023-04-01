@@ -15,7 +15,8 @@ const {
   getStateList,
   getCityList,
   user_search_manager,
-  get_agreement_details
+  get_agreement_details,
+  send_back
 } = require("../controller/ManagerController");
 
 // setting up multer for file transport 
@@ -87,6 +88,10 @@ router.route("/getDetails").get(getAgreementById);
 
 router.route("/agreement/:id").post(get_agreement_details);
 
+
+//send back
+//path /api/send-back/:id
+router.route("/send-back/:id").put(send_back)
 
 
 //Update API

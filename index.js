@@ -3,6 +3,7 @@ const path = require('path')
 
 const db = require('./data/db')
 const seed = require('./data/seeds/user')
+// const seed = require('./data/seeds/super_admin_cred')
 const app = express();
 
 const Port = process.env.PORT || 8080
@@ -17,6 +18,7 @@ app.use(express.static("frontend/build"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 seed.seed()
+// seed.super_admin_cred()
 
 app.use('/api/auth',require('./Routes/Auth'))
 app.use('/api/admin',require('./Routes/AdminPanel'))
