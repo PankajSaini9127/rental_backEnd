@@ -90,26 +90,6 @@ async function get_user (req,res){
 }
 
 
-async function get_emp_code (req,res){
-    try {
-        const users = await db.from('users').select("code").orderBy("id","desc").limit(1)
-        console.log(users, "line no 94")
-        if(users.length === 0){
-            const code = "EMP-1"
-            return   res.send({code})
-        }else{
-            
-            const empCode ="EMP-"+ (parseInt(users[0].code.split("-")[1])+1)
-          return res.send({success:true,code:empCode})
-        }
-        // res.send(users)
-        // res.send()
-    } catch (error) {
-        console.log(error)
-       return res.status(500).send()
-    }
-}
-
 
 async function user_search (req,res){
     try {
@@ -140,15 +120,15 @@ async function getMetaData (req,res){
         if(user){
             user.map(row=>{
                 row.role = JSON.parse(row.role)
-                if(row.role.includes('BHU'))
+                if(row.role.includes('bhu'))
                 meta.BHU += 1
-                else if(row.role.includes('Senior Manager'))
+                else if(row.role.includes('senior_manager'))
                 meta.Senior_Manager += 1
-                else if(row.role.includes('Manager'))
+                else if(row.role.includes('manager'))
                 meta.Manager += 1
-                else if(row.role.includes('Finance'))
+                else if(row.role.includes('finance'))
                 meta.Finance += 1
-                else if(row.role.includes('Operations'))
+                else if(row.role.includes('operations'))
                 meta.Operations += 1
             })
         }
@@ -165,4 +145,25 @@ async function getMetaData (req,res){
 
 }
 
-module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser,get_user,get_emp_code,user_search, getMetaData}
+
+// async function get_emp_code (req,res){
+//     try {
+//         const users = await db.from('users').select("code").orderBy("id","desc").limit(1)
+//         console.log(users, "line no 94")
+//         if(users.length === 0){
+//             const code = "EMP-1"
+//             return   res.send({code})
+//         }else{
+            
+//             const empCode ="EMP-"+ (parseInt(users[0].code.split("-")[1])+1)
+//           return res.send({success:true,code:empCode})
+//         }
+//         // res.send(users)
+//         // res.send()
+//     } catch (error) {
+//         console.log(error)
+//        return res.status(500).send()
+//     }
+// }
+
+module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser,get_user,user_search, getMetaData}

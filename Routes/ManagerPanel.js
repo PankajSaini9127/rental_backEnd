@@ -16,7 +16,8 @@ const {
   getCityList,
   user_search_manager,
   get_agreement_details,
-  send_back
+  send_back,
+  get_status
 } = require("../controller/ManagerController");
 
 // setting up multer for file transport 
@@ -121,5 +122,8 @@ router.route('/editAgreement').patch(editAgreement)
 
 //search value 
 router.route('/search/manager').post(user_search_manager)
+
+//get meta data dashboard
+router.route('/dashboard/get-meta').get(get_status)
 
 module.exports = router;

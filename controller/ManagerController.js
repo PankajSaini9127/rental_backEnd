@@ -50,7 +50,8 @@ const getAllAgreement = async (req, res) => {
         "landlords.id",
         "agreements.*"
       )
-      .join("landlords", "agreements.id", "=", "landlords.agreement_id");
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .orderBy('agreements.id','=','asc')
 
     let ids = [];
     let agreement = {};
@@ -607,13 +608,13 @@ async function send_back(req,res){
     // console.log(req.params.id);
     const update = await db("agreements")
       .where("id", "=", req.params.id)
-      .update({ status: req.body.status, remark: req.body.remark });
+      .update({ status: req.body.status, remark: req.body.rectification_msg });
       console.log(update);
     if (update === 1) {
       res.send({ success: true, message: "Agreement Update Successfully" });
     } else {
       
-      // throw new Error({ success: false, message: "Something went wrong please try again later" })
+      throw new Error({ success: false, message: "Something went wrong please try again later" })
     }
   } catch (error) {
     console.log(error);
@@ -622,6 +623,53 @@ async function send_back(req,res){
       message: "Something went wrong please try again later",
     });
   }
+}
+
+
+//dashboard  item 
+async function get_status (req,res){
+  try{
+    let status = await db('agreements').select('status')
+
+    let meta = {
+      totalAgreement:0,
+        Pending : 0,
+        Send_Back : 0,
+        Approved : 0,
+        Rejected : 0,
+        Renewal : 0,
+    }
+    console.log(status)
+
+    if(status){
+        status.map(row=>{
+             meta.totalAgreement +=1
+            if(row.status === "Sent Back For Rectification"){
+              meta.Send_Back += 1
+
+            }else if(
+              row.status === 'Sent To Finance Team' ||
+              row.status ===  'Sent To Sr Manager' ||
+              row.status === 'Sent To BHU' || 
+              row.status === "Operations" ){
+                meta.Approved += 1
+              }else if(row.status === "Hold"){
+                  meta.Pending += 1
+              }
+            
+        })
+    }
+
+    console.log(meta)
+
+    res.send(meta)
+
+}
+catch(err){
+    console.log(err)
+    res.status(500).send('something went wrong');
+}
+
 }
 
 module.exports = {
@@ -640,5 +688,6 @@ module.exports = {
   deleteAgreement,
   add_landlord,
   uploadDoc,
-  send_back
+  send_back,
+  get_status
 };

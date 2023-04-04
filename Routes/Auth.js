@@ -14,5 +14,4 @@ router.route('/login').post(LoginCred)
 
 router.route('/super-admin-creds').post(SuperAdminCreds)
 
-
 module.exports = router
