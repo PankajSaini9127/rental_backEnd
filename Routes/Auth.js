@@ -1,5 +1,5 @@
 const express = require('express');
-const { LoginCred } = require('../controller/LoginControls');
+const { LoginCred, SuperAdminCreds } = require('../controller/LoginControls');
 
 const router =  express.Router();
 
@@ -9,5 +9,9 @@ const router =  express.Router();
 //controllers/loginConteols
 router.route('/login').post(LoginCred)
 
+//path /api/auth/super-admin-creds
+//post req.body {email,password,role}
+
+router.route('/super-admin-creds').post(SuperAdminCreds)
 
 module.exports = router
