@@ -120,15 +120,15 @@ async function getMetaData (req,res){
         if(user){
             user.map(row=>{
                 row.role = JSON.parse(row.role)
-                if(row.role.includes('bhu'))
+                if(row.role.includes('BHU'))
                 meta.BHU += 1
-                else if(row.role.includes('senior_manager'))
+                else if(row.role.includes('Senior_Manager'))
                 meta.Senior_Manager += 1
-                else if(row.role.includes('manager'))
+                else if(row.role.includes('Manager'))
                 meta.Manager += 1
-                else if(row.role.includes('finance'))
+                else if(row.role.includes('Finance'))
                 meta.Finance += 1
-                else if(row.role.includes('operations'))
+                else if(row.role.includes('Operations'))
                 meta.Operations += 1
             })
         }
