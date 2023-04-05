@@ -32,16 +32,47 @@ async function forgotPassword (req,res){
 async function selectRole (req,res){
     
     try {
-        console.log(req.body)
-        let user = await db.from('users').select('name',"role","id").where(cb=>{
-            req.body.map((row,i)=>{
-              return  cb.orWhereILike('role',`%${row}%`)
+        if(req.body.role.length > 0 && req.body.state.length > 0 && req.body.city.length > 0){
+            console.log(req.body)
+            let user = await db.from('users').select('name',"role","id").where('state','=',req.body.state)
+            .andWhere('city','=',req.body.city).andWhere
+            (cb=>{
+                req.body.role.map((row,i)=>{
+                  return  cb.orWhereILike('role',`%${row}%`)
+                })
             })
-        })
-        console.log(user)
+            console.log(user)
+            
+            
+           return  res.send((user))
+        }else{
+            res.send(([]))
+        }
+       
         
-        
-       return  res.send((user))
+      
+        }
+     catch (error) {
+        console.log(error)
+        return res.status(500).send()
+    }
+}
+
+async function selectRoleSRM (req,res){
+    
+    try {
+        console.log(req.body)
+      
+            let user = await db.from('users').select('name',"role","id").where
+            (cb=>{
+                req.body.map((row,i)=>{
+                  return  cb.orWhereILike('role',`%${row}%`)
+                })
+            })
+            console.log(user)
+            
+            
+           return  res.send((user))   
         
       
         }
@@ -120,7 +151,7 @@ async function getMetaData (req,res){
         if(user){
             user.map(row=>{
                 row.role = JSON.parse(row.role)
-                if(row.role.includes('BHU'))
+                if(row.role.includes('BUH'))
                 meta.BHU += 1
                 else if(row.role.includes('Senior_Manager'))
                 meta.Senior_Manager += 1
@@ -166,4 +197,4 @@ async function getMetaData (req,res){
 //     }
 // }
 
-module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser,get_user,user_search, getMetaData}
+module.exports = {updateStatus,forgotPassword,selectRole,getAllUser,updateUser,get_user,user_search, getMetaData,selectRoleSRM}

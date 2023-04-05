@@ -604,11 +604,11 @@ async function get_agreement_details(req, res) {
 //send back
 async function send_back(req,res){
   try {
-    // console.log(">>>>",req.body,"Send Back");
+    console.log(">>>>",req.body,"Send Back");
     // console.log(req.params.id);
     const update = await db("agreements")
       .where("id", "=", req.params.id)
-      .update({ status: req.body.status, remark: req.body.rectification_msg });
+      .update({ status: req.body.status, remark: req.body.remark });
       console.log(update);
     if (update === 1) {
       res.send({ success: true, message: "Agreement Update Successfully" });
