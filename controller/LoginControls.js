@@ -16,7 +16,7 @@ async function LoginCred(req, res) {
         .andWhere("password", "=", req.body.password)
         // .andWhereILike('role',`%${req.body.role}%`)
         .andWhere("status","=","Active")
-        console.log(result[0].role)
+        // console.log(result[0].role)
 
         const role = JSON.parse(result[0].role)
 
