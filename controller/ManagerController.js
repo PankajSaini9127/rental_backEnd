@@ -359,7 +359,7 @@ async function getAgreementById(req, res) {
 
 async function editAgreement(req, res) {
   try {
-    // console.log(req.body)
+    console.log(req.body)
 
     let {
       id,
@@ -389,6 +389,8 @@ async function editAgreement(req, res) {
       year4,
       year5,
       landlord,
+      status,
+      remark
     } = req.body;
 
     let saveAgreement = await db("agreements").where("id", "=", id).update({
@@ -416,6 +418,8 @@ async function editAgreement(req, res) {
       year3,
       year4,
       year5,
+      status,
+      remark
     });
 
     console.log(saveAgreement);

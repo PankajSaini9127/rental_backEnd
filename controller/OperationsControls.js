@@ -18,7 +18,7 @@ const getAllAgreement = async (req, res) => {
 
     let data = await Promise.allSettled(
       supervisor.map(async (row) => {
-        console.log(row);
+       
         return await db("agreements")
           .select(
             "users.name as manager_name",
