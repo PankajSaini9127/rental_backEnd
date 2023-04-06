@@ -43,6 +43,7 @@ const fileFilter = (req, file, cb) => {
     file.mimetype === "image/svg" ||
     file.mimetype === "image/jpg" ||
     file.mimetype === "text/csv" ||
+    file.mimetype === "application/pdf" ||
     file.mimetype ===
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   ) {

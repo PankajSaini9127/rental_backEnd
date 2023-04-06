@@ -124,7 +124,14 @@ async function get_user (req,res){
 
 async function user_search (req,res){
     try {
-        const user = await db('users').select("*").whereILike('name',`%${req.body.name}%`)
+        const user = await db('users').select("*").where((cb)=>{
+            cb.whereILike("name", `%${req.body.name}%`);
+            cb.orWhereILike("role", `%${req.body.name}%`);
+            cb.orWhereILike("email", `%${req.body.name}%`);
+            cb.orWhereILike("mobile", `%${req.body.name}%`);
+            cb.orWhereILike("code", `%${req.body.name}%`);
+    
+          })
       return  res.send(user)
     } catch (error) {
         console.log(error)

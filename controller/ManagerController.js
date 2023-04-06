@@ -490,7 +490,13 @@ async function user_search_manager(req, res) {
         "agreements.*"
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .whereILike("name", `%${req.body.name}%`);
+      .where((cb)=>{
+        cb.whereILike("name", `%${req.body.name}%`);
+        cb.orWhereILike("location", `%${req.body.name}%`);
+        cb.orWhereILike("monthlyRent", `%${req.body.name}%`);
+        cb.orWhereILike("code", `%${req.body.name}%`);
+
+      })
 
     console.log(data);
 
