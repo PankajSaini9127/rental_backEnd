@@ -14,15 +14,12 @@ async function LoginCred(req, res) {
         .select("*")
         .where("email", "=", req.body.email)
         .andWhere("password", "=", req.body.password)
-        // .andWhereILike('role',`%${req.body.role}%`)
         .andWhere("status","=","Active")
-        // console.log(result[0].role)
 
-        const role = JSON.parse(result[0].role)
 
-    
+    console.log(result)
 
-      if (result.length > 0 && role.includes(req.body.role)) {
+      if (result.length > 0){
         res.send({success:true,result})
       } else {
         res.status(203).send({ success: false, message: "Invalid Credentials !" });

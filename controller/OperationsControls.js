@@ -2,10 +2,11 @@ const db = require("../data/db");
 
 const getAllAgreement = async (req, res) => {
   try {
+    console.log(req.params.id)
     const supervisor = await db("users")
       .select("*")
       .where("supervisor", "=", req.params.id);
-    //    console.log(">>>",supervisor)
+      //  console.log(">>>",supervisor)
 
     // for getting the name for Sr manager
     let Sr_names = {};
@@ -32,6 +33,7 @@ const getAllAgreement = async (req, res) => {
       })
     );
 
+   
     data =
     data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
     // console.log(">>>data" ,data)

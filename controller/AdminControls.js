@@ -99,9 +99,11 @@ async function getAllUser (req,res){
 async function updateUser (req,res){
     try {
      req.body.role= JSON.stringify(req.body.role)
+     console.log(req.body)
      const update = await db("users").where("id",req.params.id).update(req.body)
  
     if(update){
+
         return res.status(200).send({success:true,message:"User Updated."})
     }
     } catch (error) {
