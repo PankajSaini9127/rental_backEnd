@@ -317,6 +317,7 @@ async function getAgreementById(req, res) {
               agreement_id: row.agreement_id,
               aadhar_card: row.aadhar_card,
               pan_card: row.pan_card,
+              gst:row.gst
             },
           ],
         };
@@ -343,6 +344,7 @@ async function getAgreementById(req, res) {
               agreement_id: row.agreement_id,
               aadhar_card: row.aadhar_card,
               pan_card: row.pan_card,
+              gst:row.gst
             },
           ],
         };
@@ -389,6 +391,8 @@ async function editAgreement(req, res) {
       year4,
       year5,
       landlord,
+      status,
+      remark
     } = req.body;
 
     let saveAgreement = await db("agreements").where("id", "=", id).update({
@@ -416,6 +420,8 @@ async function editAgreement(req, res) {
       year3,
       year4,
       year5,
+      status,
+      remark
     });
 
     console.log(saveAgreement);

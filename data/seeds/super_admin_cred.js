@@ -5,8 +5,8 @@
 const  db = require('../db')
 exports.seed = async function() {
   // Deletes ALL existing entries
-  // await db('super_admin_creds').del()
-  // await db('super_admin_creds').insert([
+  // await db('users').del()
+  // await db('users').insert([
   //   {id: 1, email: 'andromeda@gmail.com',password:"andromeda2023",role:"Super Admin",name:"Andromeda"}
   // ]);
 };
