@@ -51,9 +51,8 @@ const getAllAgreement = async (req, res) => {
         "agreements.*"
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .orderBy('agreements.id','=','asc')
-
-    let ids = [];
+      
+      let ids = [];
     let agreement = {};
     data.map((row) => {
       if (ids.includes(row.id)) {
@@ -73,7 +72,7 @@ const getAllAgreement = async (req, res) => {
 
     // console.log(data)
 
-    res.send({ success: true, agreement, ids });
+    res.send({ success: true, agreement, ids: ids.reverse() });
   } catch (error) {
     console.log(error);
     res.send({
