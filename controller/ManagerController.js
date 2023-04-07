@@ -289,7 +289,7 @@ async function getAgreementById(req, res) {
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .where("agreement_id", req.query.id);
 
-    console.log(data);
+    // console.log(data);
 
     let ids = [];
     let agreement = {};
@@ -308,6 +308,9 @@ async function getAgreementById(req, res) {
               panNo: row.panNo,
               gstNo: row.gstNo,
               mobileNo: row.mobileNo,
+              gst: row.gst,
+              cheque: row.cheque,
+              branchName: row.branchName,
               alternateMobile: row.alternateMobile,
               email: row.email,
               bankName: row.bankName,
@@ -322,6 +325,7 @@ async function getAgreementById(req, res) {
         };
       } else {
         ids.push(row.id);
+        
         agreement = {
           ...row,
           landlord: [
@@ -333,6 +337,9 @@ async function getAgreementById(req, res) {
               aadharNo: row.aadharNo,
               panNo: row.panNo,
               gstNo: row.gstNo,
+              gst: row.gst,
+              cheque: row.cheque,
+              branchName: row.branchName,
               mobileNo: row.mobileNo,
               alternateMobile: row.alternateMobile,
               email: row.email,
@@ -348,7 +355,7 @@ async function getAgreementById(req, res) {
         };
       }
     });
-    console.log(agreement);
+    // console.log(agreement);
 
     return res.status(200).send(agreement);
   } catch (error) {
@@ -359,7 +366,7 @@ async function getAgreementById(req, res) {
 
 async function editAgreement(req, res) {
   try {
-    // console.log(req.body)
+    console.log(req.body)
 
     let {
       id,
@@ -544,10 +551,13 @@ async function get_agreement_details(req, res) {
             landlord_id: [...agreement[row.id].landlord_id, row.landlord_id],
             name: [...agreement[row.id].name, row.name],
             leeseName: [...agreement[row.id].leeseName, row.leeseName],
+            branchName: [...agreement[row.id].branchName, row.branchName],
             aadharNo: [...agreement[row.id].aadharNo, row.aadharNo],
             panNo: [...agreement[row.id].panNo, row.panNo],
             gstNo: [...agreement[row.id].gstNo, row.gstNo],
             mobileNo: [...agreement[row.id].mobileNo, row.mobileNo],
+            cheque: [...agreement[row.id].cheque, row.cheque],
+            gst: [...agreement[row.id].gst, row.gst],
             alternateMobile: [
               ...agreement[row.id].alternateMobile,
               row.alternateMobile,
@@ -578,12 +588,15 @@ async function get_agreement_details(req, res) {
             leeseName: [row.leeseName],
             state: [row.state],
             city: [row.city],
+            branchName: [row.branchName],
             location: [row.location],
             pincode: [row.pincode],
             address: [row.address],
             aadharNo: [row.aadharNo],
             panNo: [row.panNo],
             gstNo: [row.gstNo],
+            gst: [row.gst],
+            cheque: [row.cheque],
             mobileNo: [row.mobileNo],
             alternateMobile: [row.alternateMobile],
             email: [row.email],
