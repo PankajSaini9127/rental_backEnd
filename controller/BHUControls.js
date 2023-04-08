@@ -133,8 +133,10 @@ const updateAgreement = async (req, res) => {
     if (update === 1) {
       res.send({ success: true, message: "Agreement Update Successfully" });
     } else {
+
       console.log(update);
       throw new Error({ success: false, message: "Something went wrong please try again later" })
+
     }
   } catch (error) {
     console.log(error);

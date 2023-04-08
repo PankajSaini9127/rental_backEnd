@@ -51,9 +51,8 @@ const getAllAgreement = async (req, res) => {
         "agreements.*"
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .orderBy('agreements.id','=','asc')
-
-    let ids = [];
+      
+      let ids = [];
     let agreement = {};
     data.map((row) => {
       if (ids.includes(row.id)) {
@@ -73,7 +72,7 @@ const getAllAgreement = async (req, res) => {
 
     // console.log(data)
 
-    res.send({ success: true, agreement, ids });
+    res.send({ success: true, agreement, ids: ids.reverse() });
   } catch (error) {
     console.log(error);
     res.send({
@@ -289,7 +288,7 @@ async function getAgreementById(req, res) {
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .where("agreement_id", req.query.id);
 
-    console.log(data);
+    // console.log(data);
 
     let ids = [];
     let agreement = {};
@@ -308,6 +307,9 @@ async function getAgreementById(req, res) {
               panNo: row.panNo,
               gstNo: row.gstNo,
               mobileNo: row.mobileNo,
+              gst: row.gst,
+              cheque: row.cheque,
+              branchName: row.branchName,
               alternateMobile: row.alternateMobile,
               email: row.email,
               bankName: row.bankName,
@@ -317,11 +319,13 @@ async function getAgreementById(req, res) {
               agreement_id: row.agreement_id,
               aadhar_card: row.aadhar_card,
               pan_card: row.pan_card,
+              gst:row.gst
             },
           ],
         };
       } else {
         ids.push(row.id);
+        
         agreement = {
           ...row,
           landlord: [
@@ -333,6 +337,9 @@ async function getAgreementById(req, res) {
               aadharNo: row.aadharNo,
               panNo: row.panNo,
               gstNo: row.gstNo,
+              gst: row.gst,
+              cheque: row.cheque,
+              branchName: row.branchName,
               mobileNo: row.mobileNo,
               alternateMobile: row.alternateMobile,
               email: row.email,
@@ -343,12 +350,13 @@ async function getAgreementById(req, res) {
               agreement_id: row.agreement_id,
               aadhar_card: row.aadhar_card,
               pan_card: row.pan_card,
+              gst:row.gst
             },
           ],
         };
       }
     });
-    console.log(agreement);
+    // console.log(agreement);
 
     return res.status(200).send(agreement);
   } catch (error) {
@@ -443,6 +451,8 @@ async function editAgreement(req, res) {
             accountNo,
             ifscCode,
             agreement_id,
+            gst,
+            cheque,
             aadhar_card,
             pan_card,
           } = row;
@@ -462,6 +472,8 @@ async function editAgreement(req, res) {
               accountNo,
               ifscCode,
               agreement_id,
+              gst,
+              cheque,
               aadhar_card,
               pan_card,
             });
@@ -548,10 +560,13 @@ async function get_agreement_details(req, res) {
             landlord_id: [...agreement[row.id].landlord_id, row.landlord_id],
             name: [...agreement[row.id].name, row.name],
             leeseName: [...agreement[row.id].leeseName, row.leeseName],
+            branchName: [...agreement[row.id].branchName, row.branchName],
             aadharNo: [...agreement[row.id].aadharNo, row.aadharNo],
             panNo: [...agreement[row.id].panNo, row.panNo],
             gstNo: [...agreement[row.id].gstNo, row.gstNo],
             mobileNo: [...agreement[row.id].mobileNo, row.mobileNo],
+            cheque: [...agreement[row.id].cheque, row.cheque],
+            gst: [...agreement[row.id].gst, row.gst],
             alternateMobile: [
               ...agreement[row.id].alternateMobile,
               row.alternateMobile,
@@ -582,12 +597,15 @@ async function get_agreement_details(req, res) {
             leeseName: [row.leeseName],
             state: [row.state],
             city: [row.city],
+            branchName: [row.branchName],
             location: [row.location],
             pincode: [row.pincode],
             address: [row.address],
             aadharNo: [row.aadharNo],
             panNo: [row.panNo],
             gstNo: [row.gstNo],
+            gst: [row.gst],
+            cheque: [row.cheque],
             mobileNo: [row.mobileNo],
             alternateMobile: [row.alternateMobile],
             email: [row.email],

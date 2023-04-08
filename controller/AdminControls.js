@@ -84,7 +84,10 @@ async function selectRoleSRM (req,res){
 
 async function getAllUser (req,res){
     try {
-      const users = await db.from('users').select('*').where(req.body)
+        // const user = ["Admin","Finance","Operations","BUH","Senior_Manager","Manager"]
+      const users = await db.from('users').select('*').where(req.body).andWhereNot("email","=",`andromeda@gmail.com`)
+        
+      console.log(users)
    if(users.length > 0 ){
     return res.send(users)
    }else{
