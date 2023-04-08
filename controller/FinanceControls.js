@@ -6,6 +6,7 @@ const getAllAgreement = async (req, res) => {
       .select("*")
       .where("supervisor", "=", req.params.id)
 
+
     // for getting the name for Sr manager
     let Sr_names = {};
     supervisor.map((row) => {
@@ -25,7 +26,7 @@ const getAllAgreement = async (req, res) => {
             "landlords.id as landlords",
             "agreements.*"
           )
-          .where("bhu_id",'=', row.id)
+          .where("op_id",'=', row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .join("users","agreements.manager_id","=","users.id")
       })
@@ -115,4 +116,25 @@ async function user_search_bhu(req, res) {
   }
 }
 
-module.exports = { getAllAgreement, user_search_bhu };
+const updateAgreement = async (req, res) => {
+    try {
+      const update = await db("agreements")
+        .where("id", "=", req.params.id)
+        .update(req.body);
+        console.log(update)
+      if (update === 1) {
+        res.send({ success: true, message: "Agreement Update Successfully" });
+      } else {
+        console.log(update);
+        throw new Error({ success: false, message: "Something went wrong please try again later" })
+      }
+    } catch (error) {
+      console.log(error);
+      res.send({
+        success: false,
+        message: "Something went wrong please try again later",
+      });
+    }
+  };
+
+module.exports = { getAllAgreement, user_search_bhu ,updateAgreement};

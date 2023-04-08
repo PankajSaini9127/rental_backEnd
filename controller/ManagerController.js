@@ -138,7 +138,7 @@ const updateAgreement = async (req, res) => {
     console.log(req.params.id);
     const update = await db("agreements")
       .where("id", "=", req.params.id)
-      .update({ status: req.body.status, srm_id: req.body.srm_id });
+      .update(req.body);
       console.log(update);
     if (update === 1) {
       res.send({ success: true, message: "Agreement Update Successfully" });
