@@ -451,6 +451,8 @@ async function editAgreement(req, res) {
             accountNo,
             ifscCode,
             agreement_id,
+            gst,
+            cheque,
             aadhar_card,
             pan_card,
           } = row;
@@ -470,6 +472,8 @@ async function editAgreement(req, res) {
               accountNo,
               ifscCode,
               agreement_id,
+              gst,
+              cheque,
               aadhar_card,
               pan_card,
             });
