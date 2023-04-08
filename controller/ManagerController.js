@@ -304,6 +304,7 @@ async function getAgreementById(req, res) {
               percentageShare: row.percentageShare,
               leeseName: row.leeseName,
               aadharNo: row.aadharNo,
+              area: row.area,
               panNo: row.panNo,
               gstNo: row.gstNo,
               mobileNo: row.mobileNo,
@@ -339,6 +340,7 @@ async function getAgreementById(req, res) {
               gstNo: row.gstNo,
               gst: row.gst,
               cheque: row.cheque,
+              area: row.area,
               branchName: row.branchName,
               mobileNo: row.mobileNo,
               alternateMobile: row.alternateMobile,
@@ -371,7 +373,6 @@ async function editAgreement(req, res) {
 
     let {
       id,
-      code,
       pincode,
       state,
       address,
@@ -381,7 +382,7 @@ async function editAgreement(req, res) {
       monthlyRent,
       noticePeriod,
       yearlyIncrement,
-      deposite,
+      deposit,
       gst_certificate,
       draft_agreement,
       electricity_bill,
@@ -398,6 +399,7 @@ async function editAgreement(req, res) {
       year5,
       landlord,
       status,
+      area,
       remark
     } = req.body;
 
@@ -406,12 +408,13 @@ async function editAgreement(req, res) {
       state,
       address,
       location,
+      area,
       city,
       lockInYear,
       monthlyRent,
       noticePeriod,
       yearlyIncrement,
-      deposite,
+      deposit,
       gst_certificate,
       draft_agreement,
       electricity_bill,
