@@ -2,11 +2,9 @@ const db = require("../data/db");
 
 const getAllAgreement = async (req, res) => {
   try {
-    console.log(req.params.id)
     const supervisor = await db("users")
       .select("*")
-      .where("supervisor", "=", req.params.id);
-      //  console.log(">>>",supervisor)
+      .where("supervisor", "=", req.params.id)
 
     // for getting the name for Sr manager
     let Sr_names = {};
@@ -27,16 +25,16 @@ const getAllAgreement = async (req, res) => {
             "landlords.id as landlords",
             "agreements.*"
           )
+          .where("bhu_id",'=', row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-           .join("users","agreements.manager_id","=","users.id")
-          .where("bhu_id", row.id);
+          .join("users","agreements.manager_id","=","users.id")
       })
     );
 
    
     data =
     data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
-    // console.log(">>>data" ,data)
+    console.log(">>>data" ,data)
 
     let ids = [];
     let agreement = {};

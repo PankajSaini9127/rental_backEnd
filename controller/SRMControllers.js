@@ -46,12 +46,13 @@ const getAllAgreement = async (req, res) => {
         [row.id]: {
           ...agreement[row.id],
           name: [...agreement[row.id].name, row.name],
-          manager:supervisor[0].name
+          manager:manager_name[row.manager_id]
         },
       };
     } else {
       ids.push(row.id);
-      agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager: manager_name[row.srm_id]} };
+      console.log(">>>>>",row.manager_id)
+      agreement = { ...agreement, [row.id]: { ...row, name: [row.name] ,manager: manager_name[row.manager_id]} };
     }
   });
 

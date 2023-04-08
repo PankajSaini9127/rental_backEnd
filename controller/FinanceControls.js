@@ -4,72 +4,64 @@ const getAllAgreement = async (req, res) => {
   try {
     const supervisor = await db("users")
       .select("*")
-      .where("supervisor", "=", req.params.id);
-    console.log(">>>", supervisor[0].id);
+      .where("supervisor", "=", req.params.id)
 
-    // console.log(sr_manager)
+
     // for getting the name for Sr manager
     let Sr_names = {};
     supervisor.map((row) => {
       Sr_names = { ...Sr_names, [row.id]: row.name };
     });
 
-    console.log();
+    // console.log(Sr_names);
 
     let data = await Promise.allSettled(
       supervisor.map(async (row) => {
-        // console.log(row);
+       
         return await db("agreements")
           .select(
             "users.name as manager_name",
             "landlords.name",
             "landlords.agreement_id",
             "landlords.id as landlords",
-            "agreements.*",
-           
+            "agreements.*"
           )
+          .where("op_id",'=', row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .join("users","agreements.manager_id","=","users.id")
-          .where("srm_id", row.id);
       })
     );
-    // data = data.map((row)=>row.status === 'fulfilled' && row.value[0])
-    data =
-      data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
 
-    // console.log(">>>", data);
+   
+    data =
+    data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+    console.log(">>>data" ,data)
 
     let ids = [];
     let agreement = {};
 
-  data.map((row) => {
-        if (ids.includes(row.id)) {
-          agreement = {
-            ...agreement,
-            [row.id]: {
-              ...agreement[row.id],
-              name: [...agreement[row.id].name, row.name],
-              sr_manager: supervisor[0].name
-            },
-          };
-        } else {
-          ids.push(row.id);
-          agreement = {
-            ...agreement,
-            [row.id]: {
-              ...row,
-              name: [row.name],
-              sr_manager: Sr_names[row.srm_id]
-            },
-          };
-        
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            sr_manager: supervisor[0].name,
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = {
+          ...agreement,
+          [row.id]: { ...row, name: [row.name], sr_manager: Sr_names[row.bhu_id] },
+        };
       }
-      
-    // console.log("lineno 73",ids,agreement)
-  });
-  // console.log("lineno 75",ids,agreement)
+    });
 
-  return res.send({success:true,ids,agreement})
+    // console.log('>>>',ids,agreement)
+
+    return res.send({ success: true, agreement, ids });
   } catch (error) {
     console.log(error);
     return res.send({
@@ -125,24 +117,24 @@ async function user_search_bhu(req, res) {
 }
 
 const updateAgreement = async (req, res) => {
-  try {
-    const update = await db("agreements")
-      .where("id", "=", req.params.id)
-      .update(req.body);
-      console.log(update)
-    if (update === 1) {
-      res.send({ success: true, message: "Agreement Update Successfully" });
-    } else {
-      console.log(update);
-      throw new Error({ success: false, message: "Something went wrong please try again later" })
+    try {
+      const update = await db("agreements")
+        .where("id", "=", req.params.id)
+        .update(req.body);
+        console.log(update)
+      if (update === 1) {
+        res.send({ success: true, message: "Agreement Update Successfully" });
+      } else {
+        console.log(update);
+        throw new Error({ success: false, message: "Something went wrong please try again later" })
+      }
+    } catch (error) {
+      console.log(error);
+      res.send({
+        success: false,
+        message: "Something went wrong please try again later",
+      });
     }
-  } catch (error) {
-    console.log(error);
-    res.send({
-      success: false,
-      message: "Something went wrong please try again later",
-    });
-  }
-};
+  };
 
-module.exports = { getAllAgreement, user_search_bhu, updateAgreement };
+module.exports = { getAllAgreement, user_search_bhu ,updateAgreement};

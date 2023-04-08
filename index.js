@@ -27,6 +27,7 @@ app.use('/api',require('./Routes/SeniorManager'))
 app.use('/api/BHU',require('./Routes/BHU'))
 app.use('/api',require('./Routes/newAuthController'))
 app.use('/api/operations',require('./Routes/Operations'))
+app.use('/api/finance',require('./Routes/FinanceRoute'))
 
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "frontend","build", "index.html"));
