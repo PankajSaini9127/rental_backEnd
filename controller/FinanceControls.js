@@ -28,7 +28,7 @@ const getAllAgreement = async (req, res) => {
           )
           .where("op_id",'=', row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-          .join("users","agreements.manager_id","=","users.id").orderBy('id',"desc")
+          .join("users","agreements.manager_id","=","users.id").orderBy('agreements.id',"desc")
       })
     );
 
