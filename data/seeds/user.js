@@ -1,6 +1,12 @@
 
 const  db = require('../db')
 exports.seed = async function() {
+  // Deletes ALL existing entries
+  // const role = JSON.stringify(["Super Admin"])
+  // await db('users').del()
+  // await db('users').insert([
+  //   {id: 1,code:123,mobile:858588,supervisor:"",modify:'', email: 'andromeda@gmail.com',password:"andromeda2023",role:role,name:"Andromeda"}
+  // ]);
   
   // Deletes ALL existing entries
   // await db('users').del()
