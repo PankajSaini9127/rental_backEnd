@@ -14,7 +14,7 @@ const getAllAgreement = async (req, res) => {
       Sr_names = { ...Sr_names, [row.id]: row.name };
     });
 
-    console.log();
+    console.log(supervisor);
 
     let data = await Promise.allSettled(
       supervisor.map(async (row) => {
