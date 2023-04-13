@@ -19,6 +19,7 @@ const {
   send_back,
   get_status
 } = require("../controller/ManagerController");
+const { add_rent, get_landlord_id } = require("../controller/MontlyRent");
 
 // setting up multer for file transport 
 const router = express.Router();
@@ -106,7 +107,7 @@ router.route("/delAgreement/:id").delete(deleteAgreement);
 router.route('/list_teure').get(get_tenure)
 
 // /api/list_monthly
-router.route('/list_monthly').get(get_monthly_rent)
+router.route('/list_monthly/:id').get(get_monthly_rent)
 
 // /api/stateList 
 // Api for getting state list
@@ -123,5 +124,12 @@ router.route('/search/manager').post(user_search_manager)
 
 //get meta data dashboard
 router.route('/dashboard/get-meta').get(get_status)
+
+
+//monthaly Rent 
+router.route('/monthly_rent/add').post(add_rent)
+
+//get landlord id 
+router.route('/month_rent/get_landlord_id/:id').get(get_landlord_id)
 
 module.exports = router;

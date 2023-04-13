@@ -85,7 +85,7 @@ const getAllAgreement = async (req, res) => {
 
 const get_tenure = async (req, res) => {
   try {
-    var m11 = new Date(Date.now());
+    var month = new Date(Date.now());
 
     m11.setMonth(m11.getMonth() - 10);
 
@@ -199,19 +199,53 @@ const uploadDoc = async (req, res) => {
 
 async function get_monthly_rent(req, res) {
   try {
-    var tenure11Month = await db
+    console.log("hhhihi")
+
+    var monthaly_rent = await db
       .from("agreements")
       .select("*")
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .orderBy("agreements.time", "desc");
-    console.log(tenure11Month);
-    tenure11Month = tenure11Month.map((row, i) => {
-      var m11 = new Date(row.time);
-      m11.setMonth(m11.getMonth() - 1);
-      return row.time >= m11 && row;
-    });
+      .whereNot("agreements.rent_start_date","=",'null')
+      .andWhere("agreements.id","=",req.params.id)
+      // .orderBy("agreements.time", "desc");
+    // console.log(monthaly_rent);
 
-    return res.send({ success: true, monthly_rent: tenure11Month });
+    var getDaysInMonth = function(month,year) {
+      return new Date(year, month, 0).getDate();;
+     };
+
+  let finalData = []
+
+  var months = [ "January", "February", "March", "April", "May", "June", 
+           "July", "August", "September", "October", "November", "December" ];
+
+    monthaly_rent = monthaly_rent.map((row, i) => {
+
+     const today = new Date()
+      var rent_date = new Date(row.rent_start_date);
+      // console.log(">>>>>",rent_date)
+    
+        const daysInMonth = getDaysInMonth(rent_date.getMonth(),rent_date.getFullYear())
+
+        const day =getDaysInMonth(rent_date.getMonth(),rent_date.getFullYear())- rent_date.getDate()
+  console.log(day)
+  
+  
+       console.log(row.monthlyRent/daysInMonth*day)
+          
+
+        
+        row.monthlyRent = row.monthlyRent/31*day
+
+        row = {...row, rent_month:months[rent_date.getMonth()],rent_year:rent_date.getFullYear()}
+        // if(rent_date.getMonth() === today.getMonth()){
+          // return row
+          finalData.push(row)
+        // }
+
+     
+    });
+    return res.send({ success: true, monthly_rent: finalData });
   } catch (error) {
     console.log(error);
     return res.status(500).send();
