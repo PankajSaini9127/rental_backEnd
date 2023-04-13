@@ -31,12 +31,12 @@ const userRegistration = async(req,res)=>{
 
            
           }else{
-          throw new Error({success:false,message:"All filds are required"})
+          throw new Error({success:false,message:"All fields are required"})
           }
 
     } catch (error) {
         console.log(error)
-       return res.status(422).send({success:false,message:"All filds are required"})
+       return res.status(422).send({success:false,message:"All fields are required"})
     }
    
     
