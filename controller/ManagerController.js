@@ -50,7 +50,8 @@ const getAllAgreement = async (req, res) => {
         "landlords.id",
         "agreements.*"
       )
-      .join("landlords", "agreements.id", "=", "landlords.agreement_id").orderBy('agreements.id',"desc")
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .orderBy('agreements.id',"desc")
       
       let ids = [];
     let agreement = {};
@@ -72,7 +73,7 @@ const getAllAgreement = async (req, res) => {
 
     // console.log(data)
 
-    res.send({ success: true, agreement, ids: ids});
+    res.send({ success: true, agreement, ids: ids });
   } catch (error) {
     console.log(error);
     res.send({
