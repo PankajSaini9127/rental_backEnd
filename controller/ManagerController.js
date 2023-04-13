@@ -72,7 +72,7 @@ const getAllAgreement = async (req, res) => {
 
     // console.log(data)
 
-    res.send({ success: true, agreement, ids: ids.reverse() });
+    res.send({ success: true, agreement, ids: ids});
   } catch (error) {
     console.log(error);
     res.send({
