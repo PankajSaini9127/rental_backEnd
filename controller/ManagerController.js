@@ -1,20 +1,19 @@
 require("dotenv").config();
 const { select } = require("../data/db");
 const db = require("../data/db");
+const moment = require('moment')
 
 const newAgreement = async (req, res) => {
   try {
     const agreement = await db("agreements").insert(req.body);
-    console.log(req.body);
+    //console.log(req.body);
 
     if (agreement.length == 1) {
-      res
-        .status(201)
-        .send({
-          success: true,
-          message: "Agreement Submit Successfully",
-          agreement,
-        });
+      res.status(201).send({
+        success: true,
+        message: "Agreement Submit Successfully",
+        agreement,
+      });
     } else {
       throw new Error({
         success: false,
@@ -22,13 +21,13 @@ const newAgreement = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({ success: false, message: "Something went wrong Please", error });
   }
 };
 
 async function add_landlord(req, res) {
-  // console.log(req.body)
+  // //console.log(req.body)
   try {
     const lanloard = await db("landlords").insert(req.body);
 
@@ -36,7 +35,7 @@ async function add_landlord(req, res) {
       res.send({ message: "Landlord Added." });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.status(500).send({ message: "Something went wrong !!!" });
   }
 }
@@ -51,9 +50,9 @@ const getAllAgreement = async (req, res) => {
         "agreements.*"
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .orderBy('agreements.id',"desc")
-      
-      let ids = [];
+      .orderBy("agreements.id", "desc");
+
+    let ids = [];
     let agreement = {};
     data.map((row) => {
       if (ids.includes(row.id)) {
@@ -69,13 +68,13 @@ const getAllAgreement = async (req, res) => {
         agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
       }
     });
-    console.log(agreement);
+    //console.log(agreement);
 
-    // console.log(data)
+    // //console.log(data)
 
     res.send({ success: true, agreement, ids: ids });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "something Went Wrong please try again later",
@@ -89,15 +88,15 @@ const get_tenure = async (req, res) => {
 
     m11.setMonth(m11.getMonth() - 10);
 
-    console.log("11m>>>", m11);
+    //console.log("11m>>>", m11);
 
     var y3 = new Date(Date.now());
     y3.setMonth(y3.getMonth() - 10 * 3);
-    console.log("y3>>>", y3);
+    //console.log("y3>>>", y3);
 
     var y5 = new Date(Date.now());
     y5.setMonth(y5.getMonth() - 10 * 5);
-    console.log("y5>>>", y5);
+    //console.log("y5>>>", y5);
 
     var tenure11Month = await db
       .from("agreements")
@@ -125,31 +124,33 @@ const get_tenure = async (req, res) => {
           return row;
       }
     });
-    console.log(tenure11Month);
+    //console.log(tenure11Month);
     return res.send({ success: true, renewal: tenure11Month });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     return res.status(500).send();
   }
 };
 
 const updateAgreement = async (req, res) => {
   try {
-    console.log(">>>>",req.body);
-    console.log(req.params.id);
+    //console.log(">>>>", req.body);
+    //console.log(req.params.id);
     const update = await db("agreements")
       .where("id", "=", req.params.id)
       .update(req.body);
-      console.log(update);
+    //console.log(update);
     if (update === 1) {
-      res.send({ success: true, message: "Agreement Update Successfully" });
+      return res.send({
+        success: true,
+        message: "Agreement Update Successfully",
+      });
     } else {
-      
       // throw new Error({ success: false, message: "Something went wrong please try again later" })
     }
   } catch (error) {
     console.log(error);
-    res.send({
+    res.status(500).send({
       success: false,
       message: "Something went wrong please try again later",
     });
@@ -158,12 +159,12 @@ const updateAgreement = async (req, res) => {
 
 const deleteAgreement = async (req, res) => {
   try {
-    console.log(req.params.id);
+    //console.log(req.params.id);
     const result = await db("agreements").where("id", req.params.id).del();
     const landlords = await db("landlords")
       .where("agreement_id", req.params.id)
       .del();
-    console.log(result, landlords);
+    //console.log(result, landlords);
     if (result === 1 && landlords === 1) {
       res.status(202).send({ success: true, message: "Delete Successful" });
     } else {
@@ -173,7 +174,7 @@ const deleteAgreement = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "Something went Wrong Please try again later",
@@ -192,62 +193,90 @@ const uploadDoc = async (req, res) => {
       res.status(203).send({ message: "Pleae Provide the document." });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({ message: "Something went Wrong !!!" });
   }
 };
 
 async function get_monthly_rent(req, res) {
   try {
-    console.log("hhhihi")
-
-    var monthaly_rent = await db
+    var monthly_rent = await db
       .from("agreements")
       .select("*")
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .whereNot("agreements.rent_start_date","=",'null')
-      .andWhere("agreements.id","=",req.params.id)
-      // .orderBy("agreements.time", "desc");
-    // console.log(monthaly_rent);
+      .andWhere("agreements.id", "=", req.params.id);
 
-    var getDaysInMonth = function(month,year) {
-      return new Date(year, month, 0).getDate();;
-     };
+    var getDaysInMonth = function (month, year) {
+      return new Date(year, month, 0).getDate();
+    };
 
-  let finalData = []
+    let finalData = [];
 
-  var months = [ "January", "February", "March", "April", "May", "June", 
-           "July", "August", "September", "October", "November", "December" ];
-
-    monthaly_rent = monthaly_rent.map((row, i) => {
-
-     const today = new Date()
+       monthly_rent = monthly_rent.map((row, i) => {
+      
+      console.log("RSD >>> ", row.rent_start_date);
       var rent_date = new Date(row.rent_start_date);
-      // console.log(">>>>>",rent_date)
-    
-        const daysInMonth = getDaysInMonth(rent_date.getMonth(),rent_date.getFullYear())
 
-        const day =getDaysInMonth(rent_date.getMonth(),rent_date.getFullYear())- rent_date.getDate()
-  console.log(day)
-  
-  
-       console.log(row.monthlyRent/daysInMonth*day)
-          
+      const totalDaysInMonth = getDaysInMonth(
+        rent_date.getMonth() + 1,
+        rent_date.getFullYear()
+      );
+      // console.log("rent>>>", row);
 
-        
-        row.monthlyRent = row.monthlyRent/31*day
 
-        row = {...row, rent_month:months[rent_date.getMonth()],rent_year:rent_date.getFullYear()}
-        // if(rent_date.getMonth() === today.getMonth()){
-          // return row
-          finalData.push(row)
-        // }
+      const restDays = totalDaysInMonth - rent_date.getDate();
 
-     
+      console.log("rent>>>", row.monthlyRent / totalDaysInMonth);
+      console.log(
+        totalDaysInMonth,
+        restDays,
+        row.monthlyRent,
+        rent_date.getDate()
+      );
+
+      // calculating the final amount
+      const finalAmount = (((row.monthlyRent / totalDaysInMonth) * restDays)/100)*parseInt(row.percentage) 
+      const finalAmountForFullMonth = (row.monthlyRent/100)*parseInt(row.percentage) 
+
+      // this code will also add the field for next month 
+
+      const todayMoment = moment()
+      const tomorrowMoment = todayMoment.clone().add(1,'month')
+
+      const nextMonthSlab = {
+        monthly_rent : row.monthlyRent,
+        code : row.code,
+        location  : row.location ,
+        gst  : row.gstNo ,
+        utr_no  : row.utr_number ,
+        landlord_name: row.name,
+        status: row.status,
+        share: row.percentage,
+        rent_amount: finalAmountForFullMonth,
+        rent_date : tomorrowMoment
+      }
+
+
+      row = {
+        monthly_rent : row.monthlyRent,
+        code : row.code,
+        location  : row.location ,
+        gst  : row.gstNo ,
+        utr_no  : row.utr_number ,
+        landlord_name: row.name,
+        status: row.status,
+        share: row.percentage,
+        rent_amount: finalAmount,
+        rent_date : row.rent_start_date,
+      };
+      finalData.push(row);
+      finalData.push(nextMonthSlab);
     });
+
+    console.log(finalData)
     return res.send({ success: true, monthly_rent: finalData });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     return res.status(500).send();
   }
 }
@@ -268,7 +297,7 @@ async function getStateList(req, res) {
       }
     } else return res.send([]);
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.status(500).send("Error");
   }
 }
@@ -287,14 +316,14 @@ async function getCityList(req, res) {
       }
     } else return res.send([]);
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.status(500).send("Error");
   }
 }
 
 async function detailsAgreement(req, res) {
   try {
-    console.log(req.query.id);
+    //console.log(req.query.id);
     const agreement = await db("agreements").join(
       "landlords",
       "agreements.id",
@@ -303,7 +332,7 @@ async function detailsAgreement(req, res) {
     );
 
     agreement.map((row, i) => {
-      console.log(row.id, req.params.id);
+      //console.log(row.id, req.params.id);
       if (row.agreement_id == req.params.id) {
         return res.send(row);
       }
@@ -311,7 +340,7 @@ async function detailsAgreement(req, res) {
 
     return res.send(agreement);
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     return res.status(500).send();
   }
 }
@@ -323,7 +352,7 @@ async function getAgreementById(req, res) {
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .where("agreement_id", req.query.id);
 
-    // console.log(data);
+    // //console.log(data);
 
     let ids = [];
     let agreement = {};
@@ -355,13 +384,13 @@ async function getAgreementById(req, res) {
               agreement_id: row.agreement_id,
               aadhar_card: row.aadhar_card,
               pan_card: row.pan_card,
-              gst:row.gst
+              gst: row.gst,
             },
           ],
         };
       } else {
         ids.push(row.id);
-        
+
         agreement = {
           ...row,
           landlord: [
@@ -387,24 +416,24 @@ async function getAgreementById(req, res) {
               agreement_id: row.agreement_id,
               aadhar_card: row.aadhar_card,
               pan_card: row.pan_card,
-              gst:row.gst
+              gst: row.gst,
             },
           ],
         };
       }
     });
-    // console.log(agreement);
+    // //console.log(agreement);
 
     return res.status(200).send(agreement);
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     return res.status(500).send();
   }
 }
 
 async function editAgreement(req, res) {
   try {
-    console.log(req.body)
+    //console.log(req.body)
 
     let {
       id,
@@ -435,7 +464,7 @@ async function editAgreement(req, res) {
       landlord,
       status,
       area,
-      remark
+      remark,
     } = req.body;
 
     let saveAgreement = await db("agreements").where("id", "=", id).update({
@@ -465,13 +494,13 @@ async function editAgreement(req, res) {
       year4,
       year5,
       status,
-      remark
+      remark,
     });
 
-    console.log(saveAgreement);
+    //console.log(saveAgreement);
 
     if (saveAgreement) {
-      console.log(landlord);
+      //console.log(landlord);
       Promise.all(
         landlord.map(async (row, index) => {
           let {
@@ -521,14 +550,14 @@ async function editAgreement(req, res) {
           return res.send({ message: "Agreement edited" });
         })
         .catch((err) => {
-          console.log("err=>", err);
+          //console.log("err=>", err);
           res.status(501).send({ message: "Landloard not updated" });
         });
     } else {
       res.status(501).send({ message: "Landloard not updated" });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.status(500).send({ message: "Agreement edited" });
   }
 }
@@ -544,15 +573,14 @@ async function user_search_manager(req, res) {
         "agreements.*"
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .where((cb)=>{
+      .where((cb) => {
         cb.whereILike("name", `%${req.body.name}%`);
         cb.orWhereILike("location", `%${req.body.name}%`);
         cb.orWhereILike("monthlyRent", `%${req.body.name}%`);
         cb.orWhereILike("code", `%${req.body.name}%`);
+      });
 
-      })
-
-    console.log(data);
+    //console.log(data);
 
     let ids = [];
     let agreement = {};
@@ -571,11 +599,11 @@ async function user_search_manager(req, res) {
       }
     });
 
-    // console.log(data)
+    // //console.log(data)
 
     res.send({ success: true, agreement, ids });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     return res.status(500).send();
   }
 }
@@ -661,29 +689,30 @@ async function get_agreement_details(req, res) {
 
     return res.status(200).send({ agreement, ids });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     return res.status(500).send();
   }
 }
 
-
 //send back
-async function send_back(req,res){
+async function send_back(req, res) {
   try {
-    console.log(">>>>",req.body,"Send Back");
-    // console.log(req.params.id);
+    //console.log(">>>>", req.body, "Send Back");
+    // //console.log(req.params.id);
     const update = await db("agreements")
       .where("id", "=", req.params.id)
       .update({ status: req.body.status, remark: req.body.remark });
-      console.log(update);
+    //console.log(update);
     if (update === 1) {
       res.send({ success: true, message: "Agreement Update Successfully" });
     } else {
-      
-      throw new Error({ success: false, message: "Something went wrong please try again later" })
+      throw new Error({
+        success: false,
+        message: "Something went wrong please try again later",
+      });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "Something went wrong please try again later",
@@ -691,54 +720,71 @@ async function send_back(req,res){
   }
 }
 
-
-//dashboard  item 
-async function get_status (req,res){
-  try{
-    let status = await db('agreements').select('status')
+//dashboard  item
+async function get_status(req, res) {
+  try {
+    let status = await db("agreements").select("status");
 
     let meta = {
-      totalAgreement:0,
-        Pending : 0,
-        Send_Back : 0,
-        Approved : 0,
-        Rejected : 0,
-        Renewal : 0,
+      totalAgreement: 0,
+      Pending: 0,
+      Send_Back: 0,
+      Approved: 0,
+      Rejected: 0,
+      Renewal: 0,
+    };
+    //console.log(status)
+
+    if (status) {
+      status.map((row) => {
+        meta.totalAgreement += 1;
+        if (row.status === "Sent Back For Rectification") {
+          meta.Send_Back += 1;
+        } else if (
+          row.status === "Sent To Finance Team" ||
+          row.status === "Sent To Sr Manager" ||
+          row.status === "Sent To BHU" ||
+          row.status === "Operations"
+        ) {
+          meta.Approved += 1;
+        } else if (row.status === "Hold") {
+          meta.Pending += 1;
+        }
+      });
     }
-    console.log(status)
 
-    if(status){
-        status.map(row=>{
-             meta.totalAgreement +=1
-            if(row.status === "Sent Back For Rectification"){
-              meta.Send_Back += 1
+    //console.log(meta)
 
-            }else if(
-              row.status === 'Sent To Finance Team' ||
-              row.status ===  'Sent To Sr Manager' ||
-              row.status === 'Sent To BHU' || 
-              row.status === "Operations" ){
-                meta.Approved += 1
-              }else if(row.status === "Hold"){
-                  meta.Pending += 1
-              }
-            
-        })
-    }
-
-    console.log(meta)
-
-    res.send(meta)
-
-}
-catch(err){
-    console.log(err)
-    res.status(500).send('something went wrong');
+    res.send(meta);
+  } catch (err) {
+    //console.log(err)
+    res.status(500).send("something went wrong");
+  }
 }
 
+// monthly rental listing APIs
+async function getMonthListing(req, res) {
+  try {
+    if (!req.query.id)
+      res.status(203).send({ message: "Please provide the manager ID." });
+  } catch (err) {
+    //console.log("Error >> ", err);
+    return res.status(500).send({ message: "Something Went wrong" });
+  }
+}
+
+async function set_final_agreement(req, res) {
+  try {
+    //console.log(">>>Body::",req.body)
+    res.send("All Okay ");
+  } catch (error) {
+    //console.log(error)
+    return res.status(500).send({ message: "Something Went Wrong" });
+  }
 }
 
 module.exports = {
+  set_final_agreement,
   get_agreement_details,
   user_search_manager,
   editAgreement,
@@ -755,5 +801,5 @@ module.exports = {
   add_landlord,
   uploadDoc,
   send_back,
-  get_status
+  get_status,
 };

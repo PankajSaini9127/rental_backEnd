@@ -17,9 +17,10 @@ const {
   user_search_manager,
   get_agreement_details,
   send_back,
-  get_status
+  get_status,
+  set_final_agreement
 } = require("../controller/ManagerController");
-const { add_rent, get_landlord_id } = require("../controller/MontlyRent");
+const { add_rent, get_landlord_id, list_month_rent } = require("../controller/MontlyRent");
 
 // setting up multer for file transport 
 const router = express.Router();
@@ -131,5 +132,11 @@ router.route('/monthly_rent/add').post(add_rent)
 
 //get landlord id 
 router.route('/month_rent/get_landlord_id/:id').get(get_landlord_id)
+
+// API for setting up the final agreement
+router.route('/setFinalAgreement').post(set_final_agreement)
+
+// API for list 
+router.route('/listMonthRent').get(list_month_rent)
 
 module.exports = router;
