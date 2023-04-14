@@ -85,7 +85,7 @@ async function get_monthly_rent() {
                     gst  : row.gstNo || "" ,
                     utr_no  : row.utr_number ,
                     landlord_name: row.name,
-                    status: row.status,
+                    status: 'Hold',
                     share: row.percentage,
                     rent_amount: finalAmountForFullMonth,
                     rent_date : new Date(tomorrowMoment)

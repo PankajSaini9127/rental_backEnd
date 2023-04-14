@@ -12,7 +12,7 @@ exports.seed = async function() {
   // await db('users').del()
   // let res = await db.insert({ password: 'Admin',code : '1',name : "Yashwant",email:'yashwantsahu3002@gmail.com',role:'["Manager","Admin"]',supervisor:"Yashwant",mobile:"8239879127"},).into('users');
   // console.log(res)
-  let res = await db.table('knex_migrations').truncate()
+  // let res = await db.table('knex_migrations').truncate()
   //  res = await db.table('agreements').truncate()
   //  res2= await db.table('landlords').truncate()
   // console.log("Seed Response>>>",res,res2)
