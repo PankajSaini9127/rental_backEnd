@@ -47,7 +47,7 @@ async function add_rent(req,res){
 
 async function list_month_rent(req,res){
     try{
-        const data = await db('monthly_rent').select("*")
+        const data = await db('monthly_rent').select("*").orderBy('id',"desc")
 
         //console.log(data)
         if(data)
@@ -61,4 +61,42 @@ async function list_month_rent(req,res){
     }
 }
 
-module.exports ={add_rent,get_landlord_id,list_month_rent}
+
+async function add_invoice (req,res){
+    try {
+        const invoice = await db("monthly_rent").update({
+              invoice_number:req.body.invoiceNo,
+              invoice_date:req.body.invoiceDate,
+              rent_amount:req.body.rentAmount,
+              gst_amount:req.body.gstAmount,
+              invoice:req.body.invoice,
+              status:"Sent To Sr Manager",
+              manager_id:req.body.manager_id
+        }).where("id","=",req.params.id)
+     console.log(invoice)
+     if(invoice === 1){
+         return res.status(201).send({success:true,message:"Invoice Details Added"})
+     }else{
+        return  res.status(203).send({success:false,message:"omething Went Wrong Please Try Again Later"})
+     }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({success:false,message:"Something Went Wrong Please Try Again Later"})
+    }
+}
+
+async function update_payment_status(req,res){
+    try {
+        const invoice = await db("monthly_rent").update(req.body).where("id","=",req.params.id)
+        if(invoice === 1){
+            return res.status(200).send({success:true,message:"Done"})
+        }else{
+           return  res.status(203).send({success:false,message:"something Went Wrong Please Try Again Later"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({success:false,message:"Something Went Wrong Please Try Again Later"})
+    }
+}
+
+module.exports ={add_rent,get_landlord_id,list_month_rent,add_invoice,update_payment_status}
