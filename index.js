@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require('path')
+const job = require("./controller/CronJobs").job
 
 const db = require('./data/db')
 const seed = require('./data/seeds/user')
@@ -19,6 +20,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 seed.seed()
 // seed.super_admin_cred()
+
+// activate the job runner
+job.start()
 
 app.use('/api/auth',require('./Routes/Auth'))
 app.use('/api/admin',require('./Routes/AdminPanel'))

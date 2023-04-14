@@ -10,7 +10,7 @@ async function get_landlord_id(req,res){
         
     } catch (error) {
         //console.log(error)
-        res.status(500).send({success:false,mesage:"Something Went Wrong! Please Try Again Later."})
+        res.status(500).send({success:false,message:"Something Went Wrong! Please Try Again Later."})
     }
 
 }

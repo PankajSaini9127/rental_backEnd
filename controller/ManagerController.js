@@ -242,6 +242,8 @@ async function get_monthly_rent(req, res) {
 
       const todayMoment = moment()
       const tomorrowMoment = todayMoment.clone().add(1,'month')
+      let RentDate = new Date(row.rent_start_date).getUTCDate()
+
 
       const nextMonthSlab = {
         monthly_rent : row.monthlyRent,
@@ -256,7 +258,7 @@ async function get_monthly_rent(req, res) {
         rent_date : tomorrowMoment
       }
 
-
+      // current Slab
       row = {
         monthly_rent : row.monthlyRent,
         code : row.code,
@@ -269,8 +271,12 @@ async function get_monthly_rent(req, res) {
         rent_amount: finalAmount,
         rent_date : row.rent_start_date,
       };
+
       finalData.push(row);
+
+      if(RentDate > 15)
       finalData.push(nextMonthSlab);
+ 
     });
 
     console.log(finalData)
