@@ -20,7 +20,7 @@ const {
   get_status,
   set_final_agreement
 } = require("../controller/ManagerController");
-const { add_rent, get_landlord_id, list_month_rent } = require("../controller/MontlyRent");
+const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status} = require("../controller/MontlyRent");
 
 // setting up multer for file transport 
 const router = express.Router();
@@ -138,5 +138,9 @@ router.route('/setFinalAgreement').post(set_final_agreement)
 
 // API for list 
 router.route('/listMonthRent').get(list_month_rent)
+
+router.route('/add_invoice/:id').put(add_invoice)
+
+router.route('/sent-monthly-payment/:id').put(update_payment_status)
 
 module.exports = router;

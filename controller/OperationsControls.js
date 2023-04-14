@@ -115,4 +115,75 @@ async function user_search_bhu(req, res) {
   }
 }
 
-module.exports = { getAllAgreement, user_search_bhu };
+
+///get monthly rent 
+
+async function get_monthly_rent_opr(req,res){
+  try {
+//     console.log(req.params.id)
+//     const supervisor = await db('users').select('*').where('supervisor', '=', req.params.id)
+// // console.log(supervisor)
+    // if (supervisor.length === 0) throw new Error()
+
+    const result = await db('users')
+    .select("*")
+    .join('users as buh','buh.supervisor',"=","users.id")
+    .where("users.supervisor","=",req.params.id)
+    console.log("Join Result>>>>>>>",result)
+
+
+    let manager_name = {}
+    result.map(row => {
+      manager_name = { ...manager_name, [row.id]: row.name }
+    })
+    
+    console.log(manager_name)
+    let data = await Promise.allSettled(result.map(async (row) => {
+      console.log(row.id); return await db("monthly_rent")
+        .select("*")
+        .where('srm_id', row.id)
+        .whereNot('status', '=', "Hold")
+        .orderBy('id',"desc")
+    }))
+
+
+    data = data[0].status === 'fulfilled' ? data[0].value.map((row, i) => row) : []
+
+    // console.log(">>up>",data)
+
+    let ids = [];
+    let agreement = {};
+
+
+    data.map((row) => {
+      // console.log(row)
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            srm: manager_name[row.manager_id]
+          },
+        };
+      } else {
+        ids.push(row.id);
+        console.log(">>>>>", row.manager_id)
+        agreement = { ...agreement, [row.id]: { ...row, name: [row.name], manager: manager_name[row.manager_id] } };
+      }
+    });
+
+    // console.log('>>>', ids, agreement)
+
+
+
+    return res.send({ success: true,ids, agreement  });
+
+    
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({success:false,message:"Some Error Occured!! Please Try Again Later."})
+  }
+}
+
+module.exports = { getAllAgreement, user_search_bhu ,get_monthly_rent_opr};
