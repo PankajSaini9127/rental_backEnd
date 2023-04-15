@@ -20,7 +20,7 @@ const {
   get_status,
   set_final_agreement
 } = require("../controller/ManagerController");
-const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status} = require("../controller/MontlyRent");
+const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code} = require("../controller/MontlyRent");
 
 // setting up multer for file transport 
 const router = express.Router();
@@ -142,5 +142,7 @@ router.route('/listMonthRent').get(list_month_rent)
 router.route('/add_invoice/:id').put(add_invoice)
 
 router.route('/sent-monthly-payment/:id').put(update_payment_status)
+
+router.route('/get-monthly-rent-by-code/:code').get(get_agreements_code)
 
 module.exports = router;

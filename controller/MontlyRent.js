@@ -99,4 +99,92 @@ async function update_payment_status(req,res){
     }
 }
 
-module.exports ={add_rent,get_landlord_id,list_month_rent,add_invoice,update_payment_status}
+
+//view page data get by code 
+async function get_agreements_code(req,res){
+    try {
+        const data = await db("agreements")
+          .select("landlords.*", "agreements.*", "landlords.id as landlord_id")
+          .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+          .where("code","=", req.params.code);
+    
+        let ids = [];
+        let agreement = {};
+        data.map((row) => {
+          if (ids.includes(row.id)) {
+            agreement = {
+              ...agreement,
+              [row.id]: {
+                ...agreement[row.id],
+                landlord_id: [...agreement[row.id].landlord_id, row.landlord_id],
+                name: [...agreement[row.id].name, row.name],
+                leeseName: [...agreement[row.id].leeseName, row.leeseName],
+                branchName: [...agreement[row.id].branchName, row.branchName],
+                aadharNo: [...agreement[row.id].aadharNo, row.aadharNo],
+                panNo: [...agreement[row.id].panNo, row.panNo],
+                gstNo: [...agreement[row.id].gstNo, row.gstNo],
+                mobileNo: [...agreement[row.id].mobileNo, row.mobileNo],
+                cheque: [...agreement[row.id].cheque, row.cheque],
+                gst: [...agreement[row.id].gst, row.gst],
+                alternateMobile: [
+                  ...agreement[row.id].alternateMobile,
+                  row.alternateMobile,
+                ],
+                email: [...agreement[row.id].email, row.email],
+                bankName: [...agreement[row.id].bankName, row.bankName],
+                benificiaryName: [
+                  ...agreement[row.id].benificiaryName,
+                  row.benificiaryName,
+                ],
+                accountNo: [...agreement[row.id].accountNo, row.accountNo],
+                ifscCode: [...agreement[row.id].ifscCode, row.ifscCode],
+                agreement_id: [...agreement[row.id].agreement_id, row.agreement_id],
+                aadhar_card: [...agreement[row.id].aadhar_card, row.aadhar_card],
+                pan_card: [...agreement[row.id].pan_card, row.pan_card],
+                percentage: [...agreement[row.id].percentage, row.percentage],
+              },
+            };
+          } else {
+            ids.push(row.id);
+            agreement = {
+              ...agreement,
+              [row.id]: {
+                ...row,
+                landlord_id: [row.landlord_id],
+                name: [row.name],
+                percentage: [row.percentage],
+                leeseName: [row.leeseName],
+                state: [row.state],
+                city: [row.city],
+                branchName: [row.branchName],
+                location: [row.location],
+                pincode: [row.pincode],
+                address: [row.address],
+                aadharNo: [row.aadharNo],
+                panNo: [row.panNo],
+                gstNo: [row.gstNo],
+                gst: [row.gst],
+                cheque: [row.cheque],
+                mobileNo: [row.mobileNo],
+                alternateMobile: [row.alternateMobile],
+                email: [row.email],
+                bankName: [row.bankName],
+                benificiaryName: [row.benificiaryName],
+                accountNo: [row.accountNo],
+                ifscCode: [row.ifscCode],
+                agreement_id: [row.agreement_id],
+                aadhar_card: [row.aadhar_card],
+                pan_card: [row.pan_card],
+              },
+            };
+          }
+        });
+    
+        return res.status(200).send({ agreement, ids });
+      } catch (error) {
+        //console.log(error);
+        return res.status(500).send();
+      }
+}
+
+module.exports ={add_rent,get_landlord_id,list_month_rent,add_invoice,update_payment_status,get_agreements_code}
