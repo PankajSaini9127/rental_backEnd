@@ -182,9 +182,27 @@ async function get_agreements_code(req,res){
     
         return res.status(200).send({ agreement, ids });
       } catch (error) {
-        //console.log(error);
-        return res.status(500).send();
+        console.log(error);
+        return res.status(500).send({success:false,message:"Something Went Wrong Please Try Again Later"});
       }
+
 }
 
-module.exports ={add_rent,get_landlord_id,list_month_rent,add_invoice,update_payment_status,get_agreements_code}
+
+      //invoice Number verification
+      async function invoice_number_verification(req,res){
+        try {
+            const invoice = await db('monthly_rent').select('invoice_number').where('invoice_number',"=",req.params.invoice)
+            console.log(invoice)
+            if(invoice.length > 0){
+                return res.send({alreadyInvoice:true})
+            }else{
+                return res.send({alreadyInvoice:false})
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({success:false,message:"Something Went Wrong Please Try Again Later"});
+        }
+    }
+
+module.exports ={add_rent,get_landlord_id,list_month_rent,add_invoice,update_payment_status,get_agreements_code,invoice_number_verification}
