@@ -49,7 +49,7 @@ const getAllAgreement = async (req, res) => {
             [row.id]: {
               ...agreement[row.id],
               name: [...agreement[row.id].name, row.name],
-              sr_manager: supervisor[0].name
+              sr_manager: Sr_names[row.srm_id]
             },
           };
         } else {

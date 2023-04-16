@@ -49,7 +49,7 @@ async function CallBack (){
 }
 
 
-async function get_monthly_rent() {
+async function get_monthly_rent(req,res) {
     try {
       var listAgreement = await db
         .from("agreements")

@@ -78,7 +78,7 @@ router.route("/add_landlord").post(add_landlord)
 
 //get request in agreements table
 // path /api/agreements
-router.route("/agreements").get(getAllAgreement);
+router.route("/agreements/:manager_id").get(getAllAgreement);
 
 //post request in agreements table get agreemennt by id
 // path /api/agreement/:id
@@ -137,7 +137,7 @@ router.route('/month_rent/get_landlord_id/:id').get(get_landlord_id)
 router.route('/setFinalAgreement').post(set_final_agreement)
 
 // API for list 
-router.route('/listMonthRent').get(list_month_rent)
+router.route('/listMonthRent/:manager_id').get(list_month_rent)
 
 router.route('/add_invoice/:id').put(add_invoice)
 
