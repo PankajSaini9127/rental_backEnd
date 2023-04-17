@@ -147,23 +147,26 @@ async function finance_get_monthly_rent (req,res){
 
     if (supervisor.length === 0) throw new Error()
 
-    let manager_name = {}
+    let operations_name = {}
     supervisor.map(row => {
-      manager_name = { ...manager_name, [row.id]: row.name }
+      operations_name = { ...operations_name, [row.id]: row.name }
     })
     
+    console.log(operations_name)
+
     let data = await Promise.allSettled(supervisor.map(async (row) => {
-      console.log(row.id); return await db("monthly_rent")
-        .select("*")
+     return await db("monthly_rent")
+        .select("monthly_rent.*","users.name as srm_name","Manager.name as manager_name")
         .where('op_id', row.id)
-        .whereNot('status', '=', "Hold")
         .orderBy('id',"desc")
+        .join("users","monthly_rent.srm_id","users.id")
+        .join("users as Manager","monthly_rent.manager_id","=","Manager.id")
     }))
 
 
     data = data[0].status === 'fulfilled' ? data[0].value.map((row, i) => row) : []
 
-    console.log(">>up>",data)
+    // console.log(">>up>",data)
 
     let ids = [];
     let agreement = {};
@@ -176,13 +179,14 @@ async function finance_get_monthly_rent (req,res){
           ...agreement,
           [row.id]: {
             ...agreement[row.id],
-            name: [...agreement[row.id].name, row.name]
+            name: [...agreement[row.id].name, row.name],
+            operations_name:operations_name[row.op_id]
           },
         };
       } else {
         ids.push(row.id);
         console.log(">>>>>", row.manager_id)
-        agreement = { ...agreement, [row.id]: { ...row, name: [row.name], manager: manager_name[row.manager_id] } };
+        agreement = { ...agreement, [row.id]: { ...row, name: [row.name],  operations_name:operations_name[row.op_id] } };
       }
     });
 

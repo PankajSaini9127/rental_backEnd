@@ -120,10 +120,6 @@ async function user_search_bhu(req, res) {
 
 async function get_monthly_rent_opr(req,res){
   try {
-//     console.log(req.params.id)
-//     const supervisor = await db('users').select('*').where('supervisor', '=', req.params.id)
-// // console.log(supervisor)
-    // if (supervisor.length === 0) throw new Error()
 
     const result = await db('users')
     .select("*")
@@ -132,24 +128,24 @@ async function get_monthly_rent_opr(req,res){
     console.log("Join Result>>>>>>>",result)
 
 
-    let manager_name = {}
+    let srm_name = {}
     result.map(row => {
-      manager_name = { ...manager_name, [row.id]: row.name }
+      srm_name = { ...srm_name, [row.id]: row.name }
     })
     
-    console.log(manager_name)
+    console.log(srm_name)
     let data = await Promise.allSettled(result.map(async (row) => {
       console.log(row.id); return await db("monthly_rent")
-        .select("*")
-        .where('srm_id', row.id)
-        .whereNot('status', '=', "Hold")
-        .orderBy('id',"desc")
+      .select("users.name as manager_name","monthly_rent.*")
+      .where('srm_id', row.id)
+      .join("users","monthly_rent.manager_id","=","users.id")
+      .orderBy('id',"desc")
     }))
 
 
+    // console.log(">>down>",data)
     data = data[0].status === 'fulfilled' ? data[0].value.map((row, i) => row) : []
 
-    // console.log(">>up>",data)
 
     let ids = [];
     let agreement = {};
@@ -162,14 +158,14 @@ async function get_monthly_rent_opr(req,res){
           ...agreement,
           [row.id]: {
             ...agreement[row.id],
-            name: [...agreement[row.id].name, row.name],
-            srm: manager_name[row.manager_id]
+            // name: [...agreement[row.id].name, row.name],
+            srm_name: srm_name[row.srm_id]
           },
         };
       } else {
         ids.push(row.id);
-        console.log(">>>>>", row.manager_id)
-        agreement = { ...agreement, [row.id]: { ...row, name: [row.name], manager: manager_name[row.manager_id] } };
+        console.log(">>>>>", row.srm_name)
+        agreement = { ...agreement, [row.id]: { ...row, name: [row.name], srm_name: srm_name[row.srm_id] } };
       }
     });
 
@@ -185,5 +181,7 @@ async function get_monthly_rent_opr(req,res){
     return res.status(500).send({success:false,message:"Some Error Occured!! Please Try Again Later."})
   }
 }
+
+
 
 module.exports = { getAllAgreement, user_search_bhu ,get_monthly_rent_opr};

@@ -50,7 +50,8 @@ const getAllAgreement = async (req, res) => {
         "agreements.*"
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .orderBy("agreements.id", "desc");
+      .orderBy("agreements.id", "desc")
+      .where("manager_id","=",req.params.manager_id);
 
     let ids = [];
     let agreement = {};

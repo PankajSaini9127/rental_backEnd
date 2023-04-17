@@ -47,7 +47,7 @@ async function add_rent(req,res){
 
 async function list_month_rent(req,res){
     try{
-        const data = await db('monthly_rent').select("*").orderBy('id',"desc")
+        const data = await db('monthly_rent').select("*").orderBy('id',"desc").where("manager_id","=",req.params.manager_id)
 
         //console.log(data)
         if(data)
@@ -191,6 +191,7 @@ async function get_agreements_code(req,res){
 
       //invoice Number verification
       async function invoice_number_verification(req,res){
+
         try {
             const invoice = await db('monthly_rent').select('invoice_number').where('invoice_number',"=",req.params.invoice)
             console.log(invoice)
