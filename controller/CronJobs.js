@@ -55,7 +55,7 @@ async function get_monthly_rent(req,res) {
         .from("agreements")
         .select("*")
         .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-        .whereNotNull("rent_start_date").andWhere("status","Deposited")
+        .whereNotNull("rent_start_date").andWhere("status","Pending")
         // console.log("list >>>>>>>>>>> ",listAgreement)
         // itrating and creating a slab from here
         Promise.allSettled(listAgreement.map(async(row, i) => {        
