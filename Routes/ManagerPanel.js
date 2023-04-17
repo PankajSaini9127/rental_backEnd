@@ -143,7 +143,7 @@ router.route('/add_invoice/:id').put(add_invoice)
 
 router.route('/sent-monthly-payment/:id').put(update_payment_status)
 
-router.route('/get-monthly-rent-by-code/:code').get(get_agreements_code)
+router.route('/get-monthly-rent-by-code/:id').get(get_agreements_code)
 
 //invoice number validation
 router.route('/get-invoice-number-validate/:invoice').get(invoice_number_verification)
