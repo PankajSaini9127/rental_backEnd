@@ -19,7 +19,7 @@ async function get_landlord_id(req,res){
 //route /api/monthly_rent
 async function add_rent(req,res){
    try {
-    //console.log(req.body)
+    console.log(req.body)
     const data = await db('monthly_rent').insert({
         code :req.body.code ,
         location :req.body.location ,
@@ -33,7 +33,7 @@ async function add_rent(req,res){
         share:req.body.share,
         monthly_rent:req.body.monthly_rent
     })
-    //console.log(data)
+    console.log(data)
     if(data.length > 0){
       return  res.send({success:true})
     }else{
@@ -47,7 +47,7 @@ async function add_rent(req,res){
 
 async function list_month_rent(req,res){
     try{
-        const data = await db('monthly_rent').select("*").orderBy('id',"desc").where("manager_id","=",req.params.manager_id)
+        const data = await db('monthly_rent').select("*").orderBy('id',"desc")
 
         //console.log(data)
         if(data)
