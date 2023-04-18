@@ -33,60 +33,59 @@ let info = {
   // html: "<b>Hello world?</b>", // html body
 };
 
-// get monthly renewal 
-async function get_monthly_rent(req, res) {
-  try {
-    var listAgreement = await db
-      .from("agreements")
-      .select("*")
-      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .whereNotNull("rent_start_date").andWhere("status", "Pending")
-    // console.log("list >>>>>>>>>>> ",listAgreement)
-    // itrating and creating a slab from here
-    Promise.allSettled(listAgreement.map(async (row, i) => {
-      // calculating the final amount
-      const finalAmountForFullMonth = (row.monthlyRent / 100) * parseInt(row.percentage)
 
-      // this code will also add the field for next month 
+async function get_monthly_rent(req,res) {
+    try {
+      var listAgreement = await db
+        .from("agreements")
+        .select("*")
+        .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+        .whereNotNull("rent_start_date").andWhere("status","Pending")
+        // console.log("list >>>>>>>>>>> ",listAgreement)
+        // itrating and creating a slab from here
+        Promise.allSettled(listAgreement.map(async(row, i) => {        
+        // calculating the final amount
+        const finalAmountForFullMonth = (row.monthlyRent/100)*parseInt(row.percentage) 
+  
+        // this code will also add the field for next month 
+  
+        const todayMoment = moment()
 
-      const todayMoment = moment()
-
-      // for checking the log is already exist in the table or not
-      let response = await db('monthly_rent').select("rent_date").where("code", row.code)
-
-
-      const tomorrowMoment = todayMoment.clone().add(1, 'month')
-
-      response = response.filter((row) => new Date(row.rent_date).getMonth() === new Date(tomorrowMoment).getMonth() && new Date(row.rent_date).getFullYear() === new Date(tomorrowMoment).getFullYear())
-
-      console.log('response ===>', response)
-
-      if (response.length === 0) {
-        return await db('monthly_rent').insert({
-          monthly_rent: row.monthlyRent,
-          code: row.code,
-          location: row.location,
-          gst: row.gstNo || "",
-          utr_no: row.utr_number,
-          landlord_name: row.name,
-          status: 'Hold',
-          share: row.percentage,
-          rent_amount: finalAmountForFullMonth,
-          rent_date: new Date(tomorrowMoment)
-        })
-      }
-    })).then((response) => {
-      console.log(response)
-    }).catch((error) => {
-      console.log(error)
-    })
-  } catch (error) {
-    //console.log(error);
-    return res.status(500).send();
-  }
-}
+        // for checking the log is already exist in the table or not
+        let response = await  db('monthly_rent').select("rent_date").where("code",row.code)
 
 
+       const tomorrowMoment = todayMoment.clone().add(1,'month')
+
+        response = response.filter((row)=>new Date(row.rent_date).getMonth() === new Date(tomorrowMoment).getMonth() && new Date(row.rent_date).getFullYear() === new Date(tomorrowMoment).getFullYear() )
+
+        console.log('response ===>',response)
+        
+        if(response.length === 0)
+        {
+                  return await db('monthly_rent').insert({
+                    monthly_rent : row.monthlyRent,
+                    code : row.code,
+                    location  : row.location ,
+                    gst  : row.gstNo || "" ,
+                    utr_no  : row.utr_number ,
+                    landlord_name: row.name,
+                    status: 'Hold',
+                    share: row.percentage,
+                    rent_amount: finalAmountForFullMonth,
+                    rent_date : new Date(tomorrowMoment)
+                })
+        }
+      })).then((response)=>{
+          console.log(response)
+      }).catch((error)=>{
+        console.log(error)
+      })
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send();
+    }
+    
 // for checking the renewal tenure 
 async function get_renewal() {
   try {
@@ -156,9 +155,12 @@ async function get_renewal() {
     })
   } catch (error) {
     console.log(error);
+
   }
 }
 
 
+
 module.exports = { job,job2 }
+
 
