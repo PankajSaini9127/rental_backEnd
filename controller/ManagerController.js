@@ -790,6 +790,56 @@ async function set_final_agreement(req, res) {
   }
 }
 
+
+//renewal listing
+async function get_renewal_list (req,res){
+  try {
+    console.log(req.params.id)
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id",
+        "agreements.*"
+      )
+      .where("agreements.manager_id","=",req.params.id)
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .andWhereNot("renewal_status","=","null")
+      .orderBy("agreements.id", "desc")
+      
+
+      console.log(data)
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
+      }
+    });
+    //console.log(agreement);
+
+    // //console.log(data)
+
+    res.send({ success: true, agreement, ids: ids });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+}
+
 module.exports = {
   set_final_agreement,
   get_agreement_details,
@@ -809,4 +859,5 @@ module.exports = {
   uploadDoc,
   send_back,
   get_status,
+  get_renewal_list
 };

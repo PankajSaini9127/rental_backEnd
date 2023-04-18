@@ -18,7 +18,8 @@ const {
   get_agreement_details,
   send_back,
   get_status,
-  set_final_agreement
+  set_final_agreement,
+  get_renewal_list
 } = require("../controller/ManagerController");
 const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification} = require("../controller/MontlyRent");
 
@@ -147,5 +148,9 @@ router.route('/get-monthly-rent-by-code/:id').get(get_agreements_code)
 
 //invoice number validation
 router.route('/get-invoice-number-validate/:invoice').get(invoice_number_verification)
+
+
+//renewal listing data
+router.route('/get-renewal-list/:id').get(get_renewal_list)
 
 module.exports = router;

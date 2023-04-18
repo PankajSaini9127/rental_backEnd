@@ -97,12 +97,12 @@ async function get_monthly_rent(req,res) {
         console.log(error)
       })
     } catch (error) {
-      //console.log(error);
+      console.log(error);
       return res.status(500).send();
     }
   }
 
-
+``
 
   
   module.exports =  {job}
