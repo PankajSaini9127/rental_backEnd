@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require('path')
-const job = require("./controller/CronJobs").job
+const cornJobs = require("./controller/CronJobs")
 
 const db = require('./data/db')
 const seed = require('./data/seeds/user')
@@ -22,7 +22,8 @@ seed.seed()
 // seed.super_admin_cred()
 
 // activate the job runner
-job.start()
+cornJobs.job.start()
+cornJobs.job2.start()
 
 app.use('/api/auth',require('./Routes/Auth'))
 app.use('/api/admin',require('./Routes/AdminPanel'))
