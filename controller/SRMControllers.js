@@ -236,6 +236,63 @@ async function get_renewal_srm(req,res){
       .where("agreements.srm_id","=",req.params.id)
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .andWhereNot("renewal_status","=","null")
+      .andWhereNot("renewal_status","=","Pending For Renewal")
+      .orderBy("agreements.id", "desc")
+      
+
+      console.log(data)
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
+      }
+    });
+    //console.log(agreement);
+
+    // //console.log(data)
+
+    res.send({ success: true, agreement, ids: ids });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+}
+
+
+async function get_search_renewal_srm (req,res){
+  try {
+    console.log(req.params.id)
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id",
+        "agreements.*"
+      )
+      .where("agreements.srm_id","=",req.params.id)
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .andWhereNot("renewal_status","=","null")
+      .andWhereNot("renewal_status","=","Pending For Renewal")
+      .andWhere((cb) => {
+        cb.whereILike("name", `%${req.query.search}%`);
+        cb.orWhereILike("location", `%${req.query.search}%`);
+        cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
+        cb.orWhereILike("code", `%${req.query.search}%`);
+      })
       .orderBy("agreements.id", "desc")
       
 
@@ -273,4 +330,4 @@ async function get_renewal_srm(req,res){
 
 
 
-module.exports = { getAllAgreement, user_search_srmanager,srm_get_monthly_rent,srm_get_monthly_rent_id,get_renewal_srm }
+module.exports = { get_search_renewal_srm, getAllAgreement, user_search_srmanager,srm_get_monthly_rent,srm_get_monthly_rent_id,get_renewal_srm }

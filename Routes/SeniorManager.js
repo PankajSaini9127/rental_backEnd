@@ -1,5 +1,5 @@
 const express = require('express');
-const { user_search_srmanager, getAllAgreement, srm_get_monthly_rent, srm_get_monthly_rent_id, get_renewal_srm } = require('../controller/SRMControllers');
+const { user_search_srmanager, getAllAgreement, srm_get_monthly_rent, srm_get_monthly_rent_id, get_renewal_srm, get_search_renewal_srm } = require('../controller/SRMControllers');
 
 
 const router = express.Router();
@@ -18,6 +18,9 @@ router.route('/srmanager/get-monthly-rent-id/:id').get(srm_get_monthly_rent_id)
 
 //get renewal list in srm
 router.route("/srmanager/get-renewal-srm/:id").get(get_renewal_srm)
+
+//get srm Search-in renewal
+router.route("/srmanager/get-search-renewal-srm/:id").get(get_search_renewal_srm)
 
 
 
