@@ -473,6 +473,7 @@ async function editAgreement(req, res) {
       status,
       area,
       remark,
+      assets
     } = req.body;
 
     let saveAgreement = await db("agreements").where("id", "=", id).update({
@@ -503,6 +504,7 @@ async function editAgreement(req, res) {
       year5,
       status,
       remark,
+      assets
     });
 
     //console.log(saveAgreement);
