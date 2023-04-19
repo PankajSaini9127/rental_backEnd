@@ -85,6 +85,7 @@ async function get_monthly_rent(req,res) {
       console.log(error);
       return res.status(500).send();
     }
+  }
     
 // for checking the renewal tenure 
 async function get_renewal() {
@@ -161,6 +162,4 @@ async function get_renewal() {
 
 
 
-module.exports = { job,job2 }
-
-
+module.exports = { job,job2}

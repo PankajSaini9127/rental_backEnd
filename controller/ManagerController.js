@@ -5,8 +5,9 @@ const moment = require('moment')
 
 const newAgreement = async (req, res) => {
   try {
+    console.log(req.body)
     const agreement = await db("agreements").insert(req.body);
-    //console.log(req.body);
+    console.log(agreement);
 
     if (agreement.length == 1) {
       res.status(201).send({
@@ -21,7 +22,7 @@ const newAgreement = async (req, res) => {
       });
     }
   } catch (error) {
-    //console.log(error);
+    console.log(error);
     res.send({ success: false, message: "Something went wrong Please", error });
   }
 };
@@ -35,7 +36,7 @@ async function add_landlord(req, res) {
       res.send({ message: "Landlord Added." });
     }
   } catch (error) {
-    //console.log(error);
+    console.log(error);
     res.status(500).send({ message: "Something went wrong !!!" });
   }
 }
@@ -375,7 +376,7 @@ async function getAgreementById(req, res) {
               percentageShare: row.percentageShare,
               leeseName: row.leeseName,
               aadharNo: row.aadharNo,
-              area: row.area,
+              // area: row.area,
               panNo: row.panNo,
               gstNo: row.gstNo,
               mobileNo: row.mobileNo,
@@ -411,7 +412,7 @@ async function getAgreementById(req, res) {
               gstNo: row.gstNo,
               gst: row.gst,
               cheque: row.cheque,
-              area: row.area,
+              // area: row.area,
               branchName: row.branchName,
               mobileNo: row.mobileNo,
               alternateMobile: row.alternateMobile,
@@ -694,10 +695,10 @@ async function get_agreement_details(req, res) {
       }
     });
 
-    return res.status(200).send({ agreement, ids });
+    return res.status(200).send({success:true, agreement, ids });
   } catch (error) {
     //console.log(error);
-    return res.status(500).send();
+    return res.status(500).send({success:false});
   }
 }
 
@@ -790,6 +791,92 @@ async function set_final_agreement(req, res) {
   }
 }
 
+async function get_agreement_id_renewal(req,res){
+  try {
+    const data = await db("agreements")
+      .select("landlords.*", "agreements.*", "landlords.id as landlord_id")
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where("agreement_id", req.query.id);
+
+    // //console.log(data);
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          landlord: [
+            ...agreement.landlord,
+            {
+              // landlord_id: row.landlord_id,
+              name: row.name,
+              percentage: row.percentage,
+              leeseName: row.leeseName,
+              aadharNo: row.aadharNo,
+              // area: row.area,
+              panNo: row.panNo,
+              gstNo: row.gstNo,
+              mobileNo: row.mobileNo,
+              gst: row.gst,
+              cheque: row.cheque,
+              branchName: row.branchName,
+              alternateMobile: row.alternateMobile,
+              email: row.email,
+              bankName: row.bankName,
+              benificiaryName: row.benificiaryName,
+              accountNo: row.accountNo,
+              ifscCode: row.ifscCode,
+              agreement_id: row.agreement_id,
+              aadhar_card: row.aadhar_card,
+              pan_card: row.pan_card,
+              gst: row.gst,
+            },
+          ],
+        };
+      } else {
+        ids.push(row.id);
+
+        agreement = {
+          ...row,
+          landlord: [
+            {
+              // landlord_id: row.landlord_id,
+              name: row.name,
+              percentage: row.percentage,
+              leeseName: row.leeseName,
+              aadharNo: row.aadharNo,
+              panNo: row.panNo,
+              gstNo: row.gstNo,
+              gst: row.gst,
+              cheque: row.cheque,
+              // area: row.area,
+              branchName: row.branchName,
+              mobileNo: row.mobileNo,
+              alternateMobile: row.alternateMobile,
+              email: row.email,
+              bankName: row.bankName,
+              benificiaryName: row.benificiaryName,
+              accountNo: row.accountNo,
+              ifscCode: row.ifscCode,
+              agreement_id: row.agreement_id,
+              aadhar_card: row.aadhar_card,
+              pan_card: row.pan_card,
+              gst: row.gst,
+            },
+          ],
+        };
+      }
+    });
+    // //console.log(agreement);
+
+    return res.status(200).send(agreement);
+  } catch (error) {
+    //console.log(error);
+    return res.status(500).send();
+  }
+}
+
 
 //renewal listing
 async function get_renewal_list (req,res){
@@ -805,6 +892,7 @@ async function get_renewal_list (req,res){
       .where("agreements.manager_id","=",req.params.id)
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .andWhereNot("renewal_status","=","null")
+      // .andWhereNot("renewal_status","=","Renewed")
       .orderBy("agreements.id", "desc")
       
 
@@ -840,7 +928,30 @@ async function get_renewal_list (req,res){
   }
 }
 
+
+// get diffrence old and new status
+async function get_deposit_amount (req,res){
+  try {
+    const deposite = await db("agreements").select('deposit').where("code","=",req.query.code)
+    .andWhere("renewal_status","=","Renewed")
+
+     if(deposite.length > 0){
+     return res.send({success:true,deposit:deposite})
+     }else{
+      return res.send({success:true,deposit:0})
+     }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({success:false})
+  }
+}
+
+
+
+
+
 module.exports = {
+  get_deposit_amount,
   set_final_agreement,
   get_agreement_details,
   user_search_manager,
@@ -859,5 +970,6 @@ module.exports = {
   uploadDoc,
   send_back,
   get_status,
-  get_renewal_list
+  get_renewal_list,
+  get_agreement_id_renewal
 };
