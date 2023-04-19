@@ -22,7 +22,9 @@ const {
   get_renewal_list,
   get_agreement_id_renewal,
   get_deposit_amount,
-  get_search_renewal_manager
+  get_search_renewal_manager,
+  insertAdjustmentAmount
+  
 } = require("../controller/ManagerController");
 const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification} = require("../controller/MontlyRent");
 
