@@ -165,4 +165,7 @@ router.route('/get-invoice-number-validate/:invoice').get(invoice_number_verific
 //renewal listing data
 router.route('/get-renewal-list/:id').get(get_renewal_list)
 
+//renewal listing data
+router.route('/insertAdjustmentAmount').post(insertAdjustmentAmount)
+
 module.exports = router;
