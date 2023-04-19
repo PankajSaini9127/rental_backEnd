@@ -19,7 +19,9 @@ const {
   send_back,
   get_status,
   set_final_agreement,
-  get_renewal_list
+  get_renewal_list,
+  get_agreement_id_renewal,
+  get_deposit_amount
 } = require("../controller/ManagerController");
 const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification} = require("../controller/MontlyRent");
 
@@ -85,6 +87,14 @@ router.route("/agreements/:manager_id").get(getAllAgreement);
 // path /api/agreement/:id
 // router.route("/agreement/:id").post(getAgreementById);
 router.route("/getDetails").get(getAgreementById);
+
+
+router.route("/getDetails-renewal").get(get_agreement_id_renewal);
+
+
+
+//get deposite amount 
+router.route("/get-deposit-amount").get(get_deposit_amount)
 
 
 

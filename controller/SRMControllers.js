@@ -222,6 +222,55 @@ async function srm_get_monthly_rent_id (req,res){
   }
 }
 
+//get renewal list 
+async function get_renewal_srm(req,res){
+  try {
+    console.log(req.params.id)
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id",
+        "agreements.*"
+      )
+      .where("agreements.srm_id","=",req.params.id)
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .andWhereNot("renewal_status","=","null")
+      .orderBy("agreements.id", "desc")
+      
+
+      console.log(data)
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
+      }
+    });
+    //console.log(agreement);
+
+    // //console.log(data)
+
+    res.send({ success: true, agreement, ids: ids });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+}
 
 
-module.exports = { getAllAgreement, user_search_srmanager,srm_get_monthly_rent,srm_get_monthly_rent_id }
+
+module.exports = { getAllAgreement, user_search_srmanager,srm_get_monthly_rent,srm_get_monthly_rent_id,get_renewal_srm }
