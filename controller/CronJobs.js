@@ -93,7 +93,10 @@ async function get_renewal() {
     var listAgreement = await db
       .from("agreements")
       .select("final_agreement_date", "tenure", "status","code")
-      .andWhere('status', "=", 'Deposited')
+      .where('status', "=", 'Deposited')
+      .andWhere('renewal_status',"=","")
+      
+
     // iterating and creating a slab from here
     // console.log(listAgreement)
     Promise.allSettled(listAgreement.map(async (row, i) => {
@@ -150,7 +153,7 @@ async function get_renewal() {
       }
 
     })).then((response) => {
-      console.log(response)
+      console.log(">>>get renewal>",response)
     }).catch((error) => {
       console.log(error)
     })

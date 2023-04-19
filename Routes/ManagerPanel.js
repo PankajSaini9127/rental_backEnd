@@ -21,7 +21,8 @@ const {
   set_final_agreement,
   get_renewal_list,
   get_agreement_id_renewal,
-  get_deposit_amount
+  get_deposit_amount,
+  get_search_renewal_manager
 } = require("../controller/ManagerController");
 const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification} = require("../controller/MontlyRent");
 
@@ -96,7 +97,8 @@ router.route("/getDetails-renewal").get(get_agreement_id_renewal);
 //get deposite amount 
 router.route("/get-deposit-amount").get(get_deposit_amount)
 
-
+//get search in renewal manager
+router.route("/get-search-renewal/:id").get(get_search_renewal_manager)
 
 router.route("/agreement/:id").post(get_agreement_details);
 

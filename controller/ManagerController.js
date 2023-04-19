@@ -948,6 +948,62 @@ async function get_deposit_amount (req,res){
 
 
 
+//get search in renewal manager
+async function get_search_renewal_manager (req,res)
+{
+  try {
+    console.log(req.params.id)
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id",
+        "agreements.*"
+      )
+      .where("agreements.manager_id","=",req.params.id)
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .andWhereNot("renewal_status","=","null")
+      .andWhere((cb) => {
+        cb.whereILike("name", `%${req.query.search}%`);
+        cb.orWhereILike("location", `%${req.query.search}%`);
+        cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
+        cb.orWhereILike("code", `%${req.query.search}%`);
+      })
+      .orderBy("agreements.id", "desc")
+      
+
+      console.log(data)
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
+      }
+    });
+    //console.log(agreement);
+
+    // //console.log(data)
+
+    res.send({ success: true, agreement, ids: ids });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+}
+
 
 
 module.exports = {
@@ -971,5 +1027,6 @@ module.exports = {
   send_back,
   get_status,
   get_renewal_list,
-  get_agreement_id_renewal
+  get_agreement_id_renewal,
+  get_search_renewal_manager
 };
