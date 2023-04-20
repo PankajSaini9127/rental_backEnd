@@ -136,8 +136,7 @@ const get_tenure = async (req, res) => {
 
 const updateAgreement = async (req, res) => {
   try {
-    //console.log(">>>>", req.body);
-    //console.log(req.params.id);
+    console.log(">>>>", req.body);
     const update = await db("agreements")
       .where("id", "=", req.params.id)
       .update(req.body);
