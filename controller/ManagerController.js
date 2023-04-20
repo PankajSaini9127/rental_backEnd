@@ -1044,7 +1044,7 @@ async function get_data_from_recovery (req,res){
     return res.status(500)
   }
 }
-
+0
 module.exports = {
   insertAdjustmentAmount,
   get_deposit_amount,
