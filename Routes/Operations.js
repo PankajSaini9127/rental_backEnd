@@ -1,5 +1,5 @@
 const express = require('express');
-const { user_search_bhu, getAllAgreement, get_monthly_rent_opr } = require('../controller/OperationsControls');
+const { user_search_bhu, getAllAgreement, get_monthly_rent_opr, get_monthly_search_opr } = require('../controller/OperationsControls');
 
 
 const router = express.Router();
@@ -14,7 +14,7 @@ router.route('/search/:id').post(user_search_bhu)
 
 router.route('/opr-monthly-payment/:id').get(get_monthly_rent_opr)
 
-
+router.route('/get-search-operations-monthlyrent').get(get_monthly_search_opr)
 
 
 module.exports = router
