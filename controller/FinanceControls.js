@@ -214,7 +214,7 @@ async function getRecoveryLog (req,res)
     {
       console.log(req.query.id)
       let response = await db('recovery_logs').select('*').where('agreement_id',req.query.id)
-      let balance = await db('recovery').select('balanceDeposit').where('agreemenet_id',req.query.id)
+      let balance = await db('recovery').select('balanceDeposit').where('agreement_id',req.query.id)
 
       if(response)
       {
