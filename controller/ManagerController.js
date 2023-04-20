@@ -1033,7 +1033,7 @@ async function insertAdjustmentAmount (req,res)
 //get data from recovery
 async function get_data_from_recovery (req,res){
   try {
-    const data = await db("recovery").select("*").where("agreemenet_id","=",req.params.id)
+    const data = await db("recovery").select("*").where("agreement_id","=",req.params.id)
     if(data.length>0){
       return res.send({success:true,data})
     }else{
