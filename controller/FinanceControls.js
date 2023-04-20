@@ -204,4 +204,55 @@ async function finance_get_monthly_rent (req,res){
 }
   
 
-module.exports = { getAllAgreement, user_search_bhu ,updateAgreement,finance_get_monthly_rent};
+
+// add the all recovery slabs for the respective agreement
+
+async function getRecoveryLog (req,res)
+{
+  try {
+    if(req.query.id)
+    {
+      console.log(req.query.id)
+      let response = await db('recovery_logs').select('*').where('agreement_id',req.query.id)
+      let balance = await db('recovery').select('balanceDeposit').where('agreement_id',req.query.id)
+
+      if(response)
+      {
+        console.log(response)
+        return res.send({history : response, balance : balance[0] })
+      }
+    }
+    else{
+      return res.status(204).send("No data found.")
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500)
+  }
+}
+
+
+// adding the recovery logs amount 
+async function insertRecoveryLog (req,res)
+{
+  try {
+    if(req.body)
+    {
+      let response = await db('recovery_logs').insert(req.body)
+
+      if(response)
+      {
+        return res.send("Data added successfully.")
+      }
+    }
+    else{
+      return res.status(204).send("No data found.")
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500)
+  }
+}
+
+
+module.exports = { getAllAgreement, user_search_bhu ,updateAgreement,finance_get_monthly_rent, insertRecoveryLog,getRecoveryLog};
