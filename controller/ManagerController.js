@@ -1010,20 +1010,37 @@ async function get_search_renewal_manager (req,res)
 // adding the adjustment amount 
 async function insertAdjustmentAmount (req,res)
 {
+  console.log(req.body)
   try {
     if(req.body)
     {
       let response = await db('recovery').insert(req.body)
 
-      if(response)
-      {
-        return res.send("Data added successfully.")
-      }
+      if(response){
+        
+          return res.send("Data added successfully.")
+        }
+      
     }
     else{
       return res.status(204).send("No data found.")
     }
   } catch (error) {
+    console.log(error)
+    return res.status(500)
+  }
+}
+
+//get data from recovery
+async function get_data_from_recovery (req,res){
+  try {
+    const data = await db("recovery").select("*").where("agreemenet_id","=",req.params.id)
+    if(data.length>0){
+      return res.send({success:true,data})
+    }else{
+      return res.status(204).send("No Data found")
+    }
+    } catch (error) {
     console.log(error)
     return res.status(500)
   }
@@ -1052,6 +1069,7 @@ module.exports = {
   get_status,
   get_renewal_list,
   get_agreement_id_renewal,
-  get_search_renewal_manager
+  get_search_renewal_manager,
+  get_data_from_recovery
 };
 

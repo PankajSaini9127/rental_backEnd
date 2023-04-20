@@ -23,7 +23,8 @@ const {
   get_agreement_id_renewal,
   get_deposit_amount,
   get_search_renewal_manager,
-  insertAdjustmentAmount
+  insertAdjustmentAmount,
+  get_data_from_recovery
   
 } = require("../controller/ManagerController");
 const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification} = require("../controller/MontlyRent");
@@ -169,5 +170,8 @@ router.route('/get-renewal-list/:id').get(get_renewal_list)
 
 //renewal listing data
 router.route('/insertAdjustmentAmount').post(insertAdjustmentAmount)
+
+//list data 
+router.route('/get-data-recovery/:id').get(get_data_from_recovery)
 
 module.exports = router;
