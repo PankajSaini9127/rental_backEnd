@@ -892,7 +892,7 @@ async function get_renewal_list (req,res){
       )
       .where("agreements.manager_id","=",req.params.id)
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .andWhereNot("renewal_status","=","")
+      .andWhereNot("renewal_status","=",'""')
       // .andWhereNot("renewal_status","=","Renewed")
       .orderBy("agreements.id", "desc")
       

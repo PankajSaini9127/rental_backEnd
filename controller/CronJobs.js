@@ -96,6 +96,7 @@ async function get_renewal() {
       .where('status', "=", 'Deposited')
       .andWhere('renewal_status',"=",'""')
       
+      console.log('>>>>',listAgreement)
 
     // iterating and creating a slab from here
     console.log(listAgreement)
@@ -149,7 +150,7 @@ async function get_renewal() {
       }
       else {
         // console.log("month==>", expiredAt.getMonth(), todayMoment.getMonth(), "year =>", expiredAt.getFullYear(), todayMoment.getFullYear())
-        return await db("agreements").update({ renewal_status: "" }).where("code",row.code)
+        return await db("agreements").update({ renewal_status: '""' }).where("code",row.code)
       }
 
     })).then((response) => {
