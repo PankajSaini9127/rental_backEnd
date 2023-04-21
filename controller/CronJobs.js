@@ -8,7 +8,7 @@ const CronJob = require('cron').CronJob
 const mailer = require('nodemailer')
 // const intervalTime = '15 10 15 * *' // interval time for monthly rent payment date 
 // const intervalTime = '* * * * * *' // interval time for monthly rent payment date 
-const intervalTimeMonthlyRenewal = '*/10 * * * *' // interval time for monthly rent payment date 
+const intervalTimeMonthlyRenewal = '*/1 * * * *' // interval time for monthly rent payment date 
 
 
 // building a job constructor for sending a notification mail at 15th of every month
@@ -94,16 +94,16 @@ async function get_renewal() {
       .from("agreements")
       .select("final_agreement_date", "tenure", "status","code")
       .where('status', "=", 'Deposited')
-      .andWhere('renewal_status',"=","")
+      .andWhere('renewal_status',"=",'""')
       
 
     // iterating and creating a slab from here
-    // console.log(listAgreement)
+    console.log(listAgreement)
     Promise.allSettled(listAgreement.map(async (row, i) => {
 
       // present date
       // let todayMoment = moment()
-      let todayMoment = moment().set({ 'year': 2025, 'month': 5 });
+      let todayMoment = moment().set({ 'year': 2028, 'month': 5 });
       // date when agreement started
       const agreements_start_date = moment(row.final_agreement_date)
       // tenure range
@@ -141,7 +141,7 @@ async function get_renewal() {
       todayMoment = new Date(todayMoment)
 
 
-      //  console.log("today=>",todayMoment,"agreement =>",expiredAt)
+       console.log("today=>",todayMoment,"agreement =>",expiredAt)
       // checking 60 days bond
       if (expiredAt.getMonth() <= todayMoment.getMonth() && expiredAt.getFullYear() <= todayMoment.getFullYear()) {
         // console.log("month==>", expiredAt.getMonth(), todayMoment.getMonth(), "year =>", expiredAt.getFullYear(), todayMoment.getFullYear())

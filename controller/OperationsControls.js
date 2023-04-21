@@ -25,7 +25,7 @@ const getAllAgreement = async (req, res) => {
             "landlords.id as landlords",
             "agreements.*"
           )
-          .where("bhu_id",'=', row.id)
+          .where("buh_id",'=', row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .join("users","agreements.manager_id","=","users.id").orderBy('agreements.id',"desc")
       })
@@ -53,7 +53,7 @@ const getAllAgreement = async (req, res) => {
         ids.push(row.id);
         agreement = {
           ...agreement,
-          [row.id]: { ...row, name: [row.name], sr_manager: Sr_names[row.bhu_id] },
+          [row.id]: { ...row, name: [row.name], sr_manager: Sr_names[row.buh_id] },
         };
       }
     });
@@ -71,7 +71,7 @@ const getAllAgreement = async (req, res) => {
 };
 
 //search use by field name
-async function user_search_bhu(req, res) {
+async function user_search_buh(req, res) {
   try {
     const supervisor = await db("users")
       .select("*")
@@ -256,4 +256,4 @@ console.log(req.query)
 }
 
 
-module.exports = { getAllAgreement, user_search_bhu ,get_monthly_rent_opr,get_monthly_search_opr};
+module.exports = { getAllAgreement, user_search_buh ,get_monthly_rent_opr,get_monthly_search_opr};

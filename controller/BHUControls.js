@@ -80,7 +80,7 @@ const getAllAgreement = async (req, res) => {
 };
 
 //search use by field name
-async function user_search_bhu(req, res) {
+async function user_search_buh(req, res) {
   try {
     const supervisor = await db("users")
       .select("*")
@@ -147,4 +147,4 @@ const updateAgreement = async (req, res) => {
   }
 };
 
-module.exports = { getAllAgreement, user_search_bhu, updateAgreement };
+module.exports = { getAllAgreement, user_search_buh, updateAgreement };

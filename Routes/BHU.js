@@ -1,5 +1,5 @@
 const express = require('express');
-const { user_search_bhu, getAllAgreement, updateAgreement } = require('../controller/BHUControls');
+const { user_search_buh, getAllAgreement, updateAgreement } = require('../controller/BHUControls');
 
 
 const router = express.Router();
@@ -12,7 +12,7 @@ router.route('/get-agreement/:id').get(getAllAgreement)
 router.route('/updateAgreement/:id').put(updateAgreement)
 
 
-router.route('/search/:id').post(user_search_bhu)
+router.route('/search/:id').post(user_search_buh)
 
 
 
