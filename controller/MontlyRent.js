@@ -128,6 +128,7 @@ async function get_agreements_code(req, res) {
       .select(
         "landlords.*",
         "agreements.*",
+        "agreements.utr_number as utr_deposit",
         "landlords.id as landlord_id",
         "monthly_rent.id as monthly_rent_id",
         "monthly_rent.*",
