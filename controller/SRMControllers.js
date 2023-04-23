@@ -27,7 +27,7 @@ const getAllAgreement = async (req, res) => {
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .where("manager_id", row.id)
           .whereNot("status", "=", "Hold")
-          .orderBy("agreements.id", "desc");
+          .orderBy("agreements.modify_date", "desc");
       })
     );
 
@@ -270,7 +270,7 @@ async function get_renewal_srm(req, res) {
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .andWhereNot("renewal_status", "=", "null")
       .andWhereNot("renewal_status", "=", "Pending For Renewal")
-      .orderBy("agreements.id", "desc");
+      .orderBy("agreements.modify_date", "desc");
 
     console.log(data);
 
@@ -324,7 +324,7 @@ async function get_search_renewal_srm(req, res) {
         cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
         cb.orWhereILike("code", `%${req.query.search}%`);
       })
-      .orderBy("agreements.id", "desc");
+      .orderBy("agreements.modify_date", "desc");
 
     console.log(data);
 
