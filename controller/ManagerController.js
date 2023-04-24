@@ -51,7 +51,7 @@ const getAllAgreement = async (req, res) => {
         "agreements.*"
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .orderBy("agreements.id", "desc")
+      .orderBy("agreements.modify_date", "desc")
       .where("manager_id","=",req.params.manager_id);
 
     let ids = [];
@@ -894,7 +894,7 @@ async function get_renewal_list (req,res){
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .andWhereNot("renewal_status","=",'""')
       // .andWhereNot("renewal_status","=","Renewed")
-      .orderBy("agreements.id", "desc")
+      .orderBy("agreements.modify_date", "desc")
       
 
       console.log(data)
@@ -970,7 +970,7 @@ async function get_search_renewal_manager (req,res)
         cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
         cb.orWhereILike("code", `%${req.query.search}%`);
       })
-      .orderBy("agreements.id", "desc")
+      .orderBy("agreements.modify_date", "desc")
       
 
       console.log(data)
@@ -1044,8 +1044,51 @@ async function get_data_from_recovery (req,res){
     return res.status(500)
   }
 }
-0
+
+
+
+//get latest modify date
+async function get_modify_date (req,res){
+  try {
+    console.log(req.query.id)
+
+    const data = await db("agreements").select("modify_date").where("id","=",req.query.id)
+    console.log(data)
+    if(data.length>0){
+      return res.send({success:true,modify_date:data[0].modify_date})
+    }else{
+      return res.status(204).send("No Data found")
+    }
+    } catch (error) {
+    console.log(error)
+    return res.status(500)
+  }
+}
+
+
+//get latest modify date
+async function get_payment_update_date (req,res){
+  try {
+    console.log(req.query.id)
+
+    const data = await db("monthly_rent").select("update_at").where("id","=",req.query.id)
+    console.log(data)
+    if(data.length>0){
+      return res.send({success:true,modify_date:data[0].update_at})
+    }else{
+      return res.status(204).send("No Data found")
+    }
+    } catch (error) {
+    console.log(error)
+    return res.status(500)
+  }
+}
+
+
+
 module.exports = {
+  get_payment_update_date,
+  get_modify_date,
   insertAdjustmentAmount,
   get_deposit_amount,
   set_final_agreement,

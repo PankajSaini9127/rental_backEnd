@@ -30,7 +30,7 @@ const getAllAgreement = async (req, res) => {
           )
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .join("users","agreements.manager_id","=","users.id")
-          .where("srm_id", row.id).orderBy('agreements.id',"desc");
+          .where("srm_id", row.id).orderBy('agreements.modify_date',"desc");
       })
     );
     // data = data.map((row)=>row.status === 'fulfilled' && row.value[0])

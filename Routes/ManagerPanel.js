@@ -24,7 +24,9 @@ const {
   get_deposit_amount,
   get_search_renewal_manager,
   insertAdjustmentAmount,
-  get_data_from_recovery
+  get_data_from_recovery,
+  get_modify_date,
+  get_payment_update_date
   
 } = require("../controller/ManagerController");
 const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification} = require("../controller/MontlyRent");
@@ -164,7 +166,6 @@ router.route('/get-monthly-rent-by-code/:id').get(get_agreements_code)
 //invoice number validation
 router.route('/get-invoice-number-validate/:invoice').get(invoice_number_verification)
 
-
 //renewal listing data
 router.route('/get-renewal-list/:id').get(get_renewal_list)
 
@@ -173,5 +174,11 @@ router.route('/insertAdjustmentAmount').post(insertAdjustmentAmount)
 
 //list data 
 router.route('/get-data-recovery/:id').get(get_data_from_recovery)
+
+//get latest modification date
+router.route('/get-modify-date').get(get_modify_date)
+
+//get latest payment modification
+router.route('/get-payment-modify-date').get(get_payment_update_date)
 
 module.exports = router;
