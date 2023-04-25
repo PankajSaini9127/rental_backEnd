@@ -42,7 +42,7 @@ async function get_monthly_rent(req,res) {
         .join("landlords", "agreements.id", "=", "landlords.agreement_id")
         .whereNotNull("rent_start_date").andWhere("status","Pending")
         // console.log("list >>>>>>>>>>> ",listAgreement)
-        // itrating and creating a slab from here
+        // iterating and creating a slab from here
         Promise.allSettled(listAgreement.map(async(row, i) => {        
         // calculating the final amount
         const finalAmountForFullMonth = (row.monthlyRent/100)*parseInt(row.percentage) 
@@ -96,7 +96,7 @@ async function get_renewal() {
       .where('status', "=", 'Deposited')
       .andWhere('renewal_status',"=",'""')
       
-      console.log('>>>>',listAgreement)
+      // console.log('>>>>',listAgreement)
 
     // iterating and creating a slab from here
     console.log(listAgreement)
@@ -154,7 +154,7 @@ async function get_renewal() {
       }
 
     })).then((response) => {
-      console.log(">>>get renewal>",response)
+      // console.log(">>>get renewal>",response)
     }).catch((error) => {
       console.log(error)
     })

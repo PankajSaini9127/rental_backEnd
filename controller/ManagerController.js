@@ -76,10 +76,10 @@ const getAllAgreement = async (req, res) => {
 
     res.send({ success: true, agreement, ids: ids });
   } catch (error) {
-    //console.log(error);
+    console.log(error);
     res.send({
       success: false,
-      message: "something Went Wrong please try again later",
+      message: "Something Went Wrong please try again later",
     });
   }
 };
@@ -137,6 +137,9 @@ const get_tenure = async (req, res) => {
 const updateAgreement = async (req, res) => {
   try {
     console.log(">>>>", req.body);
+
+    req.body.modify_date = new Date()
+
     const update = await db("agreements")
       .where("id", "=", req.params.id)
       .update(req.body);
@@ -236,7 +239,7 @@ async function get_monthly_rent(req, res) {
       );
 
       // calculating the final amount
-      const finalAmount = (((row.monthlyRent / totalDaysInMonth) * restDays)/100)*parseInt(row.percentage) 
+      const finalAmount = (((row.monthlyRent / totalDaysInMonth) * (restDays+1))/100)*parseInt(row.percentage) 
       const finalAmountForFullMonth = (row.monthlyRent/100)*parseInt(row.percentage) 
 
       // this code will also add the field for next month 
@@ -503,7 +506,8 @@ async function editAgreement(req, res) {
       year5,
       status,
       remark,
-      assets
+      assets,
+      modify_date : new Date()      
     });
 
     //console.log(saveAgreement);
@@ -710,7 +714,8 @@ async function send_back(req, res) {
     // //console.log(req.params.id);
     const update = await db("agreements")
       .where("id", "=", req.params.id)
-      .update({ status: req.body.status, remark: req.body.remark });
+      .update({ status: req.body.status, remark: req.body.remark, modify_date : new Date()
+      });
     //console.log(update);
     if (update === 1) {
       res.send({ success: true, message: "Agreement Update Successfully" });
@@ -930,7 +935,7 @@ async function get_renewal_list (req,res){
 }
 
 
-// get diffrence old and new status
+// get difference old and new status
 async function get_deposit_amount (req,res){
   try {
     const deposite = await db("agreements").select('deposit').where("code","=",req.query.code)

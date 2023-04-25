@@ -7,7 +7,7 @@ async function get_Rental_Property_Dump_Report(req, res) {
 
   try {
     db.raw(
-      `SELECT distinct a.location as property_code,(select name from users where id=a.bhu_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,a.location,l.name as lanlord_name,a.address as property_address,a.deposit as deposite_amount,a.monthlyRent as Monthly_rental,a.rent_start_date as Agreement_Start_Date,(CASE     WHEN a.tenure='11 Month' THEN DATE_SUB(DATE_SUB(a.final_agreement_date,INTERVAL -11 MONTH),INTERVAL 1 DAY) WHEN a.tenure='2 Year' THEN DATE_SUB(DATE_SUB(a.final_agreement_date,INTERVAL -24 MONTH),INTERVAL 1 DAY) WHEN a.tenure='4 Year' THEN DATE_SUB(DATE_SUB(a.final_agreement_date,INTERVAL -48 MONTH),INTERVAL 1 DAY) ELSE null END) as Agreement_End_Date,a.terminate_date as Surrender_Date,a.lockInYear as Lock_in_period,a.noticePeriod as Notice_Period,l.panNo as PAN_Details,l.gstNo as GST_Details,l.bankName,l.accountNo,l.ifscCode,l.benificiaryName,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >=? and a.time <= ? ORDER by a.code,a.location`,
+      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,a.location,l.name as lanlord_name,a.address as property_address,a.deposit as deposite_amount,a.monthlyRent as Monthly_rental,a.rent_start_date as Agreement_Start_Date,(CASE     WHEN a.tenure='11 Month' THEN DATE_SUB(DATE_SUB(a.final_agreement_date,INTERVAL -11 MONTH),INTERVAL 1 DAY) WHEN a.tenure='2 Year' THEN DATE_SUB(DATE_SUB(a.final_agreement_date,INTERVAL -24 MONTH),INTERVAL 1 DAY) WHEN a.tenure='4 Year' THEN DATE_SUB(DATE_SUB(a.final_agreement_date,INTERVAL -48 MONTH),INTERVAL 1 DAY) ELSE null END) as Agreement_End_Date,a.terminate_date as Surrender_Date,a.lockInYear as Lock_in_period,a.noticePeriod as Notice_Period,l.panNo as PAN_Details,l.gstNo as GST_Details,l.bankName,l.accountNo,l.ifscCode,l.benificiaryName,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >=? and a.time <= ? ORDER by a.code,a.location`,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
@@ -69,7 +69,7 @@ async function get_Rental_Payment_MIS(req, res) {
 
   try {
     db.raw(
-      `SELECT distinct a.location as property_code,(select name from users where id=a.bhu_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,"" as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_no FROM agreements a, landlords l, monthly_rent m where a.id=l.agreement_id and a.code=m.code and a.time >=? and a.time <=? ORDER by a.code,a.location`,
+      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,"" as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_no FROM agreements a, landlords l, monthly_rent m where a.id=l.agreement_id and a.code=m.code and a.time >=? and a.time <=? ORDER by a.code,a.location`,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
@@ -119,7 +119,7 @@ async function get_Rental_Onboarding_All_Status(req, res) {
 
   try {
     db.raw(
-      `SELECT distinct a.location as property_code,(select name from users where id=a.bhu_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >= ? and a.time <=? ORDER by a.code,a.location`,
+      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >= ? and a.time <=? ORDER by a.code,a.location`,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
@@ -166,7 +166,7 @@ async function get_Rental_Onboarding_Deposited(req, res) {
 
   try {
     db.raw(
-      `SELECT distinct a.location as property_code,(select name from users where id=a.bhu_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.status='Deposited' and a.time >=? and a.time <= ? ORDER by a.code,a.location`,
+      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.status='Deposited' and a.time >=? and a.time <= ? ORDER by a.code,a.location`,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];

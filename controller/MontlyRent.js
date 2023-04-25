@@ -52,7 +52,7 @@ async function add_rent(req, res) {
 
 async function list_month_rent(req, res) {
   try {
-    const data = await db("monthly_rent").select("*").orderBy("id", "desc");
+    const data = await db("monthly_rent").select("*");
 
     //console.log(data)
     if (data) return res.send(data);

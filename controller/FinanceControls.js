@@ -119,6 +119,8 @@ async function user_search_buh(req, res) {
 
 const updateAgreement = async (req, res) => {
     try {
+    req.body.modify_date = new Date()
+
       const update = await db("agreements")
         .where("id", "=", req.params.id)
         .update(req.body);
