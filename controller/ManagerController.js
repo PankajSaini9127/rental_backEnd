@@ -6,6 +6,7 @@ const moment = require('moment')
 const newAgreement = async (req, res) => {
   try {
     console.log(req.body)
+    delete req.body.modify_date
     const agreement = await db("agreements").insert(req.body);
     console.log(agreement);
 
