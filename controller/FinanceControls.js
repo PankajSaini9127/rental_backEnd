@@ -20,7 +20,7 @@ const getAllAgreement = async (req, res) => {
        
         return await db("agreements")
           .select(
-            "users.name as manager_name",
+            "users.name as buh",
             "landlords.name",
             "landlords.agreement_id",
             "landlords.id as landlords",
@@ -28,7 +28,7 @@ const getAllAgreement = async (req, res) => {
           )
           .where("op_id",'=', row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-          .join("users","agreements.manager_id","=","users.id")
+          .join("users","agreements.buh_id","=","users.id")
           .orderBy('agreements.modify_date',"desc")
       })
     );

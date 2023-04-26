@@ -268,7 +268,7 @@ async function get_renewal_srm(req, res) {
       )
       .where("agreements.srm_id", "=", req.params.id)
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .andWhereNot("renewal_status", "=", "null")
+      .andWhereNot("renewal_status", "=", "")
       .andWhereNot("renewal_status", "=", "Pending For Renewal")
       .orderBy("agreements.modify_date", "desc");
 

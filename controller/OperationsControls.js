@@ -7,10 +7,10 @@ const getAllAgreement = async (req, res) => {
       .where("supervisor", "=", req.params.id)
 
     // for getting the name for Sr manager
-    let Sr_names = {};
-    supervisor.map((row) => {
-      Sr_names = { ...Sr_names, [row.id]: row.name };
-    });
+    // let Sr_names = {};
+    // supervisor.map((row) => {
+    //   Sr_names = { ...Sr_names, [row.id]: row.name };
+    // });
 
     // console.log(Sr_names);
 
@@ -20,6 +20,7 @@ const getAllAgreement = async (req, res) => {
         return await db("agreements")
           .select(
             "users.name as manager_name",
+            "srm.name as Sr_name",
             "landlords.name",
             "landlords.agreement_id",
             "landlords.id as landlords",
@@ -27,7 +28,9 @@ const getAllAgreement = async (req, res) => {
           )
           .where("buh_id",'=', row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-          .join("users","agreements.manager_id","=","users.id").orderBy('agreements.modify_date',"desc")
+          .join("users","agreements.manager_id","=","users.id")
+          .join("users as srm","agreements.srm_id","=","srm.id")
+          .orderBy('agreements.modify_date',"desc")
       })
     );
 
@@ -46,14 +49,13 @@ const getAllAgreement = async (req, res) => {
           [row.id]: {
             ...agreement[row.id],
             name: [...agreement[row.id].name, row.name],
-            sr_manager: supervisor[0].name,
           },
         };
       } else {
         ids.push(row.id);
         agreement = {
           ...agreement,
-          [row.id]: { ...row, name: [row.name], sr_manager: Sr_names[row.buh_id] },
+          [row.id]: { ...row, name: [row.name]},
         };
       }
     });
