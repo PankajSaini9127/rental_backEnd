@@ -73,18 +73,35 @@ const getAllAgreement = async (req, res) => {
 };
 
 //search use by field name
-async function user_search_buh(req, res) {
+async function agreement_search_opr(req, res) {
   try {
     const supervisor = await db("users")
       .select("*")
       .where("supervisor", req.params.id);
 
+      console.log(req.query)
     const data = await db("agreements")
-      .select("*")
+      .select(
+      "users.name as manager_name",
+      "srm.name as Sr_name",
+      "landlords.name",
+      "landlords.agreement_id",
+      "landlords.id as landlords",
+      "agreements.*"
+      )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .where("manager_id", supervisor[0].id)
-      .whereNot("status", "=", "Hold")
-      .whereILike("name", `%${req.body.name}%`);
+      .join("users","agreements.manager_id","=","users.id")
+      .join("users as srm","agreements.srm_id","=","srm.id")
+      .where("buh_id", supervisor[0].id)
+      .whereNot("agreements.status", "=", "Hold")
+      .andWhere((cb) => {
+        cb.whereILike("landlords.name", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.location", `%${req.query.search}%`);
+        cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.code", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.address", `%${req.query.search}%`);
+      })
+      .orderBy('agreements.modify_date',"desc")
     console.log(data);
 
     let ids = [];
@@ -201,11 +218,10 @@ console.log(req.query)
       srm_name = { ...srm_name, [row.id]: row.name }
     })
     
-    console.log(srm_name)
     let data = await Promise.allSettled(result.map(async (row) => {
       console.log(row.id); return await db("monthly_rent")
       .select("users.name as manager_name","monthly_rent.*")
-      .where('srm_id', row.id)
+      .where('buh_id', row.id)
       .join("users","monthly_rent.manager_id","=","users.id")
       .andWhere((cb) => {
         cb.whereILike("monthly_rent.landlord_name", `%${req.query.search}%`);
@@ -258,4 +274,4 @@ console.log(req.query)
 }
 
 
-module.exports = { getAllAgreement, user_search_buh ,get_monthly_rent_opr,get_monthly_search_opr};
+module.exports = { getAllAgreement, agreement_search_opr ,get_monthly_rent_opr,get_monthly_search_opr};

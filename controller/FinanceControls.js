@@ -73,18 +73,34 @@ const getAllAgreement = async (req, res) => {
 };
 
 //search use by field name
-async function user_search_buh(req, res) {
+async function finance_agreement_search(req, res) {
   try {
     const supervisor = await db("users")
       .select("*")
       .where("supervisor", req.params.id);
 
     const data = await db("agreements")
-      .select("*")
+      .select(
+      "users.name as manager_name",
+      "srm.name as Sr_name",
+      "landlords.name",
+      "landlords.agreement_id",
+      "landlords.id as landlords",
+      "agreements.*"
+      )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .where("manager_id", supervisor[0].id)
-      .whereNot("status", "=", "Hold")
-      .whereILike("name", `%${req.body.name}%`);
+      .join("users","agreements.manager_id","=","users.id")
+      .join("users as srm","agreements.srm_id","=","srm.id")
+      .where("op_id", supervisor[0].id)
+      .whereNot("agreements.status", "=", "Hold")
+      .andWhere((cb) => {
+        cb.whereILike("landlords.name", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.location", `%${req.query.search}%`);
+        cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.code", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.address", `%${req.query.search}%`);
+      })
+      .orderBy('agreements.modify_date',"desc")
     console.log(data);
 
     let ids = [];
@@ -258,4 +274,4 @@ async function insertRecoveryLog (req,res)
 }
 
 
-module.exports = { getAllAgreement, user_search_buh ,updateAgreement,finance_get_monthly_rent, insertRecoveryLog,getRecoveryLog};
+module.exports = { getAllAgreement, finance_agreement_search ,updateAgreement,finance_get_monthly_rent, insertRecoveryLog,getRecoveryLog};

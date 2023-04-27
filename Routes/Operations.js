@@ -1,5 +1,5 @@
 const express = require('express');
-const { user_search_buh, getAllAgreement, get_monthly_rent_opr, get_monthly_search_opr } = require('../controller/OperationsControls');
+const {  getAllAgreement, get_monthly_rent_opr, get_monthly_search_opr, agreement_search_opr } = require('../controller/OperationsControls');
 
 
 const router = express.Router();
@@ -10,7 +10,7 @@ const router = express.Router();
 router.route('/get-agreement/:id').get(getAllAgreement)
 
 
-router.route('/search/:id').post(user_search_buh)
+router.route('/search/:id').get(agreement_search_opr)
 
 router.route('/opr-monthly-payment/:id').get(get_monthly_rent_opr)
 

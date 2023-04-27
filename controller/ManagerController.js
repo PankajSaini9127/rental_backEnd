@@ -592,7 +592,8 @@ async function user_search_manager(req, res) {
         cb.orWhereILike("location", `%${req.body.name}%`);
         cb.orWhereILike("monthlyRent", `%${req.body.name}%`);
         cb.orWhereILike("code", `%${req.body.name}%`);
-      });
+        cb.orWhereILike("address", `%${req.body.name}%`);
+      }).orderBy('agreements.modify_date',"desc");
 
     //console.log(data);
 
