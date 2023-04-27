@@ -105,7 +105,13 @@ async function user_search_srmanager(req, res) {
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .where("manager_id", "=", row.id)
           .whereNot("status", "=", "Hold")
-          .whereLike("name", "=", req.body.name);
+          .andWhere((cb) => {
+            cb.whereILike("name", `%${req.body.name}%`);
+            cb.orWhereILike("location", `%${req.body.name}%`);
+            cb.orWhereILike("monthlyRent", `%${req.body.name}%`);
+            cb.orWhereILike("code", `%${req.body.name}%`);
+            cb.orWhereILike("address", `%${req.body.name}%`);
+          }).orderBy('agreements.modify_date',"desc");
       })
     );
 
@@ -306,7 +312,7 @@ async function get_renewal_srm(req, res) {
 
 async function get_search_renewal_srm(req, res) {
   try {
-    console.log(req.params.id);
+    console.log(req.query.search);
     const data = await db("agreements")
       .select(
         "landlords.name",
