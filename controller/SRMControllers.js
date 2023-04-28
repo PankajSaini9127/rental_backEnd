@@ -446,6 +446,52 @@ async function get_search_monthlyrent_srm(req, res) {
   }
 }
 
+//dashboard  item
+async function get_dashboard_data(req, res) {
+  try {
+
+    let status = await db("users").select('users.id',"agreements.*")
+    .where("supervisor","=",req.params.id)
+    .join("agreements","agreements.manager_id","=","users.id")
+    
+    // let  = await db("agreements").select("status");
+
+    let meta = {
+      totalAgreement: 0,
+      Pending: 0,
+      Send_Back: 0,
+      Approved: 0,
+      Renewal: 0,
+    };
+    //console.log(status)
+
+    if (status) {
+      status.map((row) => {
+        meta.totalAgreement += 1;
+        if (row.status === "Sent Back From Sr Manager") {
+          meta.Send_Back += 1;
+        } else if (
+          row.status === "Sent To Finance Team" ||
+          row.status === "Sent To BHU" ||
+          row.status === "Sent To Operations" ||
+          row.status === "Deposited"
+        ) {
+          meta.Approved += 1;
+        } else if (row.status === "Sent To Sr Manager") {
+          meta.Pending += 1;
+        }
+      });
+    }
+
+    //console.log(meta)
+
+    res.send(meta);
+  } catch (err) {
+    console.log(err)
+    res.status(500).send("something went wrong");
+  }
+}
+
 module.exports = {
   get_search_monthlyrent_srm,
   get_search_renewal_srm,
@@ -454,4 +500,5 @@ module.exports = {
   srm_get_monthly_rent,
   srm_get_monthly_rent_id,
   get_renewal_srm,
+  get_dashboard_data
 };

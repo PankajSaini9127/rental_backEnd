@@ -163,86 +163,64 @@ async function getAgreementByIdBuh(req, res) {
 
     console.log(req.params.id)
     const data = await db("agreements")
-      .select("landlords.*", "agreements.*", "landlords.id as landlord_id")
+      .select("landlords.*", "agreements.*", "landlords.id as landlord_id","users.name as manager_name", "srm.name as srm_name")
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .where("agreement_id", req.params.id);
+      .where("agreement_id", req.params.id)
+      .join("users","agreements.manager_id","=","users.id")
+      .join("users as srm","agreements.srm_id","=","srm.id");
       
+// console.log(data)
 
-    let ids = [];
-    let agreement = {};
-    data.map((row) => {
-      if (ids.includes(row.id)) {
-        agreement = {
-          ...agreement,
-          landlord: [
-            ...agreement.landlord,
-            {
-              landlord_id: row.landlord_id,
-              name: row.name,
-              percentageShare: row.percentageShare,
-              leeseName: row.leeseName,
-              aadharNo: row.aadharNo,
-              // area: row.area,
-              panNo: row.panNo,
-              gstNo: row.gstNo,
-              mobileNo: row.mobileNo,
-              gst: row.gst,
-              cheque: row.cheque,
-              branchName: row.branchName,
-              alternateMobile: row.alternateMobile,
-              email: row.email,
-              bankName: row.bankName,
-              benificiaryName: row.benificiaryName,
-              accountNo: row.accountNo,
-              ifscCode: row.ifscCode,
-              agreement_id: row.agreement_id,
-              aadhar_card: row.aadhar_card,
-              pan_card: row.pan_card,
-              gst: row.gst,
-            },
-          ],
-        };
-      } else {
-        ids.push(row.id);
-
-        agreement = {
-          ...row,
-          landlord: [
-            {
-              landlord_id: row.landlord_id,
-              name: row.name,
-              percentageShare: row.percentageShare,
-              leeseName: row.leeseName,
-              aadharNo: row.aadharNo,
-              panNo: row.panNo,
-              gstNo: row.gstNo,
-              gst: row.gst,
-              cheque: row.cheque,
-              // area: row.area,
-              branchName: row.branchName,
-              mobileNo: row.mobileNo,
-              alternateMobile: row.alternateMobile,
-              email: row.email,
-              bankName: row.bankName,
-              benificiaryName: row.benificiaryName,
-              accountNo: row.accountNo,
-              ifscCode: row.ifscCode,
-              agreement_id: row.agreement_id,
-              aadhar_card: row.aadhar_card,
-              pan_card: row.pan_card,
-              gst: row.gst,
-            },
-          ],
-        };
-      }
-    });
-    // //console.log(agreement);
-
-    return res.status(200).send(agreement);
+    return res.status(200).send(data);
   } catch (error) {
     //console.log(error);
     return res.status(500).send();
   }
 }
 
-module.exports = {getAgreementByIdBuh, getAllAgreement, user_search_buh, updateAgreement };
+//dashboard  item
+async function get_dashboard_dats_buh(req, res) {
+  try {
+
+    let status = await db("users").select('users.id',"agreements.*")
+    .where("supervisor","=",req.params.id)
+    .join("agreements","agreements.srm_id","=","users.id")
+    
+    // let  = await db("agreements").select("status");
+
+    let meta = {
+      totalAgreement: 0,
+      Pending: 0,
+      Send_Back: 0,
+      Approved: 0,
+      Renewal: 0,
+    };
+    //console.log(status)
+
+    if (status) {
+      status.map((row) => {
+        meta.totalAgreement += 1;
+        if (row.status === "Sent Back From BUH") {
+          meta.Send_Back += 1;
+        } else if (
+          row.status === "Sent To Finance Team" ||
+          row.status === "Sent To Operations" ||
+          row.status === "Deposited"
+        ) {
+          meta.Approved += 1;
+        } else if (row.status === "Sent To BHU") {
+          meta.Pending += 1;
+        }
+      });
+    }
+
+    //console.log(meta)
+
+    res.send(meta);
+  } catch (err) {
+    console.log(err)
+    res.status(500).send("something went wrong");
+  }
+}
+
+module.exports = {getAgreementByIdBuh, getAllAgreement, user_search_buh, updateAgreement ,get_dashboard_dats_buh};
