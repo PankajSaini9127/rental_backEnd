@@ -274,4 +274,51 @@ async function insertRecoveryLog (req,res)
 }
 
 
-module.exports = { getAllAgreement, finance_agreement_search ,updateAgreement,finance_get_monthly_rent, insertRecoveryLog,getRecoveryLog};
+
+//dashboard  item
+async function get_dashboard_dats_finance(req, res) {
+  try {
+console.log(req.params.id)
+    let status = await db("users").select('users.id',"agreements.status")
+    
+    .join("agreements","agreements.op_id","=","users.id")
+    .where("supervisor","=",req.params.id)
+    
+  //  console.log(status)
+
+    let meta = {
+      totalAgreement: 0,
+      Pending: 0,
+      Send_Back: 0,
+      Approved: 0,
+      Renewal: 0,
+    };
+    console.log(status)
+
+    if (status) {
+      status.map((row) => {
+        meta.totalAgreement += 1;
+        if (row.status === "Sent Back From Finance") {
+          meta.Send_Back += 1;
+        } else if (
+          row.status === "Approved" ||
+          row.status === "Deposited"
+        ) {
+          meta.Approved += 1;
+        } else if (row.status === "Sent To Finance") {
+          meta.Pending += 1;
+        }
+      });
+    }
+
+    console.log(status)
+
+    res.send(meta);
+  } catch (err) {
+    console.log(err)
+    res.status(500).send("something went wrong");
+  }
+}
+
+
+module.exports = {get_dashboard_dats_finance, getAllAgreement, finance_agreement_search ,updateAgreement,finance_get_monthly_rent, insertRecoveryLog,getRecoveryLog};
