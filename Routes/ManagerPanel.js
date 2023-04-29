@@ -26,10 +26,11 @@ const {
   insertAdjustmentAmount,
   get_data_from_recovery,
   get_modify_date,
-  get_payment_update_date
+  get_payment_update_date,
+  get_all_approved_ag
   
 } = require("../controller/ManagerController");
-const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification} = require("../controller/MontlyRent");
+const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification, list_month_rent_paid} = require("../controller/MontlyRent");
 
 // setting up multer for file transport 
 const router = express.Router();
@@ -89,6 +90,9 @@ router.route("/add_landlord").post(add_landlord)
 // path /api/agreements
 router.route("/agreements/:manager_id").get(getAllAgreement);
 
+//approved agreements
+router.route("/agreements/approved/:manager_id").get(get_all_approved_ag)
+
 //post request in agreements table get agreemennt by id
 // path /api/agreement/:id
 // router.route("/agreement/:id").post(getAgreementById);
@@ -106,6 +110,8 @@ router.route("/get-deposit-amount").get(get_deposit_amount)
 router.route("/get-search-renewal/:id").get(get_search_renewal_manager)
 
 router.route("/agreement/:id").post(get_agreement_details);
+
+
 
 
 //send back
@@ -156,6 +162,11 @@ router.route('/setFinalAgreement').post(set_final_agreement)
 
 // API for list 
 router.route('/listMonthRent/:manager_id').get(list_month_rent)
+
+// monthly paid payment
+router.route('/listMonthRent/paid/:manager_id').get(list_month_rent_paid)
+
+
 
 router.route('/add_invoice/:id').put(add_invoice)
 

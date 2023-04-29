@@ -52,7 +52,29 @@ async function add_rent(req, res) {
 
 async function list_month_rent(req, res) {
   try {
-    const data = await db("monthly_rent").select("*");
+    const data = await db("monthly_rent").select("*").where(cb=>{
+      cb.orWhere("status","=","Sent To Sr Manager");
+      cb.orWhere("status","=","Sent To Operations");
+      cb.orWhere("status","=","Sent To Finance");
+      cb.orWhere("status","=","Pending");
+    });
+
+    //console.log(data)
+    if (data) return res.send(data);
+    else return res.send([]);
+  } catch (err) {
+    //console.log(err)
+    return res.status(500).send("Something went wrong");
+  }
+}
+
+
+
+async function list_month_rent_paid(req, res) {
+  try {
+    const data = await db("monthly_rent").select("*").where(cb=>{
+      cb.orWhere("status","=","Paid");
+    });
 
     //console.log(data)
     if (data) return res.send(data);
@@ -250,4 +272,5 @@ module.exports = {
   update_payment_status,
   get_agreements_code,
   invoice_number_verification,
+  list_month_rent_paid
 };
