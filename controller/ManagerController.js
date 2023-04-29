@@ -42,6 +42,8 @@ async function add_landlord(req, res) {
   }
 }
 
+
+//in process agreements
 const getAllAgreement = async (req, res) => {
   try {
     const data = await db("agreements")
@@ -49,6 +51,7 @@ const getAllAgreement = async (req, res) => {
         "landlords.name",
         "landlords.agreement_id",
         "landlords.id",
+        "landlords.utr_number",
         "agreements.*"
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
@@ -58,18 +61,25 @@ const getAllAgreement = async (req, res) => {
     let ids = [];
     let agreement = {};
     data.map((row) => {
-      if (ids.includes(row.id)) {
-        agreement = {
-          ...agreement,
-          [row.id]: {
-            ...agreement[row.id],
-            name: [...agreement[row.id].name, row.name],
-          },
-        };
-      } else {
-        ids.push(row.id);
-        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
+      if(row.status === "Sent To Sr Manager" ||
+      row.status === "Sent To BUH" ||
+      row.status === "Sent To Operations" ||
+      row.status === "Sent To Finance Team" ){
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              utr_number:[...agreement[row.id].utr_number, row.utr_number]
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+        }
       }
+     
     });
     //console.log(agreement);
 
@@ -84,6 +94,58 @@ const getAllAgreement = async (req, res) => {
     });
   }
 };
+
+// approved agreements
+async function get_all_approved_ag (req,res){
+  try {
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id",
+        "landlords.utr_number",
+        "agreements.*"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .orderBy("agreements.modify_date", "desc")
+      .where("manager_id","=",req.params.manager_id);
+
+      console.log(data)
+      
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if(row.status === "Approved" ||
+      row.status === "Deposited"  ){
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              utr_number:[...agreement[row.id].utr_number, row.utr_number]
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+        }
+      }
+     
+    });
+    //console.log(agreement);
+
+    // //console.log(data)
+
+    res.send({ success: true, agreement, ids: ids });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      success: false,
+      message: "Something Went Wrong please try again later",
+    });
+  }
+}
 
 const get_tenure = async (req, res) => {
   try {
@@ -630,9 +692,12 @@ async function get_agreement_details(req, res) {
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .where("agreement_id", req.params.id);
 
+      // console.log(data)
+
     let ids = [];
     let agreement = {};
     data.map((row) => {
+      
       if (ids.includes(row.id)) {
         agreement = {
           ...agreement,
@@ -664,6 +729,8 @@ async function get_agreement_details(req, res) {
             aadhar_card: [...agreement[row.id].aadhar_card, row.aadhar_card],
             pan_card: [...agreement[row.id].pan_card, row.pan_card],
             percentage: [...agreement[row.id].percentage, row.percentage],
+            utr_number: [...agreement[row.id].utr_number, row.utr_number],
+            payment_date:  [...agreement[row.id].payment_date, row.payment_date]
           },
         };
       } else {
@@ -697,6 +764,8 @@ async function get_agreement_details(req, res) {
             agreement_id: [row.agreement_id],
             aadhar_card: [row.aadhar_card],
             pan_card: [row.pan_card],
+            utr_number: [row.utr_number],
+            payment_date: [row.payment_date],
           },
         };
       }
@@ -1119,6 +1188,7 @@ module.exports = {
   get_renewal_list,
   get_agreement_id_renewal,
   get_search_renewal_manager,
-  get_data_from_recovery
+  get_data_from_recovery,
+  get_all_approved_ag
 };
 

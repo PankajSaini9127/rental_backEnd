@@ -1,5 +1,5 @@
 const express = require('express');
-const { user_search_srmanager, getAllAgreement, srm_get_monthly_rent, srm_get_monthly_rent_id, get_renewal_srm, get_search_renewal_srm, get_search_monthlyrent_srm, get_dashboard_data } = require('../controller/SRMControllers');
+const { user_search_srmanager, getAllAgreement, srm_get_monthly_rent, srm_get_monthly_rent_id, get_renewal_srm, get_search_renewal_srm, get_search_monthlyrent_srm, get_dashboard_data, getAllApprovedAgreements, srm_get_monthly_rent_paid } = require('../controller/SRMControllers');
 
 
 const router = express.Router();
@@ -9,10 +9,15 @@ const router = express.Router();
 // path /api/srmanger/getagreement/:id
 router.route('/srmanager/get-agreement/:id').get(getAllAgreement)
 
+//approved agreements
+router.route('/srmanager/approved/get-agreement/:id').get(getAllApprovedAgreements)
+
 
 router.route('/srmanager-search/:id').post(user_search_srmanager)
 
 router.route('/srmanager/get-monthly-rent/:id').get(srm_get_monthly_rent)
+
+router.route('/srmanager/paid/get-monthly-rent/:id').get(srm_get_monthly_rent_paid)
 
 router.route('/srmanager/get-monthly-rent-id/:id').get(srm_get_monthly_rent_id)
 
