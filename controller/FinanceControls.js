@@ -23,11 +23,148 @@ const getAllAgreement = async (req, res) => {
             "landlords.agreement_id",
             "landlords.id as landlords",
             "agreements.*",
+            "landlords.percentage",
             "landlords.utr_number"
           )
           .where("op_id", "=", row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .join("users", "agreements.buh_id", "=", "users.id")
+          .orderBy("agreements.modify_date", "desc");
+      })
+    );
+
+    data =
+      data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+    console.log(">>>data", data);
+
+    // let ids = [];
+    // let agreement = {};
+
+    // data.map((row) => {
+    //   if (ids.includes(row.id)) {
+    //     agreement = {
+    //       ...agreement,
+    //       [row.id]: {
+    //         ...agreement[row.id],
+    //         name: [...agreement[row.id].name, row.name],
+    //         sr_manager: supervisor[0].name,
+    //       },
+    //     };
+    //   } else {
+    //     ids.push(row.id);
+    //     agreement = {
+    //       ...agreement,
+    //       [row.id]: { ...row, name: [row.name], sr_manager: Sr_names[row.buh_id] },
+    //     };
+    //   }
+    // });
+
+    // console.log('>>>',ids,agreement)
+
+    return res.send({ success: true, agreement: data });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+};
+
+
+const get_all_agreements_inProcess = async (req, res) => {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", "=", req.params.id);
+
+    // for getting the name for Sr manager
+    let Sr_names = {};
+    supervisor.map((row) => {
+      Sr_names = { ...Sr_names, [row.id]: row.name };
+    });
+
+    // console.log(Sr_names);
+
+    let data = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        return await db("agreements")
+          .select(
+            "users.name as buh",
+            "landlords.name",
+            "landlords.agreement_id",
+            "landlords.id as landlords",
+            "agreements.*",
+            "landlords.percentage",
+            "landlords.utr_number"
+          )
+          .where("op_id", "=", row.id)
+          .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+          .join("users", "agreements.buh_id", "=", "users.id")
+          .andWhere(cb=>{
+            cb.orWhere('agreements.status',"=","Sent To Sr Manager");
+            cb.orWhere('agreements.status',"=","Pending");
+            cb.orWhere('agreements.status',"=","Sent To Operations");
+            cb.orWhere('agreements.status',"=","Sent To Finance Team");
+            cb.orWhere("agreements.status","=","Approved");
+            cb.orWhere("agreements.status","=","Terminated By Operations");
+            cb.orWhere("agreements.status","=","Approved for Termination");
+          })
+          .orderBy("agreements.modify_date", "desc");
+      })
+    );
+
+    data =
+      data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+    console.log(">>>data", data);
+
+    // data.filter((row)=>row.renewal_status === "Renewal Status")
+
+
+    return res.send({ success: true, agreement: data });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+};
+
+
+const get_all_agreements_approved = async (req, res) => {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", "=", req.params.id);
+
+    // for getting the name for Sr manager
+    let Sr_names = {};
+    supervisor.map((row) => {
+      Sr_names = { ...Sr_names, [row.id]: row.name };
+    });
+
+    // console.log(Sr_names);
+
+    let data = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        return await db("agreements")
+          .select(
+            "users.name as buh",
+            "landlords.name",
+            "landlords.agreement_id",
+            "landlords.id as landlords",
+            "agreements.*",
+            "landlords.percentage",
+            "landlords.utr_number"
+          )
+          .where("op_id", "=", row.id)
+          .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+          .join("users", "agreements.buh_id", "=", "users.id")
+          .andWhere(cb=>{
+            cb.orWhere("agreements.status","=","Deposited");
+           
+          })
           .orderBy("agreements.modify_date", "desc");
       })
     );
@@ -136,7 +273,7 @@ const updateAgreement = async (req, res) => {
     req.body.modify_date = new Date();
 
     const update = await db("agreements")
-      .where("id", "=", landlords[0].agreement_id)
+      .where("id", "=", req.params.id)
       .update(req.body);
     console.log(update);
     if (update === 1) {
@@ -207,14 +344,15 @@ async function finance_get_monthly_rent(req, res) {
             "Manager.name as manager_name"
           )
           .where("op_id", row.id)
-          .orderBy("id", "desc")
           .join("users", "monthly_rent.srm_id", "users.id")
           .join(
             "users as Manager",
             "monthly_rent.manager_id",
             "=",
             "Manager.id"
-          );
+          ).orderBy("time", "desc")
+          .orderBy("rent_date","desc")
+          .orderBy("code","desc");
       })
     );
 
@@ -390,4 +528,6 @@ module.exports = {
   finance_get_monthly_rent,
   insertRecoveryLog,
   getRecoveryLog,
+  get_all_agreements_inProcess,
+  get_all_agreements_approved
 };

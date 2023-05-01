@@ -27,9 +27,13 @@ const {
   get_data_from_recovery,
   get_modify_date,
   get_payment_update_date,
-  get_all_approved_ag
+  get_all_approved_ag,
+  get_all__ag,
+  user_search_manager_approved,
+  user_search_manager_inProcess
   
 } = require("../controller/ManagerController");
+
 const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification, list_month_rent_paid} = require("../controller/MontlyRent");
 
 // setting up multer for file transport 
@@ -93,6 +97,11 @@ router.route("/agreements/:manager_id").get(getAllAgreement);
 //approved agreements
 router.route("/agreements/approved/:manager_id").get(get_all_approved_ag)
 
+//toal agreements
+router.route("/agreements/total/:manager_id").get(get_all__ag)
+
+
+
 //post request in agreements table get agreemennt by id
 // path /api/agreement/:id
 // router.route("/agreement/:id").post(getAgreementById);
@@ -146,6 +155,11 @@ router.route('/editAgreement').patch(editAgreement)
 
 //search value 
 router.route('/search/manager').post(user_search_manager)
+
+router.route('/search/approved/manager').post(user_search_manager_approved)
+
+router.route('/search/in-process/manager').post(user_search_manager_inProcess)
+
 
 //get meta data dashboard
 router.route('/dashboard/get-meta').get(get_status)

@@ -32,6 +32,8 @@ const getAllAgreement = async (req, res) => {
             cb.orWhere("status","=","Sent To BUH");
             cb.orWhere("status","=","Sent To Operations");
             cb.orWhere("status","=","Sent To Finance Team");
+            cb.orWhere("status","=","Terminated By Manager");
+            cb.orWhere("status","=","Terminated By Sr Manager")
           })
           .orderBy("agreements.modify_date", "desc");
       })
@@ -117,6 +119,86 @@ const getAllApprovedAgreements = async (req, res) => {
             cb.orWhere("status","=","Approved");
             cb.orWhere("status","=","Deposited");
           })
+          .orderBy("agreements.modify_date", "desc");
+      })
+    );
+
+    // console.log(">>up>",data)
+    data =
+      data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+
+    // console.log(">>down>",data)
+
+    let ids = [];
+    let agreement = {};
+
+    // if(data[0] === undefined)
+    // return res.send({ success: true, agreement  , ids });
+
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            manager: manager_name[row.manager_id],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        console.log(">>>>>", row.manager_id);
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...row,
+            name: [row.name],
+            manager: manager_name[row.manager_id],
+          },
+        };
+      }
+    });
+
+    console.log(">>>", ids, agreement);
+
+    return res.send({ success: true, agreement, ids });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+};
+
+//get total agreements
+const get_total_agreements = async (req, res) => {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", "=", req.params.id);
+
+    if (supervisor.length === 0) throw new Error();
+
+    // for getting the name for Sr manager
+    let manager_name = {};
+    supervisor.map((row) => {
+      manager_name = { ...manager_name, [row.id]: row.name };
+    });
+
+    let data = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        console.log(row.id);
+        return await db("agreements")
+          .select(
+            "landlords.name",
+            "landlords.agreement_id",
+            "landlords.id ",
+            "agreements.*"
+          )
+          .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+          .where("manager_id", row.id)
+          .whereNot("status", "=", "Hold")
           .orderBy("agreements.modify_date", "desc");
       })
     );
@@ -446,7 +528,7 @@ async function get_renewal_srm(req, res) {
       )
       .where("agreements.srm_id", "=", req.params.id)
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .andWhereNot("renewal_status", "=", "")
+      .andWhereNot("renewal_status", "=", '""')
       .andWhereNot("renewal_status", "=", "Pending For Renewal")
       .orderBy("agreements.modify_date", "desc");
 
@@ -640,7 +722,7 @@ async function get_dashboard_data(req, res) {
     if (status) {
       status.map((row) => {
         meta.totalAgreement += 1;
-        if (row.status === "Sent Back From Sr Manager") {
+        if ( "Sent Back From Sr Manager") {
           meta.Send_Back += 1;
         } else if (
           row.status === "Sent To Finance Team" ||
@@ -674,5 +756,6 @@ module.exports = {
   get_renewal_srm,
   get_dashboard_data,
   getAllApprovedAgreements,
-  srm_get_monthly_rent_paid
+  srm_get_monthly_rent_paid,
+  get_total_agreements
 };

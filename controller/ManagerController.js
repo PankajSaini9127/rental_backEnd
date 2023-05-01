@@ -64,7 +64,17 @@ const getAllAgreement = async (req, res) => {
       if(row.status === "Sent To Sr Manager" ||
       row.status === "Sent To BUH" ||
       row.status === "Sent To Operations" ||
-      row.status === "Sent To Finance Team" ){
+      row.status === "Sent To Finance Team" ||
+      row.status === "Approved" ||
+      row.status === "Hold"  ||
+      row.status === "Sent Back From Sr Manager" || 
+      row.status === "Sent Back From BUH" ||
+      row.status === "Sent Back From Operations" ||
+      row.status === "Sent Back From Finance Team" ||
+      row.status === "Terminated By Manager"||
+      row.status === "Sent Back From Sr Manager Termination"||
+      row.status === "Sent Back From Operations Termination" ||
+      row.status === "Sent Back From Finance Team Termination"){
         if (ids.includes(row.id)) {
           agreement = {
             ...agreement,
@@ -115,7 +125,7 @@ async function get_all_approved_ag (req,res){
     let ids = [];
     let agreement = {};
     data.map((row) => {
-      if(row.status === "Approved" ||
+      if(
       row.status === "Deposited"  ){
         if (ids.includes(row.id)) {
           agreement = {
@@ -146,6 +156,58 @@ async function get_all_approved_ag (req,res){
     });
   }
 }
+
+
+//get all agreements 
+async function get_all__ag (req,res){
+  try {
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id",
+        "landlords.utr_number",
+        "agreements.*"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .orderBy("agreements.modify_date", "desc")
+      .where("manager_id","=",req.params.manager_id);
+
+      console.log(data)
+      
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              utr_number:[...agreement[row.id].utr_number, row.utr_number]
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+        }
+      }
+     
+    );
+    //console.log(agreement);
+
+    // //console.log(data)
+
+    res.send({ success: true, agreement, ids: ids });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      success: false,
+      message: "Something Went Wrong please try again later",
+    });
+  }
+}
+
 
 const get_tenure = async (req, res) => {
   try {
@@ -206,14 +268,14 @@ const updateAgreement = async (req, res) => {
     const update = await db("agreements")
       .where("id", "=", req.params.id)
       .update(req.body);
-    //console.log(update);
+    console.log(req.params.id);
     if (update === 1) {
       return res.send({
         success: true,
         message: "Agreement Update Successfully",
       });
     } else {
-      // throw new Error({ success: false, message: "Something went wrong please try again later" })
+      throw new Error({ success:false, message: "Something went wrong please try again later" })
     }
   } catch (error) {
     console.log(error);
@@ -685,6 +747,119 @@ async function user_search_manager(req, res) {
   }
 }
 
+
+
+
+async function user_search_manager_approved(req, res) {
+  try {
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id",
+        "agreements.*"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where((cb) => {
+        cb.whereILike("name", `%${req.body.name}%`);
+        cb.orWhereILike("location", `%${req.body.name}%`);
+        cb.orWhereILike("monthlyRent", `%${req.body.name}%`);
+        cb.orWhereILike("code", `%${req.body.name}%`);
+        cb.orWhereILike("address", `%${req.body.name}%`);
+      })
+      .andWhere(cb=>{
+      cb.orWhere("status","=","Deposited")
+      }
+      ).orderBy('agreements.modify_date',"desc");
+
+    //console.log(data);
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
+      }
+    });
+
+    // //console.log(data)
+
+    res.send({ success: true, agreement, ids });
+  } catch (error) {
+    //console.log(error);
+    return res.status(500).send();
+  }
+}
+
+
+async function user_search_manager_inProcess(req, res) {
+  try {
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id",
+        "agreements.*"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where((cb) => {
+        cb.whereILike("name", `%${req.body.name}%`);
+        cb.orWhereILike("location", `%${req.body.name}%`);
+        cb.orWhereILike("monthlyRent", `%${req.body.name}%`);
+        cb.orWhereILike("code", `%${req.body.name}%`);
+        cb.orWhereILike("address", `%${req.body.name}%`);
+      })
+      .andWhere(cb=>{
+      cb.orWhere("status","=","Sent To Sr Manager");
+      cb.orWhere("status","=","Sent To Operations");
+      cb.orWhere("status","=","Sent To BUH");
+      cb.orWhere("status","=","Sent To Finance Team");
+      cb.orWhere("status","=","Approved");
+      cb.orWhere("status","=","Sent Back From Sr Manager");
+      cb.orWhere("status","=","Sent Back From Operations");
+      cb.orWhere("status","=","Sent Back From BUH");
+      cb.orWhere("status","=","Sent Back From Finance Team");
+      }
+      ).orderBy('agreements.modify_date',"desc");
+
+    console.log(data);
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
+      }
+    });
+
+    // //console.log(data)
+
+    res.send({ success: true, agreement, ids });
+  } catch (error) {
+    //console.log(error);
+    return res.status(500).send();
+  }
+}
+
+
 async function get_agreement_details(req, res) {
   try {
     const data = await db("agreements")
@@ -832,7 +1007,13 @@ async function get_status(req, res) {
           row.status === "Operations"
         ) {
           meta.Approved += 1;
-        } else if (row.status === "Hold") {
+        } else if ((
+          row.status === "Hold"||
+          row.status === "Sent Back From Sr Manager"||
+          row.status === "Sent Back From BUH"||
+          row.status === "Sent Back From Operations"||
+          row.status === "Sent Back From Finance Team"
+               )) {
           meta.Pending += 1;
         }
       });
@@ -969,11 +1150,11 @@ async function get_renewal_list (req,res){
       .where("agreements.manager_id","=",req.params.id)
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .andWhereNot("renewal_status","=",'""')
-      // .andWhereNot("renewal_status","=","Renewed")
+      .andWhereNot("renewal_status","=","Renewed")
       .orderBy("agreements.modify_date", "desc")
       
 
-      console.log(data)
+      console.log(">>>>>>>",data)
 
     let ids = [];
     let agreement = {};
@@ -1015,7 +1196,7 @@ async function get_deposit_amount (req,res){
      if(deposite.length > 0){
      return res.send({success:true,deposit:deposite})
      }else{
-      return res.send({success:true,deposit:0})
+      return res.send({success:false,deposit:0})
      }
   } catch (error) {
     console.log(error)
@@ -1039,9 +1220,10 @@ async function get_search_renewal_manager (req,res)
       )
       .where("agreements.manager_id","=",req.params.id)
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-      .andWhereNot("renewal_status","=","null")
+      .andWhereNot("renewal_status","=",'""')
+      .andWhereNot("renewal_status","=","Renewed")
       .andWhere((cb) => {
-        cb.whereILike("name", `%${req.query.search}%`);
+        cb.orWhereILike("landlords.name", `%${req.query.search}%`);
         cb.orWhereILike("location", `%${req.query.search}%`);
         cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
         cb.orWhereILike("code", `%${req.query.search}%`);
@@ -1163,6 +1345,7 @@ async function get_payment_update_date (req,res){
 
 
 module.exports = {
+  user_search_manager_approved,
   get_payment_update_date,
   get_modify_date,
   insertAdjustmentAmount,
@@ -1189,6 +1372,8 @@ module.exports = {
   get_agreement_id_renewal,
   get_search_renewal_manager,
   get_data_from_recovery,
-  get_all_approved_ag
+  get_all_approved_ag,
+  get_all__ag,
+  user_search_manager_inProcess
 };
 
