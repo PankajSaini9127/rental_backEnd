@@ -24,6 +24,7 @@ const getAllAgreement = async (req, res) => {
             "landlords.name",
             "landlords.agreement_id",
             "landlords.id as landlords",
+            "landlords.percentage",
             "agreements.*"
           )
           .where(cb=>{
@@ -31,6 +32,7 @@ const getAllAgreement = async (req, res) => {
             cb.orWhere("agreements.status","=","Sent To Sr Manager");
             cb.orWhere("agreements.status","=","Sent To Operations");
             cb.orWhere("agreements.status","=","Sent To Finance Team");
+            cb.orWhere("agreements.status","=","Terminated By Sr Manager");
           })
           .andWhere("buh_id",'=', row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
@@ -105,13 +107,88 @@ const getAll_Approved_agreements = async (req, res) => {
             "landlords.name",
             "landlords.agreement_id",
             "landlords.id as landlords",
-            "agreements.*"
+            "agreements.*",
+            "landlords.percentage"
           )
           .where(cb=>{
             cb.orWhere("agreements.status","=","Deposited");
             cb.orWhere("agreements.status","=","Approved");
           })
           .andWhere("buh_id",'=', row.id)
+          .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+          .join("users","agreements.manager_id","=","users.id")
+          .join("users as srm","agreements.srm_id","=","srm.id")
+          .orderBy('agreements.modify_date',"desc")
+      })
+    );
+
+   
+    data =
+    data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+    console.log(">>>data" ,data)
+
+    let ids = [];
+    let agreement = {};
+
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = {
+          ...agreement,
+          [row.id]: { ...row, name: [row.name]},
+        };
+      }
+    });
+
+    // console.log('>>>',ids,agreement)
+
+    return res.send({ success: true, agreement, ids });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+};
+
+// get total agreemwents
+const getAll_total_agreements = async (req, res) => {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", "=", req.params.id)
+
+    // for getting the name for Sr manager
+    // let Sr_names = {};
+    // supervisor.map((row) => {
+    //   Sr_names = { ...Sr_names, [row.id]: row.name };
+    // });
+
+    // console.log(Sr_names);
+
+    let data = await Promise.allSettled(
+      supervisor.map(async (row) => {
+       
+        return await db("agreements")
+          .select(
+            "users.name as manager_name",
+            "srm.name as Sr_name",
+            "landlords.name",
+            "landlords.agreement_id",
+            "landlords.id as landlords",
+            "landlords.percentage",
+            "agreements.*"
+          )
+          .where("buh_id",'=', row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .join("users","agreements.manager_id","=","users.id")
           .join("users as srm","agreements.srm_id","=","srm.id")
@@ -241,19 +318,20 @@ async function get_monthly_rent_opr(req,res){
     let data = await Promise.allSettled(result.map(async (row) => {
       console.log(row.id); return await db("monthly_rent")
       .select("users.name as manager_name","monthly_rent.*")
-      .where('srm_id', row.id)
-      .andWhere(cb=>{
-        cb.orWhere('status',"=","Sent To Sr Manager");
-        cb.orWhere('status',"=","Pending");
-        cb.orWhere('status',"=","Sent To Operations");
-        cb.orWhere('status',"=","Sent To Finance ");
+      
+      .where(cb=>{
+        cb.orWhere('monthly_rent.status',"=","Sent To Sr Manager");
+        cb.orWhere('monthly_rent.status',"=","Pending");
+        cb.orWhere('monthly_rent.status',"=","Sent To Operations");
+        cb.orWhere('monthly_rent.status',"=","Sent To Finance ");
       })
+      .andWhere('srm_id', row.id)
       .join("users","monthly_rent.manager_id","=","users.id")
       .orderBy('id',"desc")
     }))
 
 
-    // console.log(">>down>",data)
+    console.log(">>down>",data)
     data = data[0].status === 'fulfilled' ? data[0].value.map((row, i) => row) : []
 
 
@@ -314,8 +392,8 @@ async function get_monthly_rent_opr_paid(req,res){
       .select("users.name as manager_name","monthly_rent.*")
       .where('srm_id', row.id)
       .andWhere(cb=>{
-        cb.orWhere('status',"=","Approved");
-        cb.orWhere('status',"=","Paid");
+        cb.orWhere('monthly_rent.status',"=","Approved");
+        cb.orWhere('monthly_rent.status',"=","Paid");
       })
       .join("users","monthly_rent.manager_id","=","users.id")
       .orderBy('id',"desc")
@@ -437,10 +515,9 @@ console.log(req.query)
 async function get_dashboard_dats_opr(req, res) {
   try {
 console.log(req.params.id)
-    let status = await db("users").select('users.id')
-    
-    .join("agreements","agreements.buh_id","=","users.id")
-    .where("supervisor","=",req.params.id)
+let status = await db("users").select('users.id',"agreements.*")
+.where("supervisor","=",req.params.id)
+.join("agreements","agreements.buh_id","=","users.id")
     
    console.log(status)
 
@@ -479,4 +556,4 @@ console.log(req.params.id)
 }
 
 
-module.exports = {getAll_Approved_agreements,get_monthly_rent_opr_paid, get_dashboard_dats_opr,getAllAgreement, agreement_search_opr ,get_monthly_rent_opr,get_monthly_search_opr};
+module.exports = {getAll_total_agreements,getAll_Approved_agreements,get_monthly_rent_opr_paid, get_dashboard_dats_opr,getAllAgreement, agreement_search_opr ,get_monthly_rent_opr,get_monthly_search_opr};

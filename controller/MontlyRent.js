@@ -57,7 +57,13 @@ async function list_month_rent(req, res) {
       cb.orWhere("status","=","Sent To Operations");
       cb.orWhere("status","=","Sent To Finance");
       cb.orWhere("status","=","Pending");
-    });
+      cb.orWhere("status","=","Sent Back From Finance");
+      cb.orWhere("status","=","Sent Back From Operations");
+      cb.orWhere("status","=","Sent Back From Sr Manager");
+      cb.orWhere("status","=","Hold");
+    }).orderBy("time", "desc")
+    .orderBy("rent_date","desc")
+    .orderBy("code","desc");
 
     //console.log(data)
     if (data) return res.send(data);
@@ -150,7 +156,7 @@ async function get_agreements_code(req, res) {
       .select(
         "landlords.*",
         "agreements.*",
-        "agreements.utr_number as utr_deposit",
+        "landlords.utr_number as utr_deposit",
         "landlords.id as landlord_id",
         "monthly_rent.id as monthly_rent_id",
         "monthly_rent.*",

@@ -40,10 +40,11 @@ async function get_monthly_rent(req,res) {
         .from("agreements")
         .select("*")
         .join("landlords", "agreements.id", "=", "landlords.agreement_id")
-        .whereNotNull("rent_start_date").andWhere("status","Pending")
-        // console.log("list >>>>>>>>>>> ",listAgreement)
+        .whereNotNull("rent_start_date").andWhere("status","Deposited")
+        console.log("list >>>>>>>>>>> ",listAgreement)
         // iterating and creating a slab from here
-        Promise.allSettled(listAgreement.map(async(row, i) => {        
+        Promise.allSettled(listAgreement.map(async(row, i) => {  
+          console.log(row.utr_number)      
         // calculating the final amount
         const finalAmountForFullMonth = (row.monthlyRent/100)*parseInt(row.percentage) 
   
@@ -59,7 +60,7 @@ async function get_monthly_rent(req,res) {
 
         response = response.filter((row)=>new Date(row.rent_date).getMonth() === new Date(tomorrowMoment).getMonth() && new Date(row.rent_date).getFullYear() === new Date(tomorrowMoment).getFullYear() )
 
-        console.log('response ===>',response)
+        // console.log('response ===>',response)
         
         if(response.length === 0)
         {
@@ -112,31 +113,32 @@ async function get_renewal() {
       // check date 
       let expiredAt = ""
       // for select the tenure type
-      switch (tenure) {
-        case "11 Month":
-          expiredAt = agreements_start_date.clone().add(10, 'month')
-          console.log("for 11 month :====>", expiredAt)
-        case "2 Year":
-          expiredAt = agreements_start_date.clone().add(22, 'month')
-          console.log("for 2 Years :====>", expiredAt)
-          break;
-        case "3 Year":
-          expiredAt = agreements_start_date.clone().add(34, 'month')
-          console.log("for 3 Years :====>", expiredAt)
-          break;
-        case "4 Year":
-          expiredAt = agreements_start_date.clone().add(46, 'month')
-          console.log("for 4 Years :====>", expiredAt)
-          break;
-        case "5 Year":
-          expiredAt = agreements_start_date.clone().add(58, 'month')
-          console.log("for 5 Years :====>", expiredAt)
-          break;
-        default:
-          console.log("No Tenure Found")
-          return false
-      }
+      // switch (tenure) {
+      //   case "11 Month":
+      //     expiredAt = agreements_start_date.clone().add(10, 'month')
+      //     console.log("for 11 month :====>", expiredAt)
+      //   case "2 Year":
+      //     expiredAt = agreements_start_date.clone().add(22, 'month')
+      //     console.log("for 2 Years :====>", expiredAt)
+      //     break;
+      //   case "3 Year":
+      //     expiredAt = agreements_start_date.clone().add(34, 'month')
+      //     console.log("for 3 Years :====>", expiredAt)
+      //     break;
+      //   case "4 Year":
+      //     expiredAt = agreements_start_date.clone().add(46, 'month')
+      //     console.log("for 4 Years :====>", expiredAt)
+      //     break;
+      //   case "5 Year":
+      //     expiredAt = agreements_start_date.clone().add(58, 'month')
+      //     console.log("for 5 Years :====>", expiredAt)
+      //     break;
+      //   default:
+      //     console.log("No Tenure Found")
+      //     return false
+      // }
 
+      expiredAt = agreements_start_date.clone().add(parseInt(tenure), 'month')
 
       expiredAt = new Date(expiredAt)
       todayMoment = new Date(todayMoment)

@@ -9,12 +9,19 @@ const {
   get_dashboard_dats_finance,
   get_agreements_by_id,
   addutr,
+  get_all_agreements_inProcess,
+  get_all_agreements_approved,
 } = require("../controller/FinanceControls");
 
 const router = express.Router();
 
 //get all agreements for listing
 router.route("/get-agreement/:id").get(getAllAgreement);
+
+router.route("/in-process/get-agreement/:id").get(get_all_agreements_inProcess);
+
+router.route("/approved/get-agreement/:id").get(get_all_agreements_approved);
+
 
 router.route("/search/:id").get(finance_agreement_search);
 
