@@ -11,6 +11,9 @@ const {
   addutr,
   get_all_agreements_inProcess,
   get_all_agreements_approved,
+  finance_get_monthly_rent_paid,
+  get_monthly_search,
+  get_monthly_search_paid,
 } = require("../controller/FinanceControls");
 
 const router = express.Router();
@@ -30,6 +33,13 @@ router.route("/updateAgreement/finance/:id").put(updateAgreement);
 router.route("/add-utr/finance/:id").put(addutr);
 
 router.route("/finance-monthly-rent/:id").get(finance_get_monthly_rent);
+
+router.route("/paid/finance-monthly-rent/:id").get(finance_get_monthly_rent_paid);
+
+router.route("/get-search-finance-monthlyrent").get(get_monthly_search);
+
+router.route("/paid/get-search-finance-monthlyrent").get(get_monthly_search_paid);
+
 
 router.route("/insertRecoveryLog").post(insertRecoveryLog);
 

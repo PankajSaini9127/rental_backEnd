@@ -342,8 +342,12 @@ async function finance_get_monthly_rent(req, res) {
             "monthly_rent.*",
             "users.name as srm_name",
             "Manager.name as manager_name"
-          )
-          .where("op_id", row.id)
+          ).where(cb=>{
+            cb.orWhere("monthly_rent.status","=","Sent To Finance");
+            cb.orWhere("monthly_rent.status","=","Approved By Finance");
+            cb.orWhere("monthly_rent.status","=","Sent Back From Finance");
+          })
+          .andWhere("monthly_rent.op_id", row.id)
           .join("users", "monthly_rent.srm_id", "users.id")
           .join(
             "users as Manager",
@@ -359,7 +363,94 @@ async function finance_get_monthly_rent(req, res) {
     data =
       data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
 
-    // console.log(">>up>",data)
+    console.log(">>up>",data)
+
+    let ids = [];
+    let agreement = {};
+
+    data.map((row) => {
+      console.log(row);
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            operations_name: operations_name[row.op_id],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        console.log(">>>>>", row.manager_id);
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...row,
+            name: [row.name],
+            operations_name: operations_name[row.op_id],
+          },
+        };
+      }
+    });
+
+    console.log(">>>", ids, agreement);
+
+    return res.send({ success: true, ids, agreement });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .send({
+        success: false,
+        message: "Some Error Occured Please Try Again Later.",
+      });
+  }
+}
+
+//monthly rent get
+async function finance_get_monthly_rent_paid(req, res) {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", "=", req.params.id);
+
+    if (supervisor.length === 0) throw new Error();
+
+    let operations_name = {};
+    supervisor.map((row) => {
+      operations_name = { ...operations_name, [row.id]: row.name };
+    });
+
+    console.log(operations_name);
+
+    let data = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        return await db("monthly_rent")
+          .select(
+            "monthly_rent.*",
+            "users.name as srm_name",
+            "Manager.name as manager_name"
+          ).where(cb=>{
+            cb.orWhere("monthly_rent.status","=","Paid");
+          })
+          .andWhere("op_id", row.id)
+          .join("users", "monthly_rent.srm_id", "users.id")
+          .join(
+            "users as Manager",
+            "monthly_rent.manager_id",
+            "=",
+            "Manager.id"
+          ).orderBy("time", "desc")
+          .orderBy("rent_date","desc")
+          .orderBy("code","desc");
+      })
+    );
+    console.log(">>up>",data)
+
+    data =
+      data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+
+    
 
     let ids = [];
     let agreement = {};
@@ -518,6 +609,188 @@ const get_agreements_by_id = async (req, res) => {
   }
 };
 
+//in process monthly payment
+async function get_monthly_search (req,res){
+try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", "=", req.query.id);
+
+    if (supervisor.length === 0) throw new Error();
+
+    let operations_name = {};
+    supervisor.map((row) => {
+      operations_name = { ...operations_name, [row.id]: row.name };
+    });
+
+    console.log(operations_name);
+
+    let data = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        return await db("monthly_rent")
+          .select(
+            "monthly_rent.*",
+            "users.name as srm_name",
+            "Manager.name as manager_name"
+          )
+          .where(cb=>{
+                    cb.orWhere("monthly_rent.status","=","Sent To Finance");
+                    cb.orWhere("monthly_rent.status","=","Approved By Finance");
+                    cb.orWhere("monthly_rent.status","=","Sent Back From Finance");
+                  })
+                  .andWhere((cb) => {
+                    cb.whereILike("landlord_name", `%${req.query.search}%`);
+                    cb.orWhereILike("monthly_rent.location", `%${req.query.search}%`);
+                    cb.orWhereILike("	monthly_rent.gst", `%${req.query.search}%`);
+                    cb.orWhereILike("monthly_rent.code", `%${req.query.search}%`);
+                    cb.orWhereILike("monthly_rent.status", `%${req.query.search}%`);
+                  })
+          .andWhere("op_id", row.id)
+          .join("users", "monthly_rent.srm_id", "users.id")
+          .join(
+            "users as Manager",
+            "monthly_rent.manager_id",
+            "=",
+            "Manager.id"
+          ).orderBy("time", "desc")
+          .orderBy("rent_date","desc")
+          .orderBy("code","desc");
+      })
+    );
+
+    data =
+      data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+
+    console.log(">>up>",data)
+
+    let ids = [];
+    let agreement = {};
+
+    data.map((row) => {
+      console.log(row);
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            operations_name: operations_name[row.op_id],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        console.log(">>>>>", row.manager_id);
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...row,
+            name: [row.name],
+            operations_name: operations_name[row.op_id],
+          },
+        };
+      }
+    });
+
+    console.log(">>>", ids, agreement);
+
+    return res.send({ success: true, ids, agreement });
+  } 
+   catch (error) {
+    console.log(error)
+    return res.status(500).send({success:false,message:"Some Error Occured!! Please Try Again Later."})
+  }
+}
+
+//paid monthly rent search
+async function get_monthly_search_paid (req,res){
+  try {
+      const supervisor = await db("users")
+        .select("*")
+        .where("supervisor", "=", req.query.id);
+  
+      if (supervisor.length === 0) throw new Error();
+  
+      let operations_name = {};
+      supervisor.map((row) => {
+        operations_name = { ...operations_name, [row.id]: row.name };
+      });
+  
+      console.log(operations_name);
+  
+      let data = await Promise.allSettled(
+        supervisor.map(async (row) => {
+          return await db("monthly_rent")
+            .select(
+              "monthly_rent.*",
+              "users.name as srm_name",
+              "Manager.name as manager_name"
+            )
+            .where(cb=>{
+                      cb.orWhere("monthly_rent.status","=","Paid");
+                    })
+                    .andWhere((cb) => {
+                      cb.whereILike("landlord_name", `%${req.query.search}%`);
+                      cb.orWhereILike("monthly_rent.location", `%${req.query.search}%`);
+                      cb.orWhereILike("	monthly_rent.gst", `%${req.query.search}%`);
+                      cb.orWhereILike("monthly_rent.code", `%${req.query.search}%`);
+                      cb.orWhereILike("monthly_rent.status", `%${req.query.search}%`);
+                    })
+            .andWhere("op_id", row.id)
+            .join("users", "monthly_rent.srm_id", "users.id")
+            .join(
+              "users as Manager",
+              "monthly_rent.manager_id",
+              "=",
+              "Manager.id"
+            ).orderBy("time", "desc")
+            .orderBy("rent_date","desc")
+            .orderBy("code","desc");
+        })
+      );
+  
+      data =
+        data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+  
+      console.log(">>up>",data)
+  
+      let ids = [];
+      let agreement = {};
+  
+      data.map((row) => {
+        console.log(row);
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              operations_name: operations_name[row.op_id],
+            },
+          };
+        } else {
+          ids.push(row.id);
+          console.log(">>>>>", row.manager_id);
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...row,
+              name: [row.name],
+              operations_name: operations_name[row.op_id],
+            },
+          };
+        }
+      });
+  
+      console.log(">>>", ids, agreement);
+  
+      return res.send({ success: true, ids, agreement });
+    } 
+     catch (error) {
+      console.log(error)
+      return res.status(500).send({success:false,message:"Some Error Occured!! Please Try Again Later."})
+    }
+  }
+
 module.exports = {
   addutr,
   get_agreements_by_id,
@@ -529,5 +802,8 @@ module.exports = {
   insertRecoveryLog,
   getRecoveryLog,
   get_all_agreements_inProcess,
-  get_all_agreements_approved
+  get_all_agreements_approved,
+  finance_get_monthly_rent_paid,
+  get_monthly_search,
+  get_monthly_search_paid
 };
