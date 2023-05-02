@@ -68,7 +68,7 @@ async function get_Rental_Payment_MIS(req, res) {
 
   try {
     db.raw(
-      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,"" as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_no FROM agreements a, landlords l, monthly_rent m where a.id=l.agreement_id and a.code=m.code and a.time >=? and a.time <=? ORDER by a.code,a.location`,
+      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,'' as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_no FROM agreements a, landlords l, monthly_rent m where a.id=l.agreement_id and a.code=m.code and a.time >=? and a.time <=?`,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
@@ -118,7 +118,7 @@ async function get_Rental_Onboarding_All_Status(req, res) {
 
   try {
     db.raw(
-      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >= ? and a.time <=? ORDER by a.code,a.location`,
+      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >= ? and a.time <=? `,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
@@ -165,7 +165,7 @@ async function get_Rental_Onboarding_Deposited(req, res) {
 
   try {
     db.raw(
-      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.status='Deposited' and a.time >=? and a.time <= ? ORDER by a.code,a.location`,
+      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.status='Deposited' and a.time >=? and a.time <= ?`,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
@@ -386,7 +386,7 @@ async function get_No_Of_Agreements(req, res) {
   const { startDate, endDate, role, id } = req.query;
   try {
     db.raw(
-      `SELECT DATE_FORMAT(a.payment_date, '%M-%y') AS month, count(A.monthlyRent) AS no_of_agreement FROM agreements a where  a.payment_date is NOT null and a.payment_date != '' and a.time >= ? and a.time <= ? GROUP BY DATE_FORMAT(a.payment_date, '%Y-%m')`,
+      `SELECT DATE_FORMAT(a.payment_date, '%M-%y') AS month, count(a.monthlyRent) AS no_of_agreement FROM agreements a where  a.payment_date is NOT null and a.payment_date != '' and a.time >= ? and a.time <= ? GROUP BY DATE_FORMAT(a.payment_date, '%M-%y')`,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
@@ -460,7 +460,7 @@ async function get_Monthly_Deposit(req, res) {
   const { startDate, endDate, role, id } = req.query;
   try {
     db.raw(
-      `SELECT DATE_FORMAT(a.payment_date, '%M-%y') AS month, SUM(a.deposit) AS total_deposit FROM agreements a, landlords l, monthly_rent m where a.id = l.agreement_id and a.code = m.code and a.payment_date is NOT null and a.payment_date != '' and a.time >= ? and a.time <= ? and a.status='Deposited' GROUP BY DATE_FORMAT(a.payment_date, '%Y-%m');`,
+      `SELECT DATE_FORMAT(a.payment_date, '%M-%y') AS month, SUM(a.deposit) AS total_deposit FROM agreements a, landlords l, monthly_rent m where a.id = l.agreement_id and a.code = m.code and a.payment_date is NOT null and a.payment_date != '' and a.time >= ? and a.time <= ? and a.status='Deposited' GROUP BY DATE_FORMAT(a.payment_date, '%M-%y');`,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
