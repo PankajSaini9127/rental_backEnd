@@ -69,7 +69,7 @@ async function get_Rental_Payment_MIS(req, res) {
 
   try {
     db.raw(
-      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,"" as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_no FROM agreements a, landlords l, monthly_rent m where a.id=l.agreement_id and a.code=m.code and a.time >=? and a.time <=? ORDER by a.code,a.location`,
+      `SELECT distinct a.location as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(a.time),"-", year(a.time)) AS Month,"" as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_no FROM agreements a, landlords l, monthly_rent m where a.id=l.agreement_id and a.code=m.code and a.time >=? and a.time <=?`,
       [startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
