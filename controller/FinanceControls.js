@@ -163,6 +163,7 @@ const get_all_agreements_approved = async (req, res) => {
           .join("users", "agreements.buh_id", "=", "users.id")
           .andWhere(cb=>{
             cb.orWhere("agreements.status","=","Deposited");
+            cb.orWhere("agreements.status","=","Approved");
            
           })
           .orderBy("agreements.modify_date", "desc");

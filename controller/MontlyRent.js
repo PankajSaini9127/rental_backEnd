@@ -23,6 +23,7 @@ async function add_rent(req, res) {
   try {
     console.log(req.body);
     const data = await db("monthly_rent").insert({
+      agreement_id: req.body.agreement_id,
       code: req.body.code,
       location: req.body.location,
       gst: req.body.gst,

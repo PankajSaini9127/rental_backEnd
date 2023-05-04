@@ -38,22 +38,23 @@ async function get_monthly_rent(req,res) {
     try {
       var listAgreement = await db
         .from("agreements")
-        .select("*")
+        .select("*","agreements.id as agreement_id")
         .join("landlords", "agreements.id", "=", "landlords.agreement_id")
         .whereNotNull("rent_start_date").andWhere("status","Deposited")
-        console.log("list >>>>>>>>>>> ",listAgreement)
+        // console.log("list >>>>>>>>>>> ",listAgreement)
         // iterating and creating a slab from here
         Promise.allSettled(listAgreement.map(async(row, i) => {  
-          console.log(row.utr_number)      
+          // console.log(row.utr_number)      
         // calculating the final amount
         const finalAmountForFullMonth = (row.monthlyRent/100)*parseInt(row.percentage) 
   
         // this code will also add the field for next month 
+        // console.log(row)
   
         const todayMoment = moment()
 
         // for checking the log is already exist in the table or not
-        let response = await  db('monthly_rent').select("rent_date").where("code",row.code)
+        let response = await  db('monthly_rent').select("rent_date").where("agreement_id",row.agreement_id)
 
 
        const tomorrowMoment = todayMoment.clone().add(1,'month')
@@ -65,6 +66,7 @@ async function get_monthly_rent(req,res) {
         if(response.length === 0)
         {
                   return await db('monthly_rent').insert({
+                    agreement_id : row.agreement_id,
                     monthly_rent : row.monthlyRent,
                     code : row.code,
                     location  : row.location ,
@@ -100,7 +102,7 @@ async function get_renewal() {
       // console.log('>>>>',listAgreement)
 
     // iterating and creating a slab from here
-    console.log(listAgreement)
+    // console.log(listAgreement)
     Promise.allSettled(listAgreement.map(async (row, i) => {
 
       // present date
@@ -144,7 +146,7 @@ async function get_renewal() {
       todayMoment = new Date(todayMoment)
 
 
-       console.log("today=>",todayMoment,"agreement =>",expiredAt)
+      //  console.log("today=>",todayMoment,"agreement =>",expiredAt)
       // checking 60 days bond
       if (expiredAt.getMonth() <= todayMoment.getMonth() && expiredAt.getFullYear() <= todayMoment.getFullYear()) {
         // console.log("month==>", expiredAt.getMonth(), todayMoment.getMonth(), "year =>", expiredAt.getFullYear(), todayMoment.getFullYear())

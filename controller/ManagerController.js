@@ -487,6 +487,10 @@ async function getAgreementById(req, res) {
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .where("agreement_id", req.query.id);
 
+      const listUnpaidRow = await db("monthly_rent").select("rent_amount","rent_date","status").where(cb=>{
+        cb.andWhere("agreement_id",req.query.id)
+        cb.andWhereNot("status","Paid")
+      })
     // //console.log(data);
 
     let ids = [];
@@ -559,7 +563,7 @@ async function getAgreementById(req, res) {
     });
     // //console.log(agreement);
 
-    return res.status(200).send(agreement);
+    return res.status(200).send({agreement,listUnpaidRow});
   } catch (error) {
     //console.log(error);
     return res.status(500).send();
@@ -1056,7 +1060,12 @@ async function get_agreement_id_renewal(req,res){
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .where("agreement_id", req.query.id);
 
-    // //console.log(data);
+    const listUnpaidRow = await db("monthly_rent").select("rent_amount","rent_date","status").where(cb=>{
+      cb.andWhere("agreement_id",req.query.id)
+      cb.andWhereNot("status","Paid")
+    })
+
+    console.log(listUnpaidRow);
 
     let ids = [];
     let agreement = {};
@@ -1128,9 +1137,9 @@ async function get_agreement_id_renewal(req,res){
     });
     // //console.log(agreement);
 
-    return res.status(200).send(agreement);
+    return res.status(200).send({agreement,listUnpaidRow});
   } catch (error) {
-    //console.log(error);
+    console.log(error);
     return res.status(500).send();
   }
 }
@@ -1342,9 +1351,41 @@ async function get_payment_update_date (req,res){
   }
 }
 
+// renewal deposit
+async function add_renewal_deposit (req,res) {
+  try {
+    
+    if(!req.body)
+    {
+      return res.status(203).send("Payload Missing !!!")
+    }
 
+    let data = null;
+    // check if is it already there s
+    const check  = await db('renewal_deposit').select("agreement_Id").where("agreement_Id","=",req.body.agreement_id);
+    console.log(check)
+    if(check.length > 0)
+     data  = await db('renewal_deposit').update(req.body).where("agreement_id","=",req.agreement_id);
+     else
+     data  = await  db('renewal_deposit').insert(req.body);
+
+     console.log(req.body)
+    if(data)
+    {
+      return res.send({message : "Data added successfully !!!"})
+    }
+
+  } catch (error) {
+    console.log(req.body)
+
+    console.log('error>>>',error)
+    return res.status(500).send("Something went wrong !!!")
+  }
+
+}
 
 module.exports = {
+  add_renewal_deposit,
   user_search_manager_approved,
   get_payment_update_date,
   get_modify_date,

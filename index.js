@@ -33,6 +33,8 @@ app.use("/api", require("./Routes/newAuthController"));
 app.use("/api/operations", require("./Routes/Operations"));
 app.use("/api/finance", require("./Routes/FinanceRoute"));
 app.use("/api/mis", require("./Routes/MisReports"));
+// added by Yashwant
+app.use("/api", require("./Routes/Landlord"));
 
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"));

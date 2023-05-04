@@ -30,7 +30,8 @@ const {
   get_all_approved_ag,
   get_all__ag,
   user_search_manager_approved,
-  user_search_manager_inProcess
+  user_search_manager_inProcess,
+  add_renewal_deposit
   
 } = require("../controller/ManagerController");
 
@@ -205,5 +206,8 @@ router.route('/get-modify-date').get(get_modify_date)
 
 //get latest payment modification
 router.route('/get-payment-modify-date').get(get_payment_update_date)
+
+//get latest payment modification
+router.route('/add-renewal-deposit').post(add_renewal_deposit)
 
 module.exports = router;
