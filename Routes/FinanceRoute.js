@@ -14,6 +14,7 @@ const {
   finance_get_monthly_rent_paid,
   get_monthly_search,
   get_monthly_search_paid,
+  convert_to_paid
 } = require("../controller/FinanceControls");
 
 const router = express.Router();
@@ -47,6 +48,8 @@ router.route("/getRecoveryLog").get(getRecoveryLog);
 
 router.route("/dashboard/get-meta/:id").get(get_dashboard_dats_finance);
 
-router.route("/agreement/:id").get(get_agreements_by_id)
+router.route("/agreement/:id").get(get_agreements_by_id);
+
+router.route("/convert-to-paid").put(convert_to_paid);
 
 module.exports = router;

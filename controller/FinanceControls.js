@@ -792,7 +792,37 @@ async function get_monthly_search_paid (req,res){
     }
   }
 
+
+// convert monthly rent to paid 
+async function convert_to_paid(req,res){
+  try {
+    if(!req.query.code) return res.status(203).send("Agreement Code is missing !!!")
+
+    const listUnpaid =await  db('monthly_rent').select("id").where(cb=>{
+      cb.andWhere("code","=",req.query.code)
+      cb.andWhereNot("status","Paid")
+    });
+
+    console.log(">>>",listUnpaid)
+
+    if(listUnpaid.length < 1) return res.send({message : "No Pending Records !!!"})
+
+    Promise.allSettled((listUnpaid).map(async(row)=>{
+      return await db('monthly_rent').where("id","=",row.id).update({status:"Paid", processed_by : "Settled by deposit"})
+    }))
+    .then(()=>{
+      return res.send({message : "Status convert to paid."})
+    })
+    .catch(()=>{
+      return res.status(500).send({message : "Some Issues In APIs"})
+    })
+  } catch (error) {
+    
+  }
+}
+
 module.exports = {
+  convert_to_paid,
   addutr,
   get_agreements_by_id,
   get_dashboard_dats_finance,
