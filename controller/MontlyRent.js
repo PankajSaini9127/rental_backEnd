@@ -62,9 +62,11 @@ async function list_month_rent(req, res) {
       cb.orWhere("status","=","Sent Back From Operations");
       cb.orWhere("status","=","Sent Back From Sr Manager");
       cb.orWhere("status","=","Hold");
-    }).orderBy("time", "desc")
-    .orderBy("rent_date","desc")
-    .orderBy("code","desc");
+    })
+    .orderBy("landlord_name", "asc")
+    .orderBy("time")
+    .orderBy("rent_date")
+    .orderBy("code")
 
     //console.log(data)
     if (data) return res.send(data);

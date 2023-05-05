@@ -751,9 +751,6 @@ async function user_search_manager(req, res) {
   }
 }
 
-
-
-
 async function user_search_manager_approved(req, res) {
   try {
     const data = await db("agreements")
