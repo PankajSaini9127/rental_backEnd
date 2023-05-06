@@ -31,7 +31,8 @@ const {
   get_all__ag,
   user_search_manager_approved,
   user_search_manager_inProcess,
-  add_renewal_deposit
+  add_renewal_deposit,
+  get_old_agreement
   
 } = require("../controller/ManagerController");
 
@@ -209,5 +210,9 @@ router.route('/get-payment-modify-date').get(get_payment_update_date)
 
 //get latest payment modification
 router.route('/add-renewal-deposit').post(add_renewal_deposit)
+
+
+//get old agreements value
+router.route('/old/agreements').get(get_old_agreement)
 
 module.exports = router;

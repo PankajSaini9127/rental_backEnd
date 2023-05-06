@@ -164,7 +164,8 @@ async function get_agreements_code(req, res) {
         "monthly_rent.id as monthly_rent_id",
         "monthly_rent.*",
         "monthly_rent.payment_date as rent_paid_date",
-        "monthly_rent.status as payment_status"
+        "monthly_rent.status as payment_status",
+        "monthly_rent.gst as rent_gst"
       )
       .join("agreements", "monthly_rent.code", "=", "agreements.code")
       .join("landlords", "agreements.id", "=", "landlords.agreement_id");
