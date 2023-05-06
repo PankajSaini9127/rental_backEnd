@@ -563,12 +563,25 @@ async function get_dashboard_dats_finance(req, res) {
     if (status) {
       status.map((row) => {
         meta.totalAgreement += 1;
-        if (row.status === "Sent Back From Finance") {
+        switch(row.status)
+        {
+          case "Sent Back From Finance" : 
           meta.Send_Back += 1;
-        } else if (row.status === "Approved" || row.status === "Deposited") {
+          break;
+          case "Approved" : 
           meta.Approved += 1;
-        } else if (row.status === "Sent To Finance") {
+          break;
+          case "Deposited" : 
+          meta.Approved += 1;
+          break;
+          case "Sent To Finance" :
           meta.Pending += 1;
+          break;
+          case "Sent To Finance Team" :
+          meta.Pending += 1;
+          break;
+          default:
+           break
         }
       });
     }

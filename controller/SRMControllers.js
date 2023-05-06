@@ -803,7 +803,7 @@ async function get_search_monthlyrent_srm_paid(req, res) {
 async function get_dashboard_data(req, res) {
   try {
 
-    let status = await db("users").select('users.id',"agreements.*")
+    let status = await db("users").select('users.id',"agreements.status")
     .where("supervisor","=",req.params.id)
     .join("agreements","agreements.manager_id","=","users.id")
     
@@ -816,27 +816,40 @@ async function get_dashboard_data(req, res) {
       Approved: 0,
       Renewal: 0,
     };
-    //console.log(status)
+    // console.log(status)
 
     if (status) {
       status.map((row) => {
+        // console.log()
         meta.totalAgreement += 1;
-        if ( "Sent Back From Sr Manager") {
+
+        switch(row.status)
+        {
+          case "Sent Back From Sr Manager" : 
           meta.Send_Back += 1;
-        } else if (
-          row.status === "Sent To Finance Team" ||
-          row.status === "Sent To BHU" ||
-          row.status === "Sent To Operations" ||
-          row.status === "Deposited"
-        ) {
-          meta.Approved += 1;
-        } else if (row.status === "Sent To Sr Manager") {
+          break;
+          case "Sent To Sr Manager" : 
           meta.Pending += 1;
+          break;
+          case "Sent To Finance Team" : 
+          meta.Approved += 1;
+          break;
+          case "Sent To BHU" :
+          meta.Approved += 1;
+          break;
+          case "Sent To Operations" :
+          meta.Approved += 1;
+          break;
+          case "Deposited" : 
+          meta.Approved += 1;
+          break;
+          default:
+           break
         }
       });
     }
 
-    //console.log(meta)
+    console.log(meta)
 
     res.send(meta);
   } catch (err) {

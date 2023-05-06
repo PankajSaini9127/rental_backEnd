@@ -44,7 +44,7 @@ async function get_monthly_rent(req,res) {
         // console.log("list >>>>>>>>>>> ",listAgreement)
         // iterating and creating a slab from here
         Promise.allSettled(listAgreement.map(async(row, i) => {  
-          // console.log(row.utr_number)      
+          // console.log(">>>",row.code,row.utr_number)      
         // calculating the final amount
         const finalAmountForFullMonth = (row.monthlyRent/100)*parseInt(row.percentage) 
   
