@@ -35,6 +35,7 @@ const getAllAgreement = async (req, res) => {
             cb.orWhere("agreements.status","=","Sent To Sr Manager");
             cb.orWhere("agreements.status","=","Sent To Operations");
             cb.orWhere("agreements.status","=","Sent To Finance Team");
+            cb.orWhere("agreements.status","=","Approved");
           })
           .andWhere("srm_id", row.id)
           .orderBy('agreements.modify_date',"desc");
@@ -119,7 +120,6 @@ const getAllAgreementApproved = async (req, res) => {
           .join("users","agreements.manager_id","=","users.id")
           .where(cb=>{
             cb.orWhere("agreements.status","=","Deposited");
-            cb.orWhere("agreements.status","=","Approved");
           })
           .andWhere("srm_id", row.id)
           .orderBy('agreements.modify_date',"desc");
@@ -172,7 +172,6 @@ const getAllAgreementApproved = async (req, res) => {
 };
 
 
-// approved agreements
 const get_total_agreements = async (req, res) => {
   try {
     const supervisor = await db("users")
@@ -253,7 +252,7 @@ const get_total_agreements = async (req, res) => {
   }
 };
 
-//search use by field name
+//search use by field name in process agreements
 async function user_search_buh(req, res) {
   try {
    console.log(req.query.search)
@@ -273,9 +272,129 @@ async function user_search_buh(req, res) {
         cb.orWhereILike("code", `%${req.query.search}%`);
         cb.orWhereILike("agreements.address", `%${req.query.search}%`);
       })
+      andWhere(cb=>{
+        cb.orWhere("status","=","Sent To Sr Manager");
+        cb.orWhere("status","=","Sent To BUH");
+        cb.orWhere("status","=","Sent To Operations");
+        cb.orWhere("status","=","Sent To Finance Team");
+        cb.orWhere("status","=","Terminated By Manager");
+        cb.orWhere("status","=","Terminated By Sr Manager");
+        cb.orWhere("agreements.status","=","Approved");
+      })
       .orderBy('agreements.modify_date',"desc")
     
 
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            manager: supervisor[0].name,
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = {
+          ...agreement,
+          [row.id]: { ...row, name: [row.name], manager: supervisor[0].name },
+        };
+      }
+    });
+
+    // console.log(data)
+
+    res.send({ success: true, agreement, ids });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send();
+  }
+}
+
+//search use by field name approved
+async function user_search_buh_approved(req, res) {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", req.params.id);
+
+    const data = await db("agreements")
+      .select("*")
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where("srm_id", supervisor[0].id)
+      .whereNot("status", "=", "Hold")
+      .andWhere((cb) => {
+        cb.whereILike("name", `%${req.query.search}%`);
+        cb.orWhereILike("location", `%${req.query.search}%`);
+        cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
+        cb.orWhereILike("code", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.address", `%${req.query.search}%`);
+      })
+      .andWhere(cb=>{
+        cb.orWhere("agreements.status","=","Deposited");
+      })
+      .orderBy('agreements.modify_date',"desc")
+    
+
+      console.log(data)
+      
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            manager: supervisor[0].name,
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = {
+          ...agreement,
+          [row.id]: { ...row, name: [row.name], manager: supervisor[0].name },
+        };
+      }
+    });
+
+    // console.log(data)
+
+    res.send({ success: true, agreement, ids });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send();
+  }
+}
+
+//search use by field name approved
+async function user_search_buh_total(req, res) {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", req.params.id);
+
+    const data = await db("agreements")
+      .select("*")
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where("srm_id", supervisor[0].id)
+      .whereNot("status", "=", "Hold")
+      .andWhere((cb) => {
+        cb.whereILike("name", `%${req.query.search}%`);
+        cb.orWhereILike("location", `%${req.query.search}%`);
+        cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
+        cb.orWhereILike("code", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.address", `%${req.query.search}%`);
+      })
+      .orderBy('agreements.modify_date',"desc")
+    
+
+      console.log(data)
+      
     let ids = [];
     let agreement = {};
     data.map((row) => {
@@ -397,4 +516,4 @@ async function get_dashboard_dats_buh(req, res) {
   }
 }
 
-module.exports = {get_total_agreements,getAgreementByIdBuh,getAllAgreementApproved, getAllAgreement, user_search_buh, updateAgreement ,get_dashboard_dats_buh};
+module.exports = {user_search_buh_total,get_total_agreements,getAgreementByIdBuh,getAllAgreementApproved, getAllAgreement, user_search_buh_approved,user_search_buh, updateAgreement ,get_dashboard_dats_buh};

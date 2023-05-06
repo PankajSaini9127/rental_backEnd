@@ -297,6 +297,142 @@ async function agreement_search_opr(req, res) {
 }
 
 
+//approved agreements
+async function agreement_search_opr_approved(req, res) {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", req.params.id);
+
+      console.log(req.query)
+    const data = await db("agreements")
+      .select(
+      "users.name as manager_name",
+      "srm.name as Sr_name",
+      "landlords.name",
+      "landlords.agreement_id",
+      "landlords.id as landlords",
+      "agreements.*"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .join("users","agreements.manager_id","=","users.id")
+      .join("users as srm","agreements.srm_id","=","srm.id")
+      .where("buh_id", supervisor[0].id)
+      .whereNot("agreements.status", "=", "Hold")
+      .andWhere((cb) => {
+        cb.whereILike("landlords.name", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.location", `%${req.query.search}%`);
+        cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.code", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.address", `%${req.query.search}%`);
+      })
+      .andWhere(cb=>{
+        cb.orWhere("agreements.status","=","Deposited");
+      })
+      .orderBy('agreements.modify_date',"desc")
+    console.log(data);
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            manager: supervisor[0].name,
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = {
+          ...agreement,
+          [row.id]: { ...row, name: [row.name], manager: supervisor[0].name },
+        };
+      }
+    });
+
+    // console.log(data)
+
+    res.send({ success: true, agreement, ids });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send();
+  }
+}
+
+//in process agreemnets search
+async function agreement_search_opr_process(req, res) {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", req.params.id);
+
+      console.log(req.query)
+    const data = await db("agreements")
+      .select(
+      "users.name as manager_name",
+      "srm.name as Sr_name",
+      "landlords.name",
+      "landlords.agreement_id",
+      "landlords.id as landlords",
+      "agreements.*"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .join("users","agreements.manager_id","=","users.id")
+      .join("users as srm","agreements.srm_id","=","srm.id")
+      .where("buh_id", supervisor[0].id)
+      .whereNot("agreements.status", "=", "Hold")
+      .andWhere((cb) => {
+        cb.whereILike("landlords.name", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.location", `%${req.query.search}%`);
+        cb.orWhereILike("monthlyRent", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.code", `%${req.query.search}%`);
+        cb.orWhereILike("agreements.address", `%${req.query.search}%`);
+      })
+      .andWhere(cb=>{
+        cb.orWhere("agreements.status","=","Sent To Sr Manager");
+        cb.orWhere("agreements.status","=","Sent To BUH");
+        cb.orWhere("agreements.status","=","Sent To Operations");
+        cb.orWhere("agreements.status","=","Sent To Finance Team");
+        cb.orWhere("agreements.status","=","Terminated By Manager");
+        cb.orWhere("agreements.status","=","Terminated By Sr Manager");
+        cb.orWhere("agreements.status","=","Approved");
+      })
+      .orderBy('agreements.modify_date',"desc")
+    console.log(data);
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            manager: supervisor[0].name,
+          },
+        };
+      } else {
+        ids.push(row.id);
+        agreement = {
+          ...agreement,
+          [row.id]: { ...row, name: [row.name], manager: supervisor[0].name },
+        };
+      }
+    });
+
+    // console.log(data)
+
+    res.send({ success: true, agreement, ids });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send();
+  }
+}
+
 ///get monthly rent 
 
 async function get_monthly_rent_opr(req,res){
@@ -556,4 +692,4 @@ let status = await db("users").select('users.id',"agreements.*")
 }
 
 
-module.exports = {getAll_total_agreements,getAll_Approved_agreements,get_monthly_rent_opr_paid, get_dashboard_dats_opr,getAllAgreement, agreement_search_opr ,get_monthly_rent_opr,get_monthly_search_opr};
+module.exports = {agreement_search_opr_approved,agreement_search_opr_process,getAll_total_agreements,getAll_Approved_agreements,get_monthly_rent_opr_paid, get_dashboard_dats_opr,getAllAgreement, agreement_search_opr ,get_monthly_rent_opr,get_monthly_search_opr};

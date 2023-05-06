@@ -618,6 +618,7 @@ async function get_search_renewal_srm(req, res) {
   }
 }
 
+//search in onthly rent in process payment
 async function get_search_monthlyrent_srm(req, res) {
   try {
     console.log(">>>body>>",req.query)
@@ -642,6 +643,17 @@ async function get_search_monthlyrent_srm(req, res) {
           .select("*")
           .where("manager_id", row.id)
           .whereNot("status", "=", "Hold")
+         
+          .andWhere(cb=>{
+            cb.orWhere("status","=","Sent To Sr Manager");
+            cb.orWhere("status","=","Sent To Operations");
+            cb.orWhere("status","=","Sent To Finance");
+            cb.orWhere("status","=","Pending");
+            cb.orWhere("status","=","Sent Back From Finance");
+            cb.orWhere("status","=","Sent Back From Operations");
+            cb.orWhere("status","=","Sent Back From Sr Manager");
+            cb.orWhere("status","=","Hold");
+          })
           .andWhere((cb) => {
             cb.whereILike("landlord_name", `%${req.query.search}%`);
             cb.orWhereILike("location", `%${req.query.search}%`);
@@ -700,6 +712,93 @@ async function get_search_monthlyrent_srm(req, res) {
   }
 }
 
+//searcgh in monthly rent paid rent
+async function get_search_monthlyrent_srm_paid(req, res) {
+  try {
+    console.log(">>>body>>",req.query)
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", "=", req.query.id);
+ 
+      console.log(supervisor)
+
+    if (supervisor.length === 0) throw new Error();
+
+    let manager_name = {};
+    supervisor.map((row) => {
+      manager_name = { ...manager_name, [row.id]: row.name };
+    });
+    
+    console.log(">>>>",supervisor)
+    let data = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        console.log(row.id);
+        return await db("monthly_rent")
+          .select("*")
+          .where("manager_id", row.id)
+          .whereNot("status", "=", "Hold")
+          .andWhere((cb) => {
+            cb.whereILike("landlord_name", `%${req.query.search}%`);
+            cb.orWhereILike("location", `%${req.query.search}%`);
+            cb.orWhereILike("monthly_rent", `%${req.query.search}%`);
+            cb.orWhereILike("code", `%${req.query.search}%`);
+            cb.orWhereILike("gst", `%${req.query.search}%`);
+          })
+          .andWhere(cb=>{
+            cb.orWhere("status","=","Paid");
+          })
+          .orderBy("id", "desc");
+      })
+    );
+
+    console.log(">>up>", data);
+    data =
+      data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+
+
+    let ids = [];
+    let agreement = {};
+
+    data.map((row) => {
+      console.log(row);
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            manager: manager_name[row.manager_id],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        console.log(">>>>>", row.manager_id);
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...row,
+            name: [row.name],
+            manager: manager_name[row.manager_id],
+          },
+        };
+      }
+    });
+
+    console.log(">search>>", ids, agreement);
+
+    return res.send({ success: true, ids, agreement });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .send({
+        success: false,
+        message: "Some Error Occured!! Please Try Again Later.",
+      });
+  }
+}
+
+
 //dashboard  item
 async function get_dashboard_data(req, res) {
   try {
@@ -757,5 +856,6 @@ module.exports = {
   get_dashboard_data,
   getAllApprovedAgreements,
   srm_get_monthly_rent_paid,
-  get_total_agreements
+  get_total_agreements,
+  get_search_monthlyrent_srm_paid
 };
