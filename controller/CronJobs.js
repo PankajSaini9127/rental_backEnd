@@ -80,7 +80,7 @@ async function get_monthly_rent(req,res) {
                 })
         }
       })).then((response)=>{
-          console.log(response)
+          // console.log(response)
       }).catch((error)=>{
         console.log(error)
       })

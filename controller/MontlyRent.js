@@ -53,6 +53,28 @@ async function add_rent(req, res) {
 
 async function list_month_rent(req, res) {
   try {
+console.log(req.query)
+    const {sortBy} = req.query
+    const orderBy = []
+    switch(sortBy){
+     case "Name":
+      orderBy.push({ column: 'landlord_name',order : 'asc' })
+      break
+     case "Time":
+      orderBy.push({ column: 'time', order: 'desc' })
+      break
+     case "Rent Date":
+      orderBy.push({ column: 'rent_date', order: 'asc' })
+      break
+     case "Code":
+      orderBy.push({ column: 'code', order: 'desc' })
+      break
+    default:
+      return orderBy
+    }
+
+    // console.log(orderBy)
+
     const data = await db("monthly_rent").select("*").where(cb=>{
       cb.orWhere("status","=","Sent To Sr Manager");
       cb.orWhere("status","=","Sent To Operations");
@@ -63,10 +85,8 @@ async function list_month_rent(req, res) {
       cb.orWhere("status","=","Sent Back From Sr Manager");
       cb.orWhere("status","=","Hold");
     })
-    .orderBy("landlord_name", "asc")
-    .orderBy("time")
-    .orderBy("rent_date")
-    .orderBy("code")
+    .orderBy(orderBy)
+
 
     //console.log(data)
     if (data) return res.send(data);

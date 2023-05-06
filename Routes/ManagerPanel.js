@@ -177,7 +177,7 @@ router.route('/month_rent/get_landlord_id/:id').get(get_landlord_id)
 router.route('/setFinalAgreement').post(set_final_agreement)
 
 // API for list 
-router.route('/listMonthRent/:manager_id').get(list_month_rent)
+router.route('/listMonthRent').get(list_month_rent)
 
 // monthly paid payment
 router.route('/listMonthRent/paid/:manager_id').get(list_month_rent_paid)
