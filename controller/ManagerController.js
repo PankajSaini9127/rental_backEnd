@@ -822,22 +822,25 @@ async function user_search_manager(req, res) {
 
     //console.log(data);
 
+   
     let ids = [];
     let agreement = {};
     data.map((row) => {
-      if (ids.includes(row.id)) {
-        agreement = {
-          ...agreement,
-          [row.id]: {
-            ...agreement[row.id],
-            name: [...agreement[row.id].name, row.name],
-          },
-        };
-      } else {
-        ids.push(row.id);
-        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
-      }
-    });
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              utr_number:[...agreement[row.id].utr_number, row.utr_number]
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+        }
+    
+  })
 
     // //console.log(data)
 
@@ -870,24 +873,28 @@ async function user_search_manager_approved(req, res) {
       }
       ).orderBy('agreements.modify_date',"desc");
 
-    //console.log(data);
+    // console.log(data);
 
     let ids = [];
     let agreement = {};
     data.map((row) => {
-      if (ids.includes(row.id)) {
-        agreement = {
-          ...agreement,
-          [row.id]: {
-            ...agreement[row.id],
-            name: [...agreement[row.id].name, row.name],
-          },
-        };
-      } else {
-        ids.push(row.id);
-        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
-      }
-    });
+      if(
+      row.status === "Deposited"  ){
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              utr_number:[...agreement[row.id].utr_number, row.utr_number]
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+        }
+    }
+  })
 
     // //console.log(data)
 
@@ -902,12 +909,13 @@ async function user_search_manager_approved(req, res) {
 async function user_search_manager_inProcess(req, res) {
   try {
     const data = await db("agreements")
-      .select(
-        "landlords.name",
-        "landlords.agreement_id",
-        "landlords.id",
-        "agreements.*"
-      )
+    .select(
+      "landlords.name",
+      "landlords.agreement_id",
+      "landlords.id",
+      "landlords.utr_number",
+      "agreements.*"
+    )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .where((cb) => {
         cb.whereILike("name", `%${req.body.name}%`);
@@ -934,19 +942,21 @@ async function user_search_manager_inProcess(req, res) {
     let ids = [];
     let agreement = {};
     data.map((row) => {
-      if (ids.includes(row.id)) {
-        agreement = {
-          ...agreement,
-          [row.id]: {
-            ...agreement[row.id],
-            name: [...agreement[row.id].name, row.name],
-          },
-        };
-      } else {
-        ids.push(row.id);
-        agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
-      }
-    });
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              utr_number:[...agreement[row.id].utr_number, row.utr_number]
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+        }
+    
+  })
 
     // //console.log(data)
 

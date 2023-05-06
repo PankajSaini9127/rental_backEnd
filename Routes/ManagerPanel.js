@@ -36,7 +36,7 @@ const {
   
 } = require("../controller/ManagerController");
 
-const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification, list_month_rent_paid} = require("../controller/MontlyRent");
+const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification, list_month_rent_paid, list_month_rent_search, list_month_rent_paid_search} = require("../controller/MontlyRent");
 
 // setting up multer for file transport 
 const router = express.Router();
@@ -214,5 +214,12 @@ router.route('/add-renewal-deposit').post(add_renewal_deposit)
 
 //get old agreements value
 router.route('/old/agreements').get(get_old_agreement)
+
+//search in monthly rent inn process
+router.route("/get-search-manager-monthlyrent").get(list_month_rent_search)
+
+
+//search in monthly rent paid
+router.route("/get-search-manager-monthlyrent/paid").get(list_month_rent_paid_search)
 
 module.exports = router;

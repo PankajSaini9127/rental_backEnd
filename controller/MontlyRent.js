@@ -78,6 +78,39 @@ async function list_month_rent(req, res) {
 }
 
 
+async function list_month_rent_search(req, res) {
+  try {
+    const data = await db("monthly_rent").select("*").where(cb=>{
+      cb.orWhere("status","=","Sent To Sr Manager");
+      cb.orWhere("status","=","Sent To Operations");
+      cb.orWhere("status","=","Sent To Finance");
+      cb.orWhere("status","=","Pending");
+      cb.orWhere("status","=","Sent Back From Finance");
+      cb.orWhere("status","=","Sent Back From Operations");
+      cb.orWhere("status","=","Sent Back From Sr Manager");
+      cb.orWhere("status","=","Hold");
+    })
+    .andWhere((cb) => {
+      cb.whereILike("landlord_name", `%${req.query.search}%`);
+      cb.orWhereILike("location", `%${req.query.search}%`);
+      cb.orWhereILike("monthly_rent", `%${req.query.search}%`);
+      cb.orWhereILike("code", `%${req.query.search}%`);
+      cb.orWhereILike("gst", `%${req.query.search}%`);
+    })
+    .orderBy("landlord_name", "asc")
+    .orderBy("time")
+    .orderBy("rent_date")
+    .orderBy("code")
+
+    console.log(data)
+    if (data) return res.send(data);
+    else return res.send([]);
+  } catch (err) {
+    console.log(err)
+    return res.status(500).send("Something went wrong");
+  }
+}
+
 
 async function list_month_rent_paid(req, res) {
   try {
@@ -91,7 +124,31 @@ async function list_month_rent_paid(req, res) {
     if (data) return res.send(data);
     else return res.send([]);
   } catch (err) {
-    //console.log(err)
+    console.log(err)
+    return res.status(500).send("Something went wrong");
+  }
+}
+
+async function list_month_rent_paid_search(req, res) {
+  try {
+    const data = await db("monthly_rent").select("*").where(cb=>{
+      cb.orWhere("status","=","Paid");
+    })
+    .andWhere((cb) => {
+      cb.whereILike("landlord_name", `%${req.query.search}%`);
+      cb.orWhereILike("location", `%${req.query.search}%`);
+      cb.orWhereILike("monthly_rent", `%${req.query.search}%`);
+      cb.orWhereILike("code", `%${req.query.search}%`);
+      cb.orWhereILike("gst", `%${req.query.search}%`);
+    })
+    .orderBy("time", "desc")
+    .orderBy("rent_date","desc")
+    .orderBy("code","desc");
+
+    if (data) return res.send(data);
+    else return res.send([]);
+  } catch (err) {
+    console.log(err)
     return res.status(500).send("Something went wrong");
   }
 }
@@ -128,6 +185,7 @@ async function add_invoice(req, res) {
     });
   }
 }
+
 
 async function update_payment_status(req, res) {
   try {
@@ -284,5 +342,7 @@ module.exports = {
   update_payment_status,
   get_agreements_code,
   invoice_number_verification,
-  list_month_rent_paid
+  list_month_rent_paid,
+  list_month_rent_paid_search,
+  list_month_rent_search
 };

@@ -1,5 +1,5 @@
 const express = require('express');
-const { user_search_buh, getAllAgreement, updateAgreement, getAgreementByIdBuh, get_dashboard_dats_buh, getAllAgreementApproved, get_total_agreements } = require('../controller/BHUControls');
+const { user_search_buh, getAllAgreement, updateAgreement, getAgreementByIdBuh, get_dashboard_dats_buh, getAllAgreementApproved, get_total_agreements, user_search_buh_approved, user_search_buh_total } = require('../controller/BHUControls');
 
 
 const router = express.Router();
@@ -16,6 +16,10 @@ router.route('/updateAgreement/:id').put(updateAgreement)
 
 
 router.route('/search/:id').get(user_search_buh)
+
+router.route('/search/approved/:id').get(user_search_buh_approved)
+
+router.route('/search/total/:id').get(user_search_buh_total)
 
 
 router.route("/get-agreement-one/:id").get(getAgreementByIdBuh)
