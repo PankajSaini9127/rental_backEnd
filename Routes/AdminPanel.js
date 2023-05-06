@@ -2,7 +2,7 @@ const express = require('express')
 
 
 const {userRegistration} = require('../controller/UserRegistration');
-const { updateUser, forgotPassword, selectRole, getAllUser, updateStatus, get_user,  user_search, getMetaData, selectRoleSRM } = require('../controller/AdminControls');
+const { updateUser, forgotPassword, selectRole, getAllUser, updateStatus, get_user,  user_search, getMetaData, selectRoleSRM, getUser } = require('../controller/AdminControls');
 
 
 const router = express.Router();
@@ -41,6 +41,8 @@ router.route('/user_search').post(user_search)
 //path /api/admin/user
 
 router.route('/user').post(getAllUser)
+
+router.route('/user/spicific').post(getUser)
 
 
 //get user

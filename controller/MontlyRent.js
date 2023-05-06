@@ -81,7 +81,9 @@ async function list_month_rent_paid(req, res) {
   try {
     const data = await db("monthly_rent").select("*").where(cb=>{
       cb.orWhere("status","=","Paid");
-    });
+    }).orderBy("time", "desc")
+    .orderBy("rent_date","desc")
+    .orderBy("code","desc");
 
     //console.log(data)
     if (data) return res.send(data);
