@@ -92,6 +92,8 @@ const get_all_agreements_inProcess = async (req, res) => {
           .select(
             "users.name as buh",
             "landlords.name",
+            "renewal_deposit.deposited as old_deposit",
+            "renewal_deposit.deposited as new_amount",
             "landlords.agreement_id",
             "landlords.id as landlords",
             "agreements.*",
@@ -101,6 +103,7 @@ const get_all_agreements_inProcess = async (req, res) => {
           .where("op_id", "=", row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .join("users", "agreements.buh_id", "=", "users.id")
+          .join("renewal_deposit","agreements.id", "=", "renewal_deposit.agreement_id")
           .andWhere(cb=>{
             cb.orWhere('agreements.status',"=","Sent To Sr Manager");
             cb.orWhere('agreements.status',"=","Pending");
@@ -113,6 +116,7 @@ const get_all_agreements_inProcess = async (req, res) => {
           .orderBy("agreements.modify_date", "desc");
       })
     );
+    console.log(data)
 
     data =
       data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
