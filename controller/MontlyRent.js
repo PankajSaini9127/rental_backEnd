@@ -56,6 +56,10 @@ async function list_month_rent(req, res) {
 console.log(req.query)
     const {sortBy} = req.query
     const orderBy = []
+    // const orderBy = [{ column: 'landlord_name',order : 'asc' },
+    // { column: 'time', order: 'desc' },
+    // { column: 'rent_date', order: 'asc' },
+    // { column: 'code', order: 'desc' }]
     switch(sortBy){
      case "Name":
       orderBy.push({ column: 'landlord_name',order : 'asc' })

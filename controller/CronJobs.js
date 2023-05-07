@@ -80,7 +80,7 @@ async function get_monthly_rent(req,res) {
                 })
         }
       })).then((response)=>{
-          // console.log(response)
+          console.log("get_monthly_rent >>>> ",response)
       }).catch((error)=>{
         console.log(error)
       })
@@ -158,7 +158,7 @@ async function get_renewal() {
       }
 
     })).then((response) => {
-      // console.log(">>>get renewal>",response)
+      console.log(">>>get renewal>",response)
     }).catch((error) => {
       console.log(error)
     })
