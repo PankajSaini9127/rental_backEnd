@@ -101,6 +101,7 @@ const get_all_agreements_inProcess = async (req, res) => {
           .where("op_id", "=", row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .join("users", "agreements.buh_id", "=", "users.id")
+          // .join("renewal_deposit","agreements.id", "=", "renewal_deposit.agreement_id")
           .andWhere(cb=>{
             cb.orWhere('agreements.status',"=","Sent To Sr Manager");
             cb.orWhere('agreements.status',"=","Pending");
@@ -113,10 +114,37 @@ const get_all_agreements_inProcess = async (req, res) => {
           .orderBy("agreements.modify_date", "desc");
       })
     );
+    // console.log(data)
+
+
+    let data2 = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        return await db("agreements")
+          .select(
+            "agreements.id",
+            "renewal_deposit.deposited as old_deposit",
+            "renewal_deposit.deposited as new_amount",
+          ).join("renewal_deposit","agreements.id", "=", "renewal_deposit.agreement_id")
+      })
+    );
+
 
     data =
       data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
     console.log(">>>data", data);
+
+    let depositValue = {}
+    data2[0].status === "fulfilled" ? data2[0].value.map((row, i) => Object.assign(depositValue,{[row.id] : row})) : [];
+
+    // console.log(depositValue)
+
+    data = data.map(row=>{
+      if(depositValue[row.agreement_id])
+      {
+        row.old_deposit = depositValue[row.agreement_id].old_deposit
+        row.new_amount = depositValue[row.agreement_id].new_amount
+      }
+      return row} )
 
     // data.filter((row)=>row.renewal_status === "Renewal Status")
 
@@ -161,6 +189,7 @@ const get_all_agreements_approved = async (req, res) => {
           .where("op_id", "=", row.id)
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .join("users", "agreements.buh_id", "=", "users.id")
+          // .join("renewal_deposit","agreements.id", "=", "renewal_deposit.agreement_id")
           .andWhere(cb=>{
             cb.orWhere("agreements.status","=","Deposited");
             cb.orWhere("agreements.status","=","Approved");
@@ -169,10 +198,31 @@ const get_all_agreements_approved = async (req, res) => {
           .orderBy("agreements.modify_date", "desc");
       })
     );
+    let data2 = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        return await db("agreements")
+          .select(
+            "agreements.id",
+            "renewal_deposit.deposited as old_deposit",
+            "renewal_deposit.deposited as new_amount",
+          ).join("renewal_deposit","agreements.id", "=", "renewal_deposit.agreement_id")
+      })
+    );
 
-    data =
-      data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
-    console.log(">>>data", data);
+    data = data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+
+    let depositValue = {}
+    data2[0].status === "fulfilled" ? data2[0].value.map((row, i) => Object.assign(depositValue,{[row.id] : row})) : [];
+
+    // console.log(depositValue)
+
+    data = data.map(row=>{
+      if(depositValue[row.agreement_id])
+      {
+        row.old_deposit = depositValue[row.agreement_id].old_deposit
+        row.new_amount = depositValue[row.agreement_id].new_amount
+      }
+      return row} )
 
     // let ids = [];
     // let agreement = {};
