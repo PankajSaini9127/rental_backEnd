@@ -884,6 +884,104 @@ async function convert_to_paid(req,res){
   }
 }
 
+
+//get all agreement value
+async function get_old_agreement_finance(req, res) {
+  try {
+    const data = await db("landlords")
+      .select("landlords.*", "agreements.code", "landlords.id as landlord_id","oldAg.*")
+      .join("agreements", "landlords.agreement_id" , "=","agreements.id")
+      .join("agreements as oldAg", "oldAg.code", "=","agreements.code")
+      .whereNull("oldAg.type")
+      .where("landlords.id","=", req.query.id)
+
+      console.log(data)
+
+
+      let ids = [];
+      let agreement = {};
+      data.map((row) => {
+        
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              landlord_id: [...agreement[row.id].landlord_id, row.landlord_id],
+              name: [...agreement[row.id].name, row.name],
+              leeseName: [...agreement[row.id].leeseName, row.leeseName],
+              branchName: [...agreement[row.id].branchName, row.branchName],
+              aadharNo: [...agreement[row.id].aadharNo, row.aadharNo],
+              panNo: [...agreement[row.id].panNo, row.panNo],
+              gstNo: [...agreement[row.id].gstNo, row.gstNo],
+              mobileNo: [...agreement[row.id].mobileNo, row.mobileNo],
+              cheque: [...agreement[row.id].cheque, row.cheque],
+              gst: [...agreement[row.id].gst, row.gst],
+              alternateMobile: [
+                ...agreement[row.id].alternateMobile,
+                row.alternateMobile,
+              ],
+              email: [...agreement[row.id].email, row.email],
+              bankName: [...agreement[row.id].bankName, row.bankName],
+              benificiaryName: [
+                ...agreement[row.id].benificiaryName,
+                row.benificiaryName,
+              ],
+              accountNo: [...agreement[row.id].accountNo, row.accountNo],
+              ifscCode: [...agreement[row.id].ifscCode, row.ifscCode],
+              agreement_id: [...agreement[row.id].agreement_id, row.agreement_id],
+              aadhar_card: [...agreement[row.id].aadhar_card, row.aadhar_card],
+              pan_card: [...agreement[row.id].pan_card, row.pan_card],
+              percentage: [...agreement[row.id].percentage, row.percentage],
+              utr_number: [...agreement[row.id].utr_number, row.utr_number],
+              payment_date:  [...agreement[row.id].payment_date, row.payment_date]
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...row,
+              landlord_id: [row.landlord_id],
+              name: [row.name],
+              percentage: [row.percentage],
+              leeseName: [row.leeseName],
+              state: [row.state],
+              city: [row.city],
+              branchName: [row.branchName],
+              location: [row.location],
+              pincode: [row.pincode],
+              address: [row.address],
+              aadharNo: [row.aadharNo],
+              panNo: [row.panNo],
+              gstNo: [row.gstNo],
+              gst: [row.gst],
+              cheque: [row.cheque],
+              mobileNo: [row.mobileNo],
+              alternateMobile: [row.alternateMobile],
+              email: [row.email],
+              bankName: [row.bankName],
+              benificiaryName: [row.benificiaryName],
+              accountNo: [row.accountNo],
+              ifscCode: [row.ifscCode],
+              agreement_id: [row.agreement_id],
+              aadhar_card: [row.aadhar_card],
+              pan_card: [row.pan_card],
+              utr_number: [row.utr_number],
+              payment_date: [row.payment_date],
+            },
+          };
+        }
+      });
+  
+      return res.status(200).send({success:true, agreement, ids });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send();
+  }
+}
+
 module.exports = {
   convert_to_paid,
   addutr,
@@ -899,5 +997,6 @@ module.exports = {
   get_all_agreements_approved,
   finance_get_monthly_rent_paid,
   get_monthly_search,
-  get_monthly_search_paid
+  get_monthly_search_paid,
+  get_old_agreement_finance
 };
