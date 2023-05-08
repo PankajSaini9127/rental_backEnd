@@ -99,7 +99,7 @@ async function get_renewal() {
       .where('status', "=", 'Deposited')
       .andWhere('renewal_status',"=",'""')
       
-      // console.log('>>>>',listAgreement)
+      console.log('>>>>',listAgreement)
 
     // iterating and creating a slab from here
     // console.log(listAgreement)
@@ -142,23 +142,25 @@ async function get_renewal() {
 
       expiredAt = agreements_start_date.clone().add(parseInt(tenure), 'month')
 
-      expiredAt = new Date(expiredAt)
-      todayMoment = new Date(todayMoment)
+      expiredAt = new Date(expiredAt).getTime()
+      todayMoment = new Date(todayMoment).getTime()
 
 
-      //  console.log("today=>",todayMoment,"agreement =>",expiredAt)
       // checking 60 days bond
-      if (expiredAt.getMonth() <= todayMoment.getMonth() && expiredAt.getFullYear() <= todayMoment.getFullYear()) {
-        // console.log("month==>", expiredAt.getMonth(), todayMoment.getMonth(), "year =>", expiredAt.getFullYear(), todayMoment.getFullYear())
+      if (expiredAt <= todayMoment) {
+        // console.log(">>>",row.code)
         return await db("agreements").update({ renewal_status: "Pending For Renewal" }).where("code",row.code)
       }
       else {
+        console.log("today=>",todayMoment,"agreement =>",expiredAt)
         // console.log("month==>", expiredAt.getMonth(), todayMoment.getMonth(), "year =>", expiredAt.getFullYear(), todayMoment.getFullYear())
+        // console.log(">>>",row.code)
+        // console.log(row.code)
         return await db("agreements").update({ renewal_status: '""' }).where("code",row.code)
       }
 
     })).then((response) => {
-      console.log(">>>get renewal> Run",)
+      console.log(">>>get renewal> Run",response)
     }).catch((error) => {
       console.log(error)
     })
