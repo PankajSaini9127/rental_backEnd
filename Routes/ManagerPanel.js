@@ -32,7 +32,8 @@ const {
   user_search_manager_approved,
   user_search_manager_inProcess,
   add_renewal_deposit,
-  get_old_agreement
+  get_old_agreement,
+  get_data_from_recovery_renewal
   
 } = require("../controller/ManagerController");
 
@@ -201,6 +202,9 @@ router.route('/insertAdjustmentAmount').post(insertAdjustmentAmount)
 
 //list data 
 router.route('/get-data-recovery/:id').get(get_data_from_recovery)
+
+//renewal recovery data
+router.route('/get-data-recovery-renewal/:id').get(get_data_from_recovery_renewal)
 
 //get latest modification date
 router.route('/get-modify-date').get(get_modify_date)

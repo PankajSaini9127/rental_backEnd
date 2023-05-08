@@ -1,5 +1,5 @@
 const express = require('express');
-const {  getAllAgreement, get_monthly_rent_opr, get_monthly_search_opr, agreement_search_opr, get_dashboard_dats_opr, get_monthly_rent_opr_paid, getAll_Approved_agreements, getAll_total_agreements, agreement_search_opr_process, agreement_search_opr_approved } = require('../controller/OperationsControls');
+const {  getAllAgreement, get_monthly_rent_opr, get_monthly_search_opr, agreement_search_opr, get_dashboard_dats_opr, get_monthly_rent_opr_paid, getAll_Approved_agreements, getAll_total_agreements, agreement_search_opr_process, agreement_search_opr_approved, get_monthly_search_opr_paid } = require('../controller/OperationsControls');
 
 
 const router = express.Router();
@@ -30,6 +30,8 @@ router.route('/opr-monthly-payment/:id').get(get_monthly_rent_opr)
 router.route('/paid/opr-monthly-payment/:id').get(get_monthly_rent_opr_paid)
 
 router.route('/get-search-operations-monthlyrent').get(get_monthly_search_opr)
+
+router.route('/get-search-operations-monthlyrent/paid').get(get_monthly_search_opr_paid)
 
 router.route("/dashboard/get-meta/:id").get(get_dashboard_dats_opr)
 

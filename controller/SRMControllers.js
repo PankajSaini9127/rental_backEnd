@@ -358,7 +358,9 @@ async function srm_get_monthly_rent(req, res) {
             cb.orWhere('status',"=","Sent To Operations");
             cb.orWhere('status',"=","Sent To Finance ");
           })
-          .orderBy("id", "desc");
+          .orderBy("time", "asc")
+    .orderBy("rent_date","asc")
+    .orderBy("code","asc")
       })
     );
 
@@ -434,7 +436,9 @@ async function srm_get_monthly_rent_paid(req, res) {
             cb.orWhere('status',"=","Approved");
             cb.orWhere('status',"=","Paid");
           })
-          .orderBy("id", "desc");
+          .orderBy("time", "asc")
+    .orderBy("rent_date","asc")
+    .orderBy("code","asc")
       })
     );
 
@@ -661,7 +665,9 @@ async function get_search_monthlyrent_srm(req, res) {
             cb.orWhereILike("code", `%${req.query.search}%`);
             cb.orWhereILike("status", `%${req.query.search}%`);
           })
-          .orderBy("id", "desc");
+          .orderBy("time", "asc")
+    .orderBy("rent_date","asc")
+    .orderBy("code","asc")
       })
     );
 
@@ -747,7 +753,9 @@ async function get_search_monthlyrent_srm_paid(req, res) {
           .andWhere(cb=>{
             cb.orWhere("status","=","Paid");
           })
-          .orderBy("id", "desc");
+          .orderBy("time", "asc")
+    .orderBy("rent_date","asc")
+    .orderBy("code","asc")
       })
     );
 

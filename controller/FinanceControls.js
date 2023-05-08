@@ -405,9 +405,9 @@ async function finance_get_monthly_rent(req, res) {
             "monthly_rent.manager_id",
             "=",
             "Manager.id"
-          ).orderBy("time", "desc")
-          .orderBy("rent_date","desc")
-          .orderBy("code","desc");
+          ).orderBy("time", "asc")
+          .orderBy("rent_date","asc")
+          .orderBy("code","asc")
       })
     );
 
@@ -491,9 +491,9 @@ async function finance_get_monthly_rent_paid(req, res) {
             "monthly_rent.manager_id",
             "=",
             "Manager.id"
-          ).orderBy("time", "desc")
-          .orderBy("rent_date","desc")
-          .orderBy("code","desc");
+          ).orderBy("time", "asc")
+          .orderBy("rent_date","asc")
+          .orderBy("code","asc")
       })
     );
     console.log(">>up>",data)
@@ -716,9 +716,9 @@ try {
             "monthly_rent.manager_id",
             "=",
             "Manager.id"
-          ).orderBy("time", "desc")
-          .orderBy("rent_date","desc")
-          .orderBy("code","desc");
+          ).orderBy("time", "asc")
+          .orderBy("rent_date","asc")
+          .orderBy("code","asc")
       })
     );
 
@@ -806,9 +806,9 @@ async function get_monthly_search_paid (req,res){
               "monthly_rent.manager_id",
               "=",
               "Manager.id"
-            ).orderBy("time", "desc")
-            .orderBy("rent_date","desc")
-            .orderBy("code","desc");
+            ).orderBy("time", "asc")
+            .orderBy("rent_date","asc")
+            .orderBy("code","asc")
         })
       );
   
