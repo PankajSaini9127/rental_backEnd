@@ -8,7 +8,6 @@ const {
   get_No_Of_Agreements,
   get_Monthly_Rent,
   get_Monthly_Deposit,
-  get_Graph_Reports,
 } = require("../controller/MisReportControls");
 
 const router = express.Router();
@@ -34,7 +33,5 @@ router.route("/no-of-agreements").get(get_No_Of_Agreements);
 router.route("/monthly-rent").get(get_Monthly_Rent);
 
 router.route("/monthly-deposit").get(get_Monthly_Deposit);
-
-router.route("/graph-reports").get(get_Graph_Reports);
 
 module.exports = router;

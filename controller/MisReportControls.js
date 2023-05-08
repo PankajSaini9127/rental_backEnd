@@ -4,7 +4,7 @@ const excel = require("exceljs");
 
 async function get_Rental_Property_Dump_Report(req, res) {
   const { startDate, endDate, role, id } = req.query;
-  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,a.location,l.name as lanlord_name,a.address as property_address,a.deposit as deposite_amount,a.monthlyRent as Monthly_rental,a.rent_start_date as Agreement_Start_Date,DATE_SUB(DATE_SUB(final_agreement_date,INTERVAL - tenure MONTH),INTERVAL 1 DAY) as Agreement_End_Date,a.terminate_date as Surrender_Date,a.lockInYear as Lock_in_period,a.noticePeriod as Notice_Period,l.panNo as PAN_Details,l.gstNo as GST_Details,l.bankName,l.accountNo,l.ifscCode,l.benificiaryName,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >=? and a.time <= ?`; 
+  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,a.location,l.name as lanlord_name,a.address as property_address,a.deposit as deposite_amount,a.monthlyRent as Monthly_rental,a.rent_start_date as Agreement_Start_Date,DATE_SUB(DATE_SUB(final_agreement_date,INTERVAL - tenure MONTH),INTERVAL 1 DAY) as Agreement_End_Date,a.terminate_date as Surrender_Date,a.lockInYear as Lock_in_period,a.noticePeriod as Notice_Period,l.panNo as PAN_Details,l.gstNo as GST_Details,l.bankName,l.accountNo,l.ifscCode,l.benificiaryName,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >=? and a.time <= ?`;
 
   if (role == "Senior_Manager") {
     sql += ` and a.srm_id = ? `;
@@ -139,7 +139,7 @@ async function get_Rental_Property_Dump_Report(req, res) {
 }
 
 async function get_Rental_Payment_MIS(req, res) {
-  const { startDate, endDate,role, id } = req.query;
+  const { startDate, endDate, role, id } = req.query;
   let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,'' as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_number FROM agreements a, landlords l, monthly_rent m where a.id=l.agreement_id and a.code=m.code and a.time >=? and a.time <=? `;
   if (role == "Senior_Manager") {
     sql += ` and a.srm_id = ? `;
@@ -241,7 +241,7 @@ async function get_Rental_Payment_MIS(req, res) {
 }
 
 async function get_Rental_Onboarding_All_Status(req, res) {
-  const { startDate, endDate,role, id } = req.query;
+  const { startDate, endDate, role, id } = req.query;
   let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >= ? and a.time <=? `;
   if (role == "Senior_Manager") {
     sql += ` and a.srm_id = ? `;
@@ -337,7 +337,7 @@ async function get_Rental_Onboarding_All_Status(req, res) {
 }
 
 async function get_Rental_Onboarding_Deposited(req, res) {
-  const { startDate, endDate,role, id } = req.query;
+  const { startDate, endDate, role, id } = req.query;
   let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.status='Deposited' and a.time >=? and a.time <= ? `;
 
   if (role == "Senior_Manager") {
@@ -456,25 +456,7 @@ async function get_Rent_Paid_Schedule(req, res) {
    MAX(CASE WHEN MONTH(a.payment_date) = 1 THEN m.monthly_rent ELSE NULL END) AS Jan,
    MAX(CASE WHEN MONTH(a.payment_date) = 2 THEN m.monthly_rent ELSE NULL END) AS Feb,
     MAX(CASE WHEN MONTH(a.payment_date) = 3 THEN m.monthly_rent ELSE NULL END) AS Mar,
-  a.final_agreement_date as Agreement_Start_Date, 
-  (
-    CASE WHEN a.tenure = '11 Month' THEN DATE_SUB(
-      DATE_SUB(
-        a.final_agreement_date, INTERVAL -11 MONTH
-      ), 
-      INTERVAL 1 DAY
-    ) WHEN a.tenure = '2 Year' THEN DATE_SUB(
-      DATE_SUB(
-        a.final_agreement_date, INTERVAL -24 MONTH
-      ), 
-      INTERVAL 1 DAY
-    ) WHEN a.tenure = '4 Year' THEN DATE_SUB(
-      DATE_SUB(
-        a.final_agreement_date, INTERVAL -48 MONTH
-      ), 
-      INTERVAL 1 DAY
-    ) ELSE null END
-  ) as Agreement_End_Date, 
+    a.rent_start_date as Agreement_Start_Date,DATE_SUB(DATE_SUB(final_agreement_date,INTERVAL - tenure MONTH),INTERVAL 1 DAY) as Agreement_End_Date, 
   a.terminate_date as Surrender_date 
 FROM 
   agreements a, 
@@ -735,26 +717,11 @@ where
 }
 
 async function get_No_Of_Agreements(req, res) {
-  const { startDate, endDate, role } = req.query;
+  const { startDate, endDate, role, graph } = req.query;
   try {
     db.raw(
-      `SELECT 
-      CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month,
-      COALESCE(count(id), 0) AS no_of_agreement 
-    FROM (
-      SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month
-      FROM (
-        SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11
-      ) AS months
-    ) AS months
-    LEFT JOIN agreements
-    ON MONTH(payment_date) = MONTH(agreements_month)
-      AND YEAR(payment_date) = YEAR(agreements_month)
-    WHERE payment_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d')
-    OR payment_date IS NULL
-    GROUP BY agreements_month
-    ORDER BY agreements_month`,
-      [startDate,startDate, endDate]
+      `SELECT CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month, COALESCE(count(id), 0) AS no_of_agreement FROM ( SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month FROM ( SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 ) AS months ) AS months LEFT JOIN agreements ON MONTH(final_agreement_date) = MONTH(agreements_month) AND YEAR(final_agreement_date) = YEAR(agreements_month) WHERE final_agreement_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d') OR final_agreement_date IS NULL GROUP BY agreements_month ORDER BY agreements_month`,
+      [startDate, startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
 
@@ -777,36 +744,23 @@ async function get_No_Of_Agreements(req, res) {
         "attachment; filename=" + "No_Of_Agreements_Report.xlsx"
       );
 
-      return workbook.xlsx.write(res).then(function () {
-        res.status(200).end();
-      });
-
-      //   res.send(resp[0]);
+      if (graph) {
+        res.send(resp[0]);
+      } else {
+        return workbook.xlsx.write(res).then(function () {
+          res.status(200).end();
+        });
+      }
     });
   } catch (error) {}
 }
 
 async function get_Monthly_Rent(req, res) {
-  const { startDate, endDate, role } = req.query;
+  const { startDate, endDate, role, graph } = req.query;
   try {
     db.raw(
-      `SELECT 
-      CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month,
-      COALESCE(SUM(monthlyRent), 0) AS total_rent 
-    FROM (
-      SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month
-      FROM (
-        SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11
-      ) AS months
-    ) AS months
-    LEFT JOIN agreements
-    ON MONTH(payment_date) = MONTH(agreements_month)
-      AND YEAR(payment_date) = YEAR(agreements_month)
-    WHERE payment_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d')
-    OR payment_date IS NULL
-    GROUP BY agreements_month
-    ORDER BY agreements_month`,
-      [startDate,startDate, endDate]
+      `SELECT CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month, COALESCE(SUM(monthly_rent), 0) AS total_rent FROM ( SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month FROM ( SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 ) AS months ) AS months LEFT JOIN monthly_rent ON MONTH(rent_date) = MONTH(agreements_month) AND YEAR(rent_date) = YEAR(agreements_month) WHERE rent_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d') OR rent_date IS NULL GROUP BY agreements_month ORDER BY agreements_month`,
+      [startDate, startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
 
@@ -829,36 +783,23 @@ async function get_Monthly_Rent(req, res) {
         "attachment; filename=" + "Monthly_Rent_Report.xlsx"
       );
 
-      return workbook.xlsx.write(res).then(function () {
-        res.status(200).end();
-      });
-
-      //   res.send(resp[0]);
+      if (graph) {
+        res.send(resp[0]);
+      } else {
+        return workbook.xlsx.write(res).then(function () {
+          res.status(200).end();
+        });
+      }
     });
   } catch (error) {}
 }
 
 async function get_Monthly_Deposit(req, res) {
-  const { startDate, endDate, role } = req.query;
+  const { startDate, endDate, role, graph } = req.query;
   try {
     db.raw(
-      `SELECT 
-      CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month,
-      COALESCE(SUM(deposit), 0) AS total_deposit 
-    FROM (
-      SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month
-      FROM (
-        SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11
-      ) AS months
-    ) AS months
-    LEFT JOIN agreements
-    ON MONTH(payment_date) = MONTH(agreements_month)
-      AND YEAR(payment_date) = YEAR(agreements_month)
-    WHERE payment_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d')
-    OR payment_date IS NULL
-    GROUP BY agreements_month
-    ORDER BY agreements_month`,
-      [startDate, startDate,endDate]
+      `SELECT CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month, COALESCE(SUM(deposit), 0) AS total_deposit FROM ( SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month FROM ( SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 ) AS months ) AS months LEFT JOIN agreements ON MONTH(final_agreement_date) = MONTH(agreements_month) AND YEAR(final_agreement_date) = YEAR(agreements_month) WHERE final_agreement_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d') OR final_agreement_date IS NULL GROUP BY agreements_month ORDER BY agreements_month`,
+      [startDate, startDate, endDate]
     ).then(function (resp) {
       let report = resp[0];
 
@@ -880,47 +821,13 @@ async function get_Monthly_Deposit(req, res) {
         "Content-Disposition",
         "attachment; filename=" + "Monthly_Deposit_Report.xlsx"
       );
-
-      return workbook.xlsx.write(res).then(function () {
-        res.status(200).end();
-      });
-
-      //   res.send(resp[0]);
-    });
-  } catch (error) {}
-}
-
-async function get_Graph_Reports(req, res) {
-  const { startDate, endDate, role, id } = req.query;
-
-  const date = moment().format("yyyy");
-
-  // console.log(moment(date).add(3, "M").format("YY"));
-
-  try {
-    db.raw(
-      `SELECT 
-      CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month,
-      COALESCE(count(id), 0) AS no_of_agreement,
-      COALESCE(SUM(monthlyRent), 0) AS total_rent,
-      COALESCE(SUM(deposit), 0) AS total_deposit
-    FROM (
-      SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month
-      FROM (
-        SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11
-      ) AS months
-    ) AS months
-    LEFT JOIN agreements
-    ON MONTH(payment_date) = MONTH(agreements_month)
-      AND YEAR(payment_date) = YEAR(agreements_month)
-    WHERE payment_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d')
-    OR payment_date IS NULL
-    GROUP BY agreements_month
-    ORDER BY agreements_month`,
-      [startDate, startDate, endDate]
-    ).then(function (resp) {
-      console.log(res[0]);
-      res.send(resp[0]);
+      if (graph) {
+        res.send(resp[0]);
+      } else {
+        return workbook.xlsx.write(res).then(function () {
+          res.status(200).end();
+        });
+      }
     });
   } catch (error) {}
 }
@@ -934,5 +841,4 @@ module.exports = {
   get_No_Of_Agreements,
   get_Monthly_Rent,
   get_Monthly_Deposit,
-  get_Graph_Reports,
 };
