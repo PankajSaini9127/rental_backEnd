@@ -14,10 +14,14 @@ const {
   finance_get_monthly_rent_paid,
   get_monthly_search,
   get_monthly_search_paid,
-  convert_to_paid
+  convert_to_paid,
+  get_old_agreement_finance
 } = require("../controller/FinanceControls");
 
 const router = express.Router();
+
+//get old agreements value finance
+router.route('/old/agreements').get(get_old_agreement_finance)
 
 //get all agreements for listing
 router.route("/get-agreement/:id").get(getAllAgreement);
