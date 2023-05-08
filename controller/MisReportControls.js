@@ -150,7 +150,7 @@ async function get_Rental_Payment_MIS(req, res) {
   if (role == "Manager") {
     sql += ` and a.manager_id = ? `;
   }
-  sql += ` ORDER by a.code,a.location`;
+  // sql += ` ORDER by a.code,a.location`;
   try {
     if (role != "Super Admin") {
       db.raw(sql, [startDate, endDate, id]).then(function (resp) {
@@ -252,7 +252,7 @@ async function get_Rental_Onboarding_All_Status(req, res) {
   if (role == "Manager") {
     sql += ` and a.manager_id = ? `;
   }
-  sql += ` ORDER by a.code,a.location`;
+  // sql += ` ORDER by a.code,a.location`;
   try {
     if (role != "Super Admin") {
       db.raw(sql, [startDate, endDate, id]).then(function (resp) {
@@ -349,7 +349,7 @@ async function get_Rental_Onboarding_Deposited(req, res) {
   if (role == "Manager") {
     sql += ` and a.manager_id = ? `;
   }
-  sql += ` ORDER by a.code,a.location`;
+  // sql += ` ORDER by a.code,a.location`;
 
   try {
     if (role != "Super Admin") {
