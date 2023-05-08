@@ -54,24 +54,24 @@ async function add_rent(req, res) {
 async function list_month_rent(req, res) {
   try {
 console.log(req.query)
-    const {sortBy} = req.query
-    const orderBy = []
-    switch(sortBy){
-     case "Name":
-      orderBy.push({ column: 'landlord_name',order : 'asc' })
-      break
-     case "Time":
-      orderBy.push({ column: 'time', order: 'desc' })
-      break
-     case "Rent Date":
-      orderBy.push({ column: 'rent_date', order: 'asc' })
-      break
-     case "Code":
-      orderBy.push({ column: 'code', order: 'desc' })
-      break
-    default:
-      return orderBy
-    }
+    // const {sortBy} = req.query
+    // const orderBy = []
+    // switch(sortBy){
+    //  case "Name":
+    //   orderBy.push({ column: 'landlord_name',order : 'asc' })
+    //   break
+    //  case "Time":
+    //   orderBy.push({ column: 'time', order: 'desc' })
+    //   break
+    //  case "Rent Date":
+    //   orderBy.push({ column: 'rent_date', order: 'asc' })
+    //   break
+    //  case "Code":
+    //   orderBy.push({ column: 'code', order: 'desc' })
+    //   break
+    // default:
+    //   return orderBy
+    // }
 
     // console.log(orderBy)
 
@@ -85,7 +85,9 @@ console.log(req.query)
       cb.orWhere("status","=","Sent Back From Sr Manager");
       cb.orWhere("status","=","Hold");
     })
-    .orderBy(orderBy)
+    .orderBy("time", "asc")
+    .orderBy("rent_date","asc")
+    .orderBy("code","asc")
 
 
     //console.log(data)
@@ -117,10 +119,9 @@ async function list_month_rent_search(req, res) {
       cb.orWhereILike("code", `%${req.query.search}%`);
       cb.orWhereILike("gst", `%${req.query.search}%`);
     })
-    .orderBy("landlord_name", "asc")
-    .orderBy("time")
-    .orderBy("rent_date")
-    .orderBy("code")
+    .orderBy("time", "asc")
+    .orderBy("rent_date","asc")
+    .orderBy("code","asc")
 
     console.log(data)
     if (data) return res.send(data);
@@ -136,9 +137,9 @@ async function list_month_rent_paid(req, res) {
   try {
     const data = await db("monthly_rent").select("*").where(cb=>{
       cb.orWhere("status","=","Paid");
-    }).orderBy("time", "desc")
-    .orderBy("rent_date","desc")
-    .orderBy("code","desc");
+    }).orderBy("time", "asc")
+    .orderBy("rent_date","asc")
+    .orderBy("code","asc")
 
     //console.log(data)
     if (data) return res.send(data);
@@ -161,9 +162,9 @@ async function list_month_rent_paid_search(req, res) {
       cb.orWhereILike("code", `%${req.query.search}%`);
       cb.orWhereILike("gst", `%${req.query.search}%`);
     })
-    .orderBy("time", "desc")
-    .orderBy("rent_date","desc")
-    .orderBy("code","desc");
+    .orderBy("time", "asc")
+    .orderBy("rent_date","asc")
+    .orderBy("code","asc")
 
     if (data) return res.send(data);
     else return res.send([]);

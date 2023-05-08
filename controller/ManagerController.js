@@ -1386,6 +1386,8 @@ async function insertAdjustmentAmount (req,res)
     {
       let response = await db('recovery').insert(req.body)
 
+      console.log(response)
+
       if(response){
         
           return res.send("Data added successfully.")
@@ -1407,6 +1409,24 @@ async function get_data_from_recovery (req,res){
     const data = await db("recovery").select("*").where("agreement_id","=",req.params.id)
     if(data.length>0){
       return res.send({success:true,data})
+    }else{
+      return res.status(204).send("No Data found")
+    }
+    } catch (error) {
+    console.log(error)
+    return res.status(500)
+  }
+}
+
+//get data from recovery
+async function get_data_from_recovery_renewal (req,res){
+  // console.log(req.params.id)
+  try {
+    const data = await db("renewal_deposit").select("*").where("agreement_id","=",req.params.id)
+    // console.log(data)
+    if(data.length>0){
+      
+      return res.send({success:true,data:data[0]})
     }else{
       return res.status(204).send("No Data found")
     }
@@ -1520,6 +1540,7 @@ module.exports = {
   get_data_from_recovery,
   get_all_approved_ag,
   get_all__ag,
-  user_search_manager_inProcess
+  user_search_manager_inProcess,
+  get_data_from_recovery_renewal
 };
 

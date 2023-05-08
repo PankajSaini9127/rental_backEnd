@@ -26,7 +26,7 @@ exports.listing = async (req, res) => {
         // cb.orWhere("agreements.buh_id", "=", id); listing will used in BUH module
       });
 
-      console.log(`List of Landlords >>> ${id}`,data.length)
+      console.log(`List of Landlords >>> ${id}`,data)
 
     return res.send({data : data});
   } catch (error) {

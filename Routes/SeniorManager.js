@@ -32,7 +32,6 @@ router.route("/srmanager/get-search-renewal-srm/:id").get(get_search_renewal_srm
 //get srm Search-in monthly rent 
 router.route("/srmanager/get-search-srm-monthlyrent").get(get_search_monthlyrent_srm)
 
-
 //get srm Search-in monthly rent 
 router.route("/srmanager/get-search-srm-monthlyrent/paid").get(get_search_monthlyrent_srm_paid)
 
