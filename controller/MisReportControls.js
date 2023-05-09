@@ -4,7 +4,7 @@ const excel = require("exceljs");
 
 async function get_Rental_Property_Dump_Report(req, res) {
   const { startDate, endDate, role, id } = req.query;
-  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,a.location,l.name as lanlord_name,a.address as property_address,a.deposit as deposite_amount,a.monthlyRent as Monthly_rental,a.rent_start_date as Agreement_Start_Date,DATE_SUB(DATE_SUB(final_agreement_date,INTERVAL - tenure MONTH),INTERVAL 1 DAY) as Agreement_End_Date,a.terminate_date as Surrender_Date,a.lockInYear as Lock_in_period,a.noticePeriod as Notice_Period,l.panNo as PAN_Details,l.gstNo as GST_Details,l.bankName,l.accountNo,l.ifscCode,l.benificiaryName,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >=? and a.time <= ?`;
+  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,a.location,l.name as lanlord_name,a.address as property_address,a.deposit as deposite_amount,a.monthlyRent as Monthly_rental,a.rent_start_date as Agreement_Start_Date,DATE_SUB(DATE_SUB(final_agreement_date,INTERVAL - tenure MONTH),INTERVAL 1 DAY) as Agreement_End_Date,a.terminate_date as Surrender_Date,a.lockInYear as Lock_in_period,a.noticePeriod as Notice_Period,l.panNo as PAN_Details,l.gstNo as GST_Details,l.bankName,l.accountNo,l.ifscCode,l.benificiaryName,a.code,a.id,a.status FROM agreements a, landlords l where a.id=l.agreement_id and a.final_agreement_date >=? and a.final_agreement_date <= ?`;
 
   if (role == "Senior_Manager") {
     sql += ` and a.srm_id = ? `;
@@ -15,10 +15,10 @@ async function get_Rental_Property_Dump_Report(req, res) {
   if (role == "Manager") {
     sql += ` and a.manager_id = ? `;
   }
-  sql += ` ORDER by a.code,a.location`;
+ // sql += ` ORDER by a.code,a.location`;
 
   try {
-    if (role != "Super Admin") {
+    if (role != "Super Admin" && role != "Finance") {
       db.raw(sql, [startDate, endDate, id]).then(function (resp) {
         let report = resp[0];
 
@@ -38,6 +38,7 @@ async function get_Rental_Property_Dump_Report(req, res) {
           { header: "Property Address", key: "property_address", width: 15 },
           { header: "Deposite Amount", key: "deposite_amount", width: 15 },
           { header: "Monthly Rental", key: "Monthly_rental", width: 15 },
+          { header: "Status", key: "status", width: 15 },
           {
             header: "Agreement Start Date",
             key: "Agreement_Start_Date",
@@ -96,6 +97,7 @@ async function get_Rental_Property_Dump_Report(req, res) {
           { header: "Property Address", key: "property_address", width: 15 },
           { header: "Deposite Amount", key: "deposite_amount", width: 15 },
           { header: "Monthly Rental", key: "Monthly_rental", width: 15 },
+          { header: "Status", key: "status", width: 15 },
           {
             header: "Agreement Start Date",
             key: "Agreement_Start_Date",
@@ -140,7 +142,7 @@ async function get_Rental_Property_Dump_Report(req, res) {
 
 async function get_Rental_Payment_MIS(req, res) {
   const { startDate, endDate, role, id } = req.query;
-  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,'' as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_number FROM agreements a, landlords l, monthly_rent m where a.id=l.agreement_id and a.code=m.code and a.time >=? and a.time <=? `;
+  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(m.rent_date),'-', year(m.rent_date)) AS Month,'' as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_number,m.monthly_rent,m.rent_date FROM agreements a, landlords l, monthly_rent m where a.id=m.agreement_id and m.agreement_id is not null and a.id=l.agreement_id and a.code=m.code and m.rent_date >=? and m.rent_date  <=? `;
   if (role == "Senior_Manager") {
     sql += ` and a.srm_id = ? `;
   }
@@ -150,14 +152,14 @@ async function get_Rental_Payment_MIS(req, res) {
   if (role == "Manager") {
     sql += ` and a.manager_id = ? `;
   }
-  // sql += ` ORDER by a.code,a.location`;
+ // sql += ` ORDER by a.code,a.location`;
   try {
-    if (role != "Super Admin") {
+    if (role != "Super Admin" && role != "Finance") {
       db.raw(sql, [startDate, endDate, id]).then(function (resp) {
         let report = resp[0];
 
         let workbook = new excel.Workbook();
-        let worksheet = workbook.addWorksheet("Rental_Property_Dump_Report");
+        let worksheet = workbook.addWorksheet("Rental_Payment_MIS");
         // excel column list
         worksheet.columns = [
           { header: "Agreement Id", key: "agreement_id", width: 15 },
@@ -175,6 +177,8 @@ async function get_Rental_Payment_MIS(req, res) {
           { header: "Ageing", key: "Ageing", width: 15 },
           { header: "Payment Date", key: "payment_date", width: 15 },
           { header: "UTR No", key: "utr_number", width: 15 },
+          { header: "Rent Amount", key: "monthly_rent", width: 15 },
+          { header: "Rent Date", key: "rent_date", width: 15 },
         ];
         worksheet.addRows(report);
         // response to send to frontend
@@ -217,6 +221,8 @@ async function get_Rental_Payment_MIS(req, res) {
           { header: "Ageing", key: "Ageing", width: 15 },
           { header: "Payment Date", key: "payment_date", width: 15 },
           { header: "UTR No", key: "utr_number", width: 15 },
+          { header: "Rent Amount", key: "monthly_rent", width: 15 },
+          { header: "Rent Date", key: "rent_date", width: 15 },
         ];
         worksheet.addRows(report);
         // response to send to frontend
@@ -242,7 +248,7 @@ async function get_Rental_Payment_MIS(req, res) {
 
 async function get_Rental_Onboarding_All_Status(req, res) {
   const { startDate, endDate, role, id } = req.query;
-  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.time >= ? and a.time <=? `;
+  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,a.status,a.code,a.id,a.deposit as deposit,l.utr_number as utr_number,l.payment_date as payment_date  FROM agreements a, landlords l where a.id=l.agreement_id and a.time >= ? and a.time <=? `;
   if (role == "Senior_Manager") {
     sql += ` and a.srm_id = ? `;
   }
@@ -252,14 +258,14 @@ async function get_Rental_Onboarding_All_Status(req, res) {
   if (role == "Manager") {
     sql += ` and a.manager_id = ? `;
   }
-  // sql += ` ORDER by a.code,a.location`;
+ // sql += ` ORDER by a.code,a.location`;
   try {
-    if (role != "Super Admin") {
+    if (role != "Super Admin" && role != "Finance") {
       db.raw(sql, [startDate, endDate, id]).then(function (resp) {
         let report = resp[0];
 
         let workbook = new excel.Workbook();
-        let worksheet = workbook.addWorksheet("Rental_Property_Dump_Report");
+        let worksheet = workbook.addWorksheet("Rental_Onboarding_All_Status");
         // excel column list
         worksheet.columns = [
           { header: "Agreement Id", key: "agreement_id", width: 15 },
@@ -273,6 +279,9 @@ async function get_Rental_Onboarding_All_Status(req, res) {
           { header: "Property Address", key: "Property_address", width: 15 },
           { header: "Month", key: "Month", width: 15 },
           { header: "Status", key: "status", width: 15 },
+          { header: "Deposit Amount", key: "deposit", width: 15 },
+          { header: "UTR Number", key: "utr_number", width: 15 },
+          { header: "Payment Date", key: "payment_date", width: 15 },
         ];
 
         worksheet.addRows(report);
@@ -298,7 +307,7 @@ async function get_Rental_Onboarding_All_Status(req, res) {
         let report = resp[0];
 
         let workbook = new excel.Workbook();
-        let worksheet = workbook.addWorksheet("Rental_Property_Dump_Report");
+        let worksheet = workbook.addWorksheet("Rental_Onboarding_All_Status");
         // excel column list
         worksheet.columns = [
           { header: "Agreement Id", key: "agreement_id", width: 15 },
@@ -312,6 +321,9 @@ async function get_Rental_Onboarding_All_Status(req, res) {
           { header: "Property Address", key: "Property_address", width: 15 },
           { header: "Month", key: "Month", width: 15 },
           { header: "Status", key: "status", width: 15 },
+          { header: "Deposit Amount", key: "deposit", width: 15 },
+          { header: "UTR Number", key: "utr_number", width: 15 },
+          { header: "Payment Date", key: "payment_date", width: 15 },
         ];
 
         worksheet.addRows(report);
@@ -338,7 +350,7 @@ async function get_Rental_Onboarding_All_Status(req, res) {
 
 async function get_Rental_Onboarding_Deposited(req, res) {
   const { startDate, endDate, role, id } = req.query;
-  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.time),'-', year(a.time)) AS Month,a.status,a.code,a.id FROM agreements a, landlords l where a.id=l.agreement_id and a.status='Deposited' and a.time >=? and a.time <= ? `;
+  let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.final_agreement_date),'-', year(a.final_agreement_date)) AS Month,a.status,a.code,a.id,a.deposit as deposit,l.utr_number as utr_number,l.payment_date as payment_date  FROM agreements a, landlords l where a.id=l.agreement_id and a.status='Deposited' and a.final_agreement_date >=? and a.final_agreement_date <= ? `;
 
   if (role == "Senior_Manager") {
     sql += ` and a.srm_id = ? `;
@@ -349,15 +361,15 @@ async function get_Rental_Onboarding_Deposited(req, res) {
   if (role == "Manager") {
     sql += ` and a.manager_id = ? `;
   }
-  // sql += ` ORDER by a.code,a.location`;
+ // sql += ` ORDER by a.code,a.location`;
 
   try {
-    if (role != "Super Admin") {
+    if (role != "Super Admin" && role != "Finance") {
       db.raw(sql, [startDate, endDate, id]).then(function (resp) {
         let report = resp[0];
 
         let workbook = new excel.Workbook();
-        let worksheet = workbook.addWorksheet("Rental_Property_Dump_Report");
+        let worksheet = workbook.addWorksheet("Rental_Onboarding_Deposited");
         // excel column list
         worksheet.columns = [
           { header: "Agreement Id", key: "agreement_id", width: 15 },
@@ -371,6 +383,9 @@ async function get_Rental_Onboarding_Deposited(req, res) {
           { header: "Property Address", key: "Property_address", width: 15 },
           { header: "Month", key: "Month", width: 15 },
           { header: "Status", key: "status", width: 15 },
+          { header: "Deposit Amount", key: "deposit", width: 15 },
+          { header: "UTR Number", key: "utr_number", width: 15 },
+          { header: "Payment Date", key: "payment_date", width: 15 },
         ];
         worksheet.addRows(report);
         // response to send to frontend
@@ -395,7 +410,7 @@ async function get_Rental_Onboarding_Deposited(req, res) {
         let report = resp[0];
 
         let workbook = new excel.Workbook();
-        let worksheet = workbook.addWorksheet("Rental_Property_Dump_Report");
+        let worksheet = workbook.addWorksheet("Rental_Onboarding_Deposited");
         // excel column list
         worksheet.columns = [
           { header: "Agreement Id", key: "agreement_id", width: 15 },
@@ -409,6 +424,9 @@ async function get_Rental_Onboarding_Deposited(req, res) {
           { header: "Property Address", key: "Property_address", width: 15 },
           { header: "Month", key: "Month", width: 15 },
           { header: "Status", key: "status", width: 15 },
+          { header: "Deposit Amount", key: "deposit", width: 15 },
+          { header: "UTR Number", key: "utr_number", width: 15 },
+          { header: "Payment Date", key: "payment_date", width: 15 },
         ];
         worksheet.addRows(report);
         // response to send to frontend
@@ -492,7 +510,7 @@ where
   a.final_agreement_date, 
   a.terminate_date `;
   try {
-    if (role != "Super Admin") {
+    if (role != "Super Admin" && role != "Finance") {
       db.raw(
         sql,
 
@@ -717,120 +735,343 @@ where
 }
 
 async function get_No_Of_Agreements(req, res) {
-  const { startDate, endDate, role, graph } = req.query;
+  const { startDate, endDate, id, role, graph } = req.query;
+  let report = [];
+  let dumpReport = [];
+
   try {
-    db.raw(
+    const resp = await db.raw(
       `SELECT CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month, COALESCE(count(id), 0) AS no_of_agreement FROM ( SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month FROM ( SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 ) AS months ) AS months LEFT JOIN agreements ON MONTH(final_agreement_date) = MONTH(agreements_month) AND YEAR(final_agreement_date) = YEAR(agreements_month) WHERE final_agreement_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d') OR final_agreement_date IS NULL GROUP BY agreements_month ORDER BY agreements_month`,
       [startDate, startDate, endDate]
-    ).then(function (resp) {
-      let report = resp[0];
+    );
 
-      let workbook = new excel.Workbook();
-      let worksheet = workbook.addWorksheet("No_Of_Agreements_Report");
+    let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,a.location,l.name as lanlord_name,a.address as property_address,a.deposit as deposite_amount,a.monthlyRent as Monthly_rental,a.rent_start_date as Agreement_Start_Date,DATE_SUB(DATE_SUB(final_agreement_date,INTERVAL - tenure MONTH),INTERVAL 1 DAY) as Agreement_End_Date,a.terminate_date as Surrender_Date,a.lockInYear as Lock_in_period,a.noticePeriod as Notice_Period,l.panNo as PAN_Details,l.gstNo as GST_Details,l.bankName,l.accountNo,l.ifscCode,l.benificiaryName,a.code,a.id,a.status FROM agreements a, landlords l where a.id=l.agreement_id and a.final_agreement_date >=? and a.final_agreement_date <= ?`;
+
+    if (role == "Senior_Manager") {
+      sql += ` and a.srm_id = ? `;
+    }
+    if (role == "Operations") {
+      sql += ` and a.op_id = ? `;
+    }
+    if (role == "Manager") {
+      sql += ` and a.manager_id = ? `;
+    }
+   // sql += ` ORDER by a.code,a.location`;
+
+    const dumpData = await db.raw(sql, [startDate, endDate]);
+
+    report = resp[0];
+    dumpReport = dumpData[0];
+
+    let workbook = new excel.Workbook();
+    let worksheet = workbook.addWorksheet("No_Of_Agreements_Report");
+    let worksheet2 = workbook.addWorksheet("Rental_Property_Dump_Report");
+
+    // excel column list
+    worksheet.columns = [
+      { header: "Month", key: "month", width: 15 },
+      { header: "No of agreements", key: "no_of_agreement", width: 15 },
+    ];
+
+    if (role != "Super Admin" && role != "Finance") {
       // excel column list
-      worksheet.columns = [
-        { header: "Month", key: "month", width: 15 },
-        { header: "No of agreements", key: "no_of_agreement", width: 15 },
+      worksheet2.columns = [
+        { header: "Agreement Id", key: "agreement_id", width: 15 },
+        { header: "Property Code", key: "property_code", width: 15 },
+        { header: "BUH", key: "BUH", width: 15 },
+        { header: "Senior Manager", key: "SR_MANAGER", width: 15 },
+        { header: "Manager", key: "Manager", width: 15 },
+        { header: "City", key: "city", width: 15 },
+        { header: "State", key: "state", width: 15 },
+        { header: "Location", key: "location", width: 15 },
+        { header: "Lanlord Name", key: "lanlord_name", width: 15 },
+        { header: "Property Address", key: "property_address", width: 15 },
+        { header: "Deposite Amount", key: "deposite_amount", width: 15 },
+        { header: "Monthly Rental", key: "Monthly_rental", width: 15 },
+        { header: "Status", key: "status", width: 15 },
+        {
+          header: "Agreement Start Date",
+          key: "Agreement_Start_Date",
+          width: 15,
+        },
+        {
+          header: "Agreement End Date",
+          key: "Agreement_End_Date",
+          width: 15,
+        },
+        { header: "Surrender Date", key: "Surrender_Date", width: 15 },
+        { header: "Lock-in Period", key: "Lock_in_period", width: 15 },
+        { header: "Notice Period", key: "Notice_Period", width: 15 },
+        { header: "Pan Details", key: "PAN_Details", width: 15 },
+        { header: "GST Details", key: "GST_Details", width: 15 },
+        { header: "Bank Name", key: "bankName", width: 15 },
+        { header: "A/c No.", key: "accountNo", width: 15 },
+        { header: "IFSC Code", key: "ifscCode", width: 15 },
+        { header: "Benificiary Name", key: "benificiaryName", width: 15 },
       ];
-      worksheet.addRows(report);
-      // response to send to frontend
-      // res is a Stream object
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-      res.setHeader(
-        "Content-Disposition",
-        "attachment; filename=" + "No_Of_Agreements_Report.xlsx"
-      );
+    } else {
+      // excel column list
+      worksheet2.columns = [
+        { header: "Agreement Id", key: "agreement_id", width: 15 },
+        { header: "Property Code", key: "property_code", width: 15 },
+        { header: "BUH", key: "BUH", width: 15 },
+        { header: "Senior Manager", key: "SR_MANAGER", width: 15 },
+        { header: "Manager", key: "Manager", width: 15 },
+        { header: "City", key: "city", width: 15 },
+        { header: "State", key: "state", width: 15 },
+        { header: "Location", key: "location", width: 15 },
+        { header: "Lanlord Name", key: "lanlord_name", width: 15 },
+        { header: "Property Address", key: "property_address", width: 15 },
+        { header: "Deposite Amount", key: "deposite_amount", width: 15 },
+        { header: "Monthly Rental", key: "Monthly_rental", width: 15 },
+        { header: "Status", key: "status", width: 15 },
+        {
+          header: "Agreement Start Date",
+          key: "Agreement_Start_Date",
+          width: 15,
+        },
+        {
+          header: "Agreement End Date",
+          key: "Agreement_End_Date",
+          width: 15,
+        },
+        { header: "Surrender Date", key: "Surrender_Date", width: 15 },
+        { header: "Lock-in Period", key: "Lock_in_period", width: 15 },
+        { header: "Notice Period", key: "Notice_Period", width: 15 },
+        { header: "Pan Details", key: "PAN_Details", width: 15 },
+        { header: "GST Details", key: "GST_Details", width: 15 },
+        { header: "Bank Name", key: "bankName", width: 15 },
+        { header: "A/c No.", key: "accountNo", width: 15 },
+        { header: "IFSC Code", key: "ifscCode", width: 15 },
+        { header: "Benificiary Name", key: "benificiaryName", width: 15 },
+      ];
+    }
 
-      if (graph) {
-        res.send(resp[0]);
-      } else {
-        return workbook.xlsx.write(res).then(function () {
-          res.status(200).end();
-        });
-      }
-    });
-  } catch (error) {}
+    worksheet.addRows(report);
+    worksheet2.addRows(dumpReport);
+
+    // response to send to frontend
+    // res is a Stream object
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "No_Of_Agreements_Report.xlsx"
+    );
+
+    if (graph) {
+      res.send(resp[0]);
+    } else {
+      await workbook.xlsx.write(res);
+      res.status(200).end();
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 async function get_Monthly_Rent(req, res) {
-  const { startDate, endDate, role, graph } = req.query;
+  const { startDate, endDate, role, id, graph } = req.query;
+  let dumpReport = [];
+
   try {
-    db.raw(
-      `SELECT CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month, COALESCE(SUM(monthly_rent), 0) AS total_rent FROM ( SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month FROM ( SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 ) AS months ) AS months LEFT JOIN monthly_rent ON MONTH(rent_date) = MONTH(agreements_month) AND YEAR(rent_date) = YEAR(agreements_month) WHERE rent_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d') OR rent_date IS NULL GROUP BY agreements_month ORDER BY agreements_month`,
+    const resp = await db.raw(
+      `SELECT CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month, COALESCE(SUM(monthly_rent), 0) AS total_rent FROM ( SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month FROM ( SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 ) AS months ) AS months LEFT JOIN monthly_rent ON MONTH(rent_date) = MONTH(agreements_month) AND YEAR(rent_date) = YEAR(agreements_month) WHERE agreement_id is not null and rent_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d') OR rent_date IS NULL GROUP BY agreements_month ORDER BY agreements_month`,
       [startDate, startDate, endDate]
-    ).then(function (resp) {
-      let report = resp[0];
+    );
 
-      let workbook = new excel.Workbook();
-      let worksheet = workbook.addWorksheet("Monthly_Rent_Report");
-      // excel column list
-      worksheet.columns = [
-        { header: "Month", key: "month", width: 15 },
-        { header: "Total rent", key: "total_rent", width: 15 },
+    let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_Name,a.address as property_address,concat(monthname(m.rent_date),'-', year(m.rent_date)) AS Month,'' as Stage,m.status as Rental_Status,0 as Ageing,m.payment_date,m.utr_number,m.monthly_rent,m.rent_date FROM agreements a, landlords l, monthly_rent m where a.id=m.agreement_id and m.agreement_id is not null  and  a.id=l.agreement_id and a.code=m.code and m.rent_date >=? and m.rent_date  <=? `;
+    if (role == "Senior_Manager") {
+      sql += ` and a.srm_id = ? `;
+    }
+    if (role == "Operations") {
+      sql += ` and a.op_id = ? `;
+    }
+    if (role == "Manager") {
+      sql += ` and a.manager_id = ? `;
+    }
+   // sql += ` ORDER by a.code,a.location`;
+
+    let report = resp[0];
+    let workbook = new excel.Workbook();
+    let worksheet = workbook.addWorksheet("Monthly_Rent_Report");
+    let worksheet2 = workbook.addWorksheet("Rental_Payment_MIS_Report");
+    // excel column list
+    worksheet.columns = [
+      { header: "Month", key: "month", width: 15 },
+      { header: "Total rent", key: "total_rent", width: 15 },
+    ];
+    worksheet.addRows(report);
+
+    if (role != "Super Admin" && role != "Finance") {
+      const reportData = await db.raw(sql, [startDate, endDate, id]);
+      dumpReport = reportData[0];
+      worksheet2.columns = [
+        { header: "Agreement Id", key: "agreement_id", width: 15 },
+        { header: "property_code", key: "property_code", width: 15 },
+        { header: "BUH", key: "BUH", width: 15 },
+        { header: "Senior Manager", key: "SR_MANAGER", width: 15 },
+        { header: "Manager", key: "Manager", width: 15 },
+        { header: "City", key: "city", width: 15 },
+        { header: "State", key: "state", width: 15 },
+        { header: "Lanlord Name", key: "Lanlord_Name", width: 15 },
+        { header: "Property Address", key: "property_address", width: 15 },
+        { header: "Month", key: "Month", width: 15 },
+        { header: "Stage", key: "Stage", width: 15 },
+        { header: "Rental Status", key: "Rental_Status", width: 15 },
+        { header: "Ageing", key: "Ageing", width: 15 },
+        { header: "Payment Date", key: "payment_date", width: 15 },
+        { header: "UTR No", key: "utr_number", width: 15 },
+        { header: "Rent Amount", key: "monthly_rent", width: 15 },
+          { header: "Rent Date", key: "rent_date", width: 15 },
       ];
-      worksheet.addRows(report);
-      // response to send to frontend
-      // res is a Stream object
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-      res.setHeader(
-        "Content-Disposition",
-        "attachment; filename=" + "Monthly_Rent_Report.xlsx"
-      );
+      worksheet2.addRows(dumpReport);
+    } else {
+      const reportData = await db.raw(sql, [startDate, endDate]);
+      dumpReport = reportData[0];
+      worksheet2.columns = [
+        { header: "Agreement Id", key: "agreement_id", width: 15 },
+        { header: "property_code", key: "property_code", width: 15 },
+        { header: "BUH", key: "BUH", width: 15 },
+        { header: "Senior Manager", key: "SR_MANAGER", width: 15 },
+        { header: "Manager", key: "Manager", width: 15 },
+        { header: "City", key: "city", width: 15 },
+        { header: "State", key: "state", width: 15 },
+        { header: "Lanlord Name", key: "Lanlord_Name", width: 15 },
+        { header: "Property Address", key: "property_address", width: 15 },
+        { header: "Month", key: "Month", width: 15 },
+        { header: "Stage", key: "Stage", width: 15 },
+        { header: "Rental Status", key: "Rental_Status", width: 15 },
+        { header: "Ageing", key: "Ageing", width: 15 },
+        { header: "Payment Date", key: "payment_date", width: 15 },
+        { header: "UTR No", key: "utr_number", width: 15 },
+        { header: "Rent Amount", key: "monthly_rent", width: 15 },
+          { header: "Rent Date", key: "rent_date", width: 15 },
+      ];
+      worksheet2.addRows(dumpReport);
+    }
 
-      if (graph) {
-        res.send(resp[0]);
-      } else {
-        return workbook.xlsx.write(res).then(function () {
-          res.status(200).end();
-        });
-      }
-    });
-  } catch (error) {}
+    // response to send to frontend
+    // res is a Stream object
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "Monthly_Rent_Report.xlsx"
+    );
+
+    if (graph) {
+      res.send(resp[0]);
+    } else {
+      await workbook.xlsx.write(res);
+      res.status(200).end();
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 async function get_Monthly_Deposit(req, res) {
   const { startDate, endDate, role, graph } = req.query;
   try {
-    db.raw(
+    const resp = await db.raw(
       `SELECT CONCAT(DATE_FORMAT(agreements_month, '%b'), '-', DATE_FORMAT(agreements_month, '%y')) AS month, COALESCE(SUM(deposit), 0) AS total_deposit FROM ( SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL seq MONTH), '%Y-%m-01') AS agreements_month FROM ( SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 ) AS months ) AS months LEFT JOIN agreements ON MONTH(final_agreement_date) = MONTH(agreements_month) AND YEAR(final_agreement_date) = YEAR(agreements_month) WHERE final_agreement_date BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d') OR final_agreement_date IS NULL GROUP BY agreements_month ORDER BY agreements_month`,
       [startDate, startDate, endDate]
-    ).then(function (resp) {
-      let report = resp[0];
+    );
 
-      let workbook = new excel.Workbook();
-      let worksheet = workbook.addWorksheet("Monthly_Deposit_Report");
+    let sql = `SELECT distinct a.id as agreement_id,a.code as agreement_code,a.code as property_code,(select name from users where id=a.buh_id) as BUH,(select name from users where id=a.srm_id) as SR_MANAGER,(select name from users where id=a.manager_id) as Manager,a.city,a.state,l.name as Lanlord_name,a.address as Property_address,concat(monthname(a.final_agreement_date),'-', year(a.final_agreement_date)) AS Month,a.status,a.code,a.id,a.deposit as deposit,l.utr_number as utr_number,l.payment_date as payment_date FROM agreements a, landlords l where a.id=l.agreement_id and a.status='Deposited' and a.final_agreement_date between ? and ? and a.final_agreement_date is not null `;
+
+    if (role == "Senior_Manager") {
+      sql += ` and a.srm_id = ? `;
+    }
+    if (role == "Operations") {
+      sql += ` and a.op_id = ? `;
+    }
+    if (role == "Manager") {
+      sql += ` and a.manager_id = ? `;
+    }
+   // sql += ` ORDER by a.code,a.location`;
+
+    let report = resp[0];
+
+    let workbook = new excel.Workbook();
+    let worksheet = workbook.addWorksheet("Monthly_Deposit_Report");
+    let worksheet2 = workbook.addWorksheet("Rental_Onboarding_Deposited");
+    // excel column list
+    worksheet.columns = [
+      { header: "Month", key: "month", width: 15 },
+      { header: "Total deposit", key: "total_deposit", width: 15 },
+    ];
+    worksheet.addRows(report);
+
+    if (role != "Super Admin" && role != "Finance") {
+      const dumpData = await db.raw(sql, [startDate, endDate, id]);
+      let dumpReport = dumpData[0];
       // excel column list
-      worksheet.columns = [
-        { header: "Month", key: "month", width: 15 },
-        { header: "Total deposit", key: "total_deposit", width: 15 },
+      worksheet2.columns = [
+        { header: "Agreement Id", key: "agreement_id", width: 15 },
+        { header: "Property Code", key: "property_code", width: 15 },
+        { header: "BUH", key: "BUH", width: 15 },
+        { header: "Senior Manager", key: "SR_MANAGER", width: 15 },
+        { header: "Manager", key: "Manager", width: 15 },
+        { header: "City", key: "city", width: 15 },
+        { header: "State", key: "state", width: 15 },
+        { header: "Lanlord Name", key: "Lanlord_name", width: 15 },
+        { header: "Property Address", key: "Property_address", width: 15 },
+        { header: "Month", key: "Month", width: 15 },
+        { header: "Status", key: "status", width: 15 },
+        { header: "Deposit Amount", key: "deposit", width: 15 },
+          { header: "UTR Number", key: "utr_number", width: 15 },
+          { header: "Payment Date", key: "payment_date", width: 15 },
       ];
-      worksheet.addRows(report);
-      // response to send to frontend
-      // res is a Stream object
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-      res.setHeader(
-        "Content-Disposition",
-        "attachment; filename=" + "Monthly_Deposit_Report.xlsx"
-      );
-      if (graph) {
-        res.send(resp[0]);
-      } else {
-        return workbook.xlsx.write(res).then(function () {
-          res.status(200).end();
-        });
-      }
-    });
+      worksheet2.addRows(dumpReport);
+    } else {
+      const dumpData = await db.raw(sql, [startDate, endDate]);
+      let dumpReport = dumpData[0];
+
+      // excel column list
+      worksheet2.columns = [
+        { header: "Agreement Id", key: "agreement_id", width: 15 },
+        { header: "Property Code", key: "property_code", width: 15 },
+        { header: "BUH", key: "BUH", width: 15 },
+        { header: "Senior Manager", key: "SR_MANAGER", width: 15 },
+        { header: "Manager", key: "Manager", width: 15 },
+        { header: "City", key: "city", width: 15 },
+        { header: "State", key: "state", width: 15 },
+        { header: "Lanlord Name", key: "Lanlord_name", width: 15 },
+        { header: "Property Address", key: "Property_address", width: 15 },
+        { header: "Month", key: "Month", width: 15 },
+        { header: "Status", key: "status", width: 15 },
+        { header: "Deposit Amount", key: "deposit", width: 15 },
+          { header: "UTR Number", key: "utr_number", width: 15 },
+          { header: "Payment Date", key: "payment_date", width: 15 },
+      ];
+      worksheet2.addRows(dumpReport);
+    }
+    // response to send to frontend
+    // res is a Stream object
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "Monthly_Deposit_Report.xlsx"
+    );
+    if (graph) {
+      res.send(resp[0]);
+    } else {
+      return workbook.xlsx.write(res).then(function () {
+        res.status(200).end();
+      });
+    }
   } catch (error) {}
 }
+
 
 module.exports = {
   get_Rental_Property_Dump_Report,
