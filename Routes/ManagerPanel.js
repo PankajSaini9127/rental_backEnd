@@ -33,7 +33,11 @@ const {
   user_search_manager_inProcess,
   add_renewal_deposit,
   get_old_agreement,
-  get_data_from_recovery_renewal
+  get_data_from_recovery_renewal,
+  getallManager,
+  getAllEmployeeList,
+  get_old_ag,
+  get_search_old_ag
   
 } = require("../controller/ManagerController");
 
@@ -103,7 +107,8 @@ router.route("/agreements/approved/:manager_id").get(get_all_approved_ag)
 //toal agreements
 router.route("/agreements/total/:manager_id").get(get_all__ag)
 
-
+//old agreements
+router.route("/agreements/old/:manager_id").get(get_old_ag)
 
 //post request in agreements table get agreemennt by id
 // path /api/agreement/:id
@@ -163,6 +168,7 @@ router.route('/search/approved/manager').post(user_search_manager_approved)
 
 router.route('/search/in-process/manager').post(user_search_manager_inProcess)
 
+router.route('/search/old/manager').post(get_search_old_ag)
 
 //get meta data dashboard
 router.route('/dashboard/get-meta').get(get_status)
@@ -225,5 +231,13 @@ router.route("/get-search-manager-monthlyrent").get(list_month_rent_search)
 
 //search in monthly rent paid
 router.route("/get-search-manager-monthlyrent/paid").get(list_month_rent_paid_search)
+
+
+//get all manager
+router.route("/get-all-manager").get(getallManager)
+
+//get all supervisor by id
+router.route("/get-all-employee-list").get(getAllEmployeeList)
+
 
 module.exports = router;

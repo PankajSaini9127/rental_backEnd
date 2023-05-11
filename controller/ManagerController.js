@@ -172,7 +172,8 @@ async function get_all__ag (req,res){
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .orderBy("agreements.modify_date", "desc")
-      .where("manager_id","=",req.params.manager_id);
+      .where("type","=","Old")
+      // .where("manager_id","=",req.params.manager_id);
 
       console.log(data)
       
@@ -195,7 +196,7 @@ async function get_all__ag (req,res){
       }
      
     );
-    //console.log(agreement);
+    // console.log(agreement);
 
     // //console.log(data)
 
@@ -209,6 +210,111 @@ async function get_all__ag (req,res){
   }
 }
 
+async function get_search_old_ag (req,res){
+  try {
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id as landlord_id",
+        "landlords.utr_number",
+        "agreements.*"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where("type","=","Old")
+      .where((cb) => {
+        cb.whereILike("name", `%${req.body.name}%`);
+        cb.orWhereILike("location", `%${req.body.name}%`);
+        cb.orWhereILike("monthlyRent", `%${req.body.name}%`);
+        cb.orWhereILike("code", `%${req.body.name}%`);
+        cb.orWhereILike("address", `%${req.body.name}%`);
+      })
+      .orderBy("agreements.modify_date", "desc")
+
+      console.log(data)
+      
+    // let ids = [];
+    // let agreement = {};
+    // data.map((row) => {
+    //     if (ids.includes(row.id)) {
+    //       agreement = {
+    //         ...agreement,
+    //         [row.id]: {
+    //           ...agreement[row.id],
+    //           name: [...agreement[row.id].name, row.name],
+    //           utr_number:[...agreement[row.id].utr_number, row.utr_number]
+    //         },
+    //       };
+    //     } else {
+    //       ids.push(row.id);
+    //       agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+    //     }
+    //   }
+     
+    // );
+    //console.log(agreement);
+
+    // //console.log(data)
+
+    res.send({ success: true,data});
+  } catch (error) {
+    console.log(error);
+    res.send({
+      success: false,
+      message: "Something Went Wrong please try again later",
+    });
+  }
+}
+
+//get old agreements 
+async function get_old_ag (req,res){
+  try {
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id as landlord_id",
+        "landlords.utr_number",
+        "agreements.*"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where("type","=","Old")
+      .orderBy("agreements.modify_date", "desc")
+
+      console.log(data)
+      
+    // let ids = [];
+    // let agreement = {};
+    // data.map((row) => {
+    //     if (ids.includes(row.id)) {
+    //       agreement = {
+    //         ...agreement,
+    //         [row.id]: {
+    //           ...agreement[row.id],
+    //           name: [...agreement[row.id].name, row.name],
+    //           utr_number:[...agreement[row.id].utr_number, row.utr_number]
+    //         },
+    //       };
+    //     } else {
+    //       ids.push(row.id);
+    //       agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+    //     }
+    //   }
+     
+    // );
+    //console.log(agreement);
+
+    // //console.log(data)
+
+    res.send({ success: true,data});
+  } catch (error) {
+    console.log(error);
+    res.send({
+      success: false,
+      message: "Something Went Wrong please try again later",
+    });
+  }
+}
 
 const get_tenure = async (req, res) => {
   try {
@@ -571,6 +677,7 @@ async function getAgreementById(req, res) {
   }
 }
 //get all agreement value
+//old agreement by code 
 async function get_old_agreement(req, res) {
   try {
     const data = await db("agreements")
@@ -1420,10 +1527,10 @@ async function get_data_from_recovery (req,res){
 
 //get data from recovery
 async function get_data_from_recovery_renewal (req,res){
-  // console.log(req.params.id)
+  console.log(req.params.id)
   try {
     const data = await db("renewal_deposit").select("*").where("agreement_id","=",req.params.id)
-    // console.log(data)
+    console.log(data)
     if(data.length>0){
       
       return res.send({success:true,data:data[0]})
@@ -1508,7 +1615,60 @@ async function add_renewal_deposit (req,res) {
 
 }
 
+
+async function getallManager (req,res){
+  try {
+    let user = await db
+      .from("users")
+      .select("name", "role", "id")
+      .where((cb) => {
+          return cb.orWhereILike("role", `%${'Manager'}%`);
+        })
+    // console.log(user);
+
+    user = user.filter((row)=> !row.role.includes("Senior_Manager"))
+    // console.log("Down",user);
+    if(user.length > 0){
+      user =  user
+    }else{
+      user = []
+    }
+    return res.send(user);
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send()
+  }
+}
+
+async function getAllEmployeeList (req,res){
+  console.log(req.query.id)
+  try {
+    let user = await db
+      .from("users")
+      .select("supervisor.name", "supervisor.role", "supervisor.id")
+      .where("users.id","=",req.query.id)
+      .join("users as supervisor","supervisor.id","=","users.supervisor")
+      
+
+    console.log(user);
+
+    if(user.length > 0){
+      user =  user
+    }else{
+      user = []
+    }
+    return res.send(user);
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send()
+  }
+}
+
 module.exports = {
+  get_search_old_ag,
+  get_old_ag,
+  getAllEmployeeList,
+  getallManager,
   get_old_agreement,
   add_renewal_deposit,
   user_search_manager_approved,
