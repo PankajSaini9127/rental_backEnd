@@ -86,7 +86,7 @@ async function get_monthly_rent(req,res) {
       })
     } catch (error) {
       console.log(error);
-      return res.status(500).send();
+      // res.status(500).send();
     }
   }
     
