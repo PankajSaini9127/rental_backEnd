@@ -3,12 +3,28 @@ const { select } = require("../data/db");
 const db = require("../data/db");
 const moment = require('moment')
 
+
+const month = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
 const newAgreement = async (req, res) => {
   try {
-    console.log(req.body)
+    //console.log(req.body)
     req.body.modify_date = new Date()
     const agreement = await db("agreements").insert(req.body);
-    console.log(agreement);
+    //console.log(agreement);
 
     if (agreement.length == 1) {
       res.status(201).send({
@@ -23,13 +39,13 @@ const newAgreement = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({ success: false, message: "Something went wrong Please", error });
   }
 };
 
 async function add_landlord(req, res) {
-  // //console.log(req.body)
+  // ////console.log(req.body)
   try {
     const lanloard = await db("landlords").insert(req.body);
 
@@ -37,7 +53,7 @@ async function add_landlord(req, res) {
       res.send({ message: "Landlord Added." });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.status(500).send({ message: "Something went wrong !!!" });
   }
 }
@@ -92,13 +108,13 @@ const getAllAgreement = async (req, res) => {
       }
      
     });
-    //console.log(agreement);
+    ////console.log(agreement);
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true, agreement, ids: ids });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "Something Went Wrong please try again later",
@@ -121,7 +137,7 @@ async function get_all_approved_ag (req,res){
       .orderBy("agreements.modify_date", "desc")
       .where("manager_id","=",req.params.manager_id);
 
-      console.log(data)
+      //console.log(data)
       
     let ids = [];
     let agreement = {};
@@ -144,13 +160,13 @@ async function get_all_approved_ag (req,res){
       }
      
     });
-    //console.log(agreement);
+    ////console.log(agreement);
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true, agreement, ids: ids });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "Something Went Wrong please try again later",
@@ -175,7 +191,7 @@ async function get_all__ag (req,res){
       .where("type","=","Old")
       // .where("manager_id","=",req.params.manager_id);
 
-      console.log(data)
+      //console.log(data)
       
     let ids = [];
     let agreement = {};
@@ -196,13 +212,13 @@ async function get_all__ag (req,res){
       }
      
     );
-    // console.log(agreement);
+    // //console.log(agreement);
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true, agreement, ids: ids });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "Something Went Wrong please try again later",
@@ -231,7 +247,7 @@ async function get_search_old_ag (req,res){
       })
       .orderBy("agreements.modify_date", "desc")
 
-      console.log(data)
+      //console.log(data)
       
     // let ids = [];
     // let agreement = {};
@@ -252,13 +268,13 @@ async function get_search_old_ag (req,res){
     //   }
      
     // );
-    //console.log(agreement);
+    ////console.log(agreement);
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true,data});
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "Something Went Wrong please try again later",
@@ -281,7 +297,7 @@ async function get_old_ag (req,res){
       .where("type","=","Old")
       .orderBy("agreements.modify_date", "desc")
 
-      console.log(data)
+      //console.log(data)
       
     // let ids = [];
     // let agreement = {};
@@ -302,13 +318,13 @@ async function get_old_ag (req,res){
     //   }
      
     // );
-    //console.log(agreement);
+    ////console.log(agreement);
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true,data});
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "Something Went Wrong please try again later",
@@ -322,15 +338,15 @@ const get_tenure = async (req, res) => {
 
     m11.setMonth(m11.getMonth() - 10);
 
-    //console.log("11m>>>", m11);
+    ////console.log("11m>>>", m11);
 
     var y3 = new Date(Date.now());
     y3.setMonth(y3.getMonth() - 10 * 3);
-    //console.log("y3>>>", y3);
+    ////console.log("y3>>>", y3);
 
     var y5 = new Date(Date.now());
     y5.setMonth(y5.getMonth() - 10 * 5);
-    //console.log("y5>>>", y5);
+    ////console.log("y5>>>", y5);
 
     var tenure11Month = await db
       .from("agreements")
@@ -358,24 +374,24 @@ const get_tenure = async (req, res) => {
           return row;
       }
     });
-    //console.log(tenure11Month);
+    ////console.log(tenure11Month);
     return res.send({ success: true, renewal: tenure11Month });
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     return res.status(500).send();
   }
 };
 
 const updateAgreement = async (req, res) => {
   try {
-    console.log(">>>>", req.body);
+    //console.log(">>>>", req.body);
 
     req.body.modify_date = new Date()
 
     const update = await db("agreements")
       .where("id", "=", req.params.id)
       .update(req.body);
-    console.log(req.params.id);
+    //console.log(req.params.id);
     if (update === 1) {
       return res.send({
         success: true,
@@ -385,7 +401,7 @@ const updateAgreement = async (req, res) => {
       throw new Error({ success:false, message: "Something went wrong please try again later" })
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.status(500).send({
       success: false,
       message: "Something went wrong please try again later",
@@ -395,12 +411,12 @@ const updateAgreement = async (req, res) => {
 
 const deleteAgreement = async (req, res) => {
   try {
-    //console.log(req.params.id);
+    ////console.log(req.params.id);
     const result = await db("agreements").where("id", req.params.id).del();
     const landlords = await db("landlords")
       .where("agreement_id", req.params.id)
       .del();
-    //console.log(result, landlords);
+    ////console.log(result, landlords);
     if (result === 1 && landlords === 1) {
       res.status(202).send({ success: true, message: "Delete Successful" });
     } else {
@@ -410,7 +426,7 @@ const deleteAgreement = async (req, res) => {
       });
     }
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     res.send({
       success: false,
       message: "Something went Wrong Please try again later",
@@ -429,7 +445,7 @@ const uploadDoc = async (req, res) => {
       res.status(203).send({ message: "Pleae Provide the document." });
     }
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     res.send({ message: "Something went Wrong !!!" });
   }
 };
@@ -450,25 +466,25 @@ async function get_monthly_rent(req, res) {
 
        monthly_rent = monthly_rent.map((row, i) => {
       
-      console.log("RSD >>> ", row.rent_start_date);
+      //console.log("RSD >>> ", row.rent_start_date);
       var rent_date = new Date(row.rent_start_date);
 
       const totalDaysInMonth = getDaysInMonth(
         rent_date.getMonth() + 1,
         rent_date.getFullYear()
       );
-      // console.log("rent>>>", row);
+      // //console.log("rent>>>", row);
 
 
       const restDays = totalDaysInMonth - rent_date.getDate();
 
-      console.log("rent>>>", row.monthlyRent / totalDaysInMonth);
-      console.log(
-        totalDaysInMonth,
-        restDays,
-        row.monthlyRent,
-        rent_date.getDate()
-      );
+      //console.log("rent>>>", row.monthlyRent / totalDaysInMonth);
+      //console.log(
+      //   totalDaysInMonth,
+      //   restDays,
+      //   row.monthlyRent,
+      //   rent_date.getDate()
+      // );
 
       // calculating the final amount
       const finalAmount = (((row.monthlyRent / totalDaysInMonth) * (restDays+1))/100)*parseInt(row.percentage) 
@@ -515,10 +531,10 @@ async function get_monthly_rent(req, res) {
  
     });
 
-    console.log(finalData)
+    //console.log(finalData)
     return res.send({ success: true, monthly_rent: finalData });
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     return res.status(500).send();
   }
 }
@@ -539,7 +555,7 @@ async function getStateList(req, res) {
       }
     } else return res.send([]);
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     res.status(500).send("Error");
   }
 }
@@ -558,14 +574,14 @@ async function getCityList(req, res) {
       }
     } else return res.send([]);
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     res.status(500).send("Error");
   }
 }
 
 async function detailsAgreement(req, res) {
   try {
-    //console.log(req.query.id);
+    ////console.log(req.query.id);
     const agreement = await db("agreements").join(
       "landlords",
       "agreements.id",
@@ -574,7 +590,7 @@ async function detailsAgreement(req, res) {
     );
 
     agreement.map((row, i) => {
-      //console.log(row.id, req.params.id);
+      ////console.log(row.id, req.params.id);
       if (row.agreement_id == req.params.id) {
         return res.send(row);
       }
@@ -582,7 +598,7 @@ async function detailsAgreement(req, res) {
 
     return res.send(agreement);
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     return res.status(500).send();
   }
 }
@@ -598,7 +614,7 @@ async function getAgreementById(req, res) {
         cb.andWhere("agreement_id",req.query.id)
         cb.andWhereNot("status","Paid")
       })
-    // //console.log(data);
+    // ////console.log(data);
 
     let ids = [];
     let agreement = {};
@@ -668,11 +684,11 @@ async function getAgreementById(req, res) {
         };
       }
     });
-    // //console.log(agreement);
+    // ////console.log(agreement);
 
     return res.status(200).send({agreement,listUnpaidRow});
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     return res.status(500).send();
   }
 }
@@ -686,7 +702,7 @@ async function get_old_agreement(req, res) {
       .whereNull("type")
       .where("code","=", req.query.code)
 
-      console.log(data)
+      //console.log(data)
 
 
       let ids = [];
@@ -768,7 +784,7 @@ async function get_old_agreement(req, res) {
   
       return res.status(200).send({success:true, agreement, ids });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     return res.status(500).send();
   }
 }
@@ -776,7 +792,7 @@ async function get_old_agreement(req, res) {
 
 async function editAgreement(req, res) {
   try {
-    //console.log(req.body)
+    ////console.log(req.body)
 
     let {
       id,
@@ -843,10 +859,10 @@ async function editAgreement(req, res) {
       modify_date : new Date()      
     });
 
-    //console.log(saveAgreement);
+    ////console.log(saveAgreement);
 
     if (saveAgreement) {
-      //console.log(landlord);
+      ////console.log(landlord);
       Promise.all(
         landlord.map(async (row, index) => {
           let {
@@ -896,14 +912,14 @@ async function editAgreement(req, res) {
           return res.send({ message: "Agreement edited" });
         })
         .catch((err) => {
-          //console.log("err=>", err);
+          ////console.log("err=>", err);
           res.status(501).send({ message: "Landloard not updated" });
         });
     } else {
       res.status(501).send({ message: "Landloard not updated" });
     }
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     res.status(500).send({ message: "Agreement edited" });
   }
 }
@@ -927,7 +943,7 @@ async function user_search_manager(req, res) {
         cb.orWhereILike("address", `%${req.body.name}%`);
       }).orderBy('agreements.modify_date',"desc");
 
-    //console.log(data);
+    ////console.log(data);
 
    
     let ids = [];
@@ -949,11 +965,11 @@ async function user_search_manager(req, res) {
     
   })
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true, agreement, ids });
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     return res.status(500).send();
   }
 }
@@ -980,7 +996,7 @@ async function user_search_manager_approved(req, res) {
       }
       ).orderBy('agreements.modify_date',"desc");
 
-    // console.log(data);
+    // //console.log(data);
 
     let ids = [];
     let agreement = {};
@@ -1003,11 +1019,11 @@ async function user_search_manager_approved(req, res) {
     }
   })
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true, agreement, ids });
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     return res.status(500).send();
   }
 }
@@ -1044,7 +1060,7 @@ async function user_search_manager_inProcess(req, res) {
       }
       ).orderBy('agreements.modify_date',"desc");
 
-    console.log(data);
+    //console.log(data);
 
     let ids = [];
     let agreement = {};
@@ -1065,11 +1081,11 @@ async function user_search_manager_inProcess(req, res) {
     
   })
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true, agreement, ids });
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     return res.status(500).send();
   }
 }
@@ -1082,7 +1098,7 @@ async function get_agreement_details(req, res) {
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .where("agreement_id", req.params.id);
 
-      // console.log(data)
+      // //console.log(data)
 
     let ids = [];
     let agreement = {};
@@ -1163,7 +1179,7 @@ async function get_agreement_details(req, res) {
 
     return res.status(200).send({success:true, agreement, ids });
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     return res.status(500).send({success:false});
   }
 }
@@ -1171,13 +1187,13 @@ async function get_agreement_details(req, res) {
 //send back
 async function send_back(req, res) {
   try {
-    //console.log(">>>>", req.body, "Send Back");
-    // //console.log(req.params.id);
+    ////console.log(">>>>", req.body, "Send Back");
+    // ////console.log(req.params.id);
     const update = await db("agreements")
       .where("id", "=", req.params.id)
       .update({ status: req.body.status, remark: req.body.remark, modify_date : new Date()
       });
-    //console.log(update);
+    ////console.log(update);
     if (update === 1) {
       res.send({ success: true, message: "Agreement Update Successfully" });
     } else {
@@ -1187,7 +1203,7 @@ async function send_back(req, res) {
       });
     }
   } catch (error) {
-    //console.log(error);
+    ////console.log(error);
     res.send({
       success: false,
       message: "Something went wrong please try again later",
@@ -1208,7 +1224,7 @@ async function get_status(req, res) {
       Rejected: 0,
       Renewal: 0,
     };
-    //console.log(status)
+    ////console.log(status)
 
     if (status) {
       status.map((row) => {
@@ -1234,11 +1250,11 @@ async function get_status(req, res) {
       });
     }
 
-    //console.log(meta)
+    ////console.log(meta)
 
     res.send(meta);
   } catch (err) {
-    //console.log(err)
+    ////console.log(err)
     res.status(500).send("something went wrong");
   }
 }
@@ -1249,17 +1265,17 @@ async function getMonthListing(req, res) {
     if (!req.query.id)
       res.status(203).send({ message: "Please provide the manager ID." });
   } catch (err) {
-    //console.log("Error >> ", err);
+    ////console.log("Error >> ", err);
     return res.status(500).send({ message: "Something Went wrong" });
   }
 }
 
 async function set_final_agreement(req, res) {
   try {
-    //console.log(">>>Body::",req.body)
+    ////console.log(">>>Body::",req.body)
     res.send("All Okay ");
   } catch (error) {
-    //console.log(error)
+    ////console.log(error)
     return res.status(500).send({ message: "Something Went Wrong" });
   }
 }
@@ -1276,7 +1292,7 @@ async function get_agreement_id_renewal(req,res){
       cb.andWhereNot("status","Paid")
     })
 
-    console.log(listUnpaidRow);
+    //console.log(listUnpaidRow);
 
     let ids = [];
     let agreement = {};
@@ -1346,11 +1362,11 @@ async function get_agreement_id_renewal(req,res){
         };
       }
     });
-    // //console.log(agreement);
+    // ////console.log(agreement);
 
     return res.status(200).send({agreement,listUnpaidRow});
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     return res.status(500).send();
   }
 }
@@ -1359,7 +1375,7 @@ async function get_agreement_id_renewal(req,res){
 //renewal listing
 async function get_renewal_list (req,res){
   try {
-    console.log(req.params.id)
+    //console.log(req.params.id)
     const data = await db("agreements")
       .select(
         "landlords.name",
@@ -1374,7 +1390,7 @@ async function get_renewal_list (req,res){
       .orderBy("agreements.modify_date", "desc")
       
 
-      console.log(">>>>>>>",data)
+      //console.log(">>>>>>>",data)
 
     let ids = [];
     let agreement = {};
@@ -1392,13 +1408,13 @@ async function get_renewal_list (req,res){
         agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
       }
     });
-    //console.log(agreement);
+    ////console.log(agreement);
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true, agreement, ids: ids });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "something Went Wrong please try again later",
@@ -1419,7 +1435,7 @@ async function get_deposit_amount (req,res){
       return res.send({success:false,deposit:0})
      }
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res.status(500).send({success:false})
   }
 }
@@ -1430,7 +1446,7 @@ async function get_deposit_amount (req,res){
 async function get_search_renewal_manager (req,res)
 {
   try {
-    console.log(req.params.id)
+    //console.log(req.params.id)
     const data = await db("agreements")
       .select(
         "landlords.name",
@@ -1451,7 +1467,7 @@ async function get_search_renewal_manager (req,res)
       .orderBy("agreements.modify_date", "desc")
       
 
-      console.log(data)
+      //console.log(data)
 
     let ids = [];
     let agreement = {};
@@ -1469,13 +1485,13 @@ async function get_search_renewal_manager (req,res)
         agreement = { ...agreement, [row.id]: { ...row, name: [row.name] } };
       }
     });
-    //console.log(agreement);
+    ////console.log(agreement);
 
-    // //console.log(data)
+    // ////console.log(data)
 
     res.send({ success: true, agreement, ids: ids });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.send({
       success: false,
       message: "something Went Wrong please try again later",
@@ -1489,11 +1505,27 @@ async function insertAdjustmentAmount (req,res)
 {
   console.log(req.body)
   try {
+
+
+    let unpaid_months = []
+
+    if(req.body.unpaid)
+    {
+      unpaid_months = req.body.unpaid.map(row=>{
+        let date = new Date(row.rent_date)
+        return { month : month[date.getMonth()+1] +"-"+ date.getFullYear(), rent : row.rent_amount, status : row.status }
+      })
+    }
+
+    console.log(unpaid_months);
+
+    delete req.body.unpaid
+
     if(req.body)
     {
-      let response = await db('recovery').insert(req.body)
+      let response = await db('recovery').insert({...req.body.recovery,unpaid_months : JSON.stringify(unpaid_months)})
 
-      console.log(response)
+      //console.log(response)
 
       if(response){
         
@@ -1520,17 +1552,17 @@ async function get_data_from_recovery (req,res){
       return res.status(204).send("No Data found")
     }
     } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res.status(500)
   }
 }
 
 //get data from recovery
 async function get_data_from_recovery_renewal (req,res){
-  console.log(req.params.id)
+  //console.log(req.params.id)
   try {
     const data = await db("renewal_deposit").select("*").where("agreement_id","=",req.params.id)
-    console.log(data)
+    //console.log(data)
     if(data.length>0){
       
       return res.send({success:true,data:data[0]})
@@ -1538,7 +1570,7 @@ async function get_data_from_recovery_renewal (req,res){
       return res.status(204).send("No Data found")
     }
     } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res.status(500)
   }
 }
@@ -1548,17 +1580,17 @@ async function get_data_from_recovery_renewal (req,res){
 //get latest modify date
 async function get_modify_date (req,res){
   try {
-    console.log(req.query.id)
+    //console.log(req.query.id)
 
     const data = await db("agreements").select("modify_date").where("id","=",req.query.id)
-    console.log(data)
+    //console.log(data)
     if(data.length>0){
       return res.send({success:true,modify_date:data[0].modify_date})
     }else{
       return res.status(204).send("No Data found")
     }
     } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res.status(500)
   }
 }
@@ -1567,17 +1599,17 @@ async function get_modify_date (req,res){
 //get latest modify date
 async function get_payment_update_date (req,res){
   try {
-    console.log(req.query.id)
+    //console.log(req.query.id)
 
     const data = await db("monthly_rent").select("update_at").where("id","=",req.query.id)
-    console.log(data)
+    //console.log(data)
     if(data.length>0){
       return res.send({success:true,modify_date:data[0].update_at})
     }else{
       return res.status(204).send("No Data found")
     }
     } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res.status(500)
   }
 }
@@ -1585,29 +1617,47 @@ async function get_payment_update_date (req,res){
 // renewal deposit
 async function add_renewal_deposit (req,res) {
   try {
-    
+   
+  
+    console.log("renewal>>>",req.body)
+  
+
+    let unpaid_months = []
+
+    if(req.body.unpaid)
+    {
+      unpaid_months = req.body.unpaid.map(row=>{
+        let date = new Date(row.rent_date)
+        return { month : month[date.getMonth()+1] +"-"+ date.getFullYear(), rent : row.rent_amount, status : row.status }
+      })
+    }
+
+    console.log(unpaid_months);
+
     if(!req.body)
     {
       return res.status(203).send("Payload Missing !!!")
     }
 
+    delete req.body.unpaid
+
     let data = null;
     // check if is it already there s
     const check  = await db('renewal_deposit').select("agreement_Id").where("agreement_Id","=",req.body.agreement_id);
-    console.log(check)
+    //console.log(check)
     if(check.length > 0)
-     data  = await db('renewal_deposit').update(req.body).where("agreement_id","=",req.agreement_id);
+     data  = await db('renewal_deposit').update({...req.body,unpaid_months : JSON.stringify(unpaid_months)}).where("agreement_id","=",req.agreement_id);
      else
-     data  = await  db('renewal_deposit').insert(req.body);
+     data  = await  db('renewal_deposit').insert({...req.body,unpaid_months : JSON.stringify(unpaid_months)});
 
-     console.log(req.body)
+     //console.log(req.body)
     if(data)
     {
       return res.send({message : "Data added successfully !!!"})
     }
 
   } catch (error) {
-    console.log(req.body)
+    //console.log(req.body)
 
     console.log('error>>>',error)
     return res.status(500).send("Something went wrong !!!")
@@ -1624,10 +1674,10 @@ async function getallManager (req,res){
       .where((cb) => {
           return cb.orWhereILike("role", `%${'Manager'}%`);
         })
-    // console.log(user);
+    // //console.log(user);
 
     user = user.filter((row)=> !row.role.includes("Senior_Manager"))
-    // console.log("Down",user);
+    // //console.log("Down",user);
     if(user.length > 0){
       user =  user
     }else{
@@ -1635,13 +1685,13 @@ async function getallManager (req,res){
     }
     return res.send(user);
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res.status(500).send()
   }
 }
 
 async function getAllEmployeeList (req,res){
-  console.log(req.query.id)
+  //console.log(req.query.id)
   try {
     let user = await db
       .from("users")
@@ -1650,7 +1700,7 @@ async function getAllEmployeeList (req,res){
       .join("users as supervisor","supervisor.id","=","users.supervisor")
       
 
-    console.log(user);
+    //console.log(user);
 
     if(user.length > 0){
       user =  user
@@ -1659,7 +1709,7 @@ async function getAllEmployeeList (req,res){
     }
     return res.send(user);
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res.status(500).send()
   }
 }
