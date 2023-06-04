@@ -122,6 +122,56 @@ const getAllAgreement = async (req, res) => {
   }
 };
 
+// get all terminated agreements 
+const get_terminated_agreements = async (req, res) => {
+  try {
+    const data = await db("agreements")
+      .select(
+        "landlords.name",
+        "landlords.agreement_id",
+        "landlords.id",
+        "landlords.utr_number",
+        "agreements.*"
+      )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .orderBy("agreements.modify_date", "desc")
+      .where("manager_id","=",req.params.manager_id);
+
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+      if(row.status === "Terminated"){
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              utr_number:[...agreement[row.id].utr_number, row.utr_number]
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+        }
+      }
+     
+    });
+    ////console.log(agreement);
+
+    console.log(data)
+
+    res.send({ success: true, agreement, ids: ids });
+  } catch (error) {
+    //console.log(error);
+    res.send({
+      success: false,
+      message: "Something Went Wrong please try again later",
+    });
+  }
+};
+
 // approved agreements
 async function get_all_approved_ag (req,res){
   try {
@@ -188,7 +238,7 @@ async function get_all__ag (req,res){
       )
       .join("landlords", "agreements.id", "=", "landlords.agreement_id")
       .orderBy("agreements.modify_date", "desc")
-      .where("type","=","Old")
+      // .where("type","=","Old")
       // .where("manager_id","=",req.params.manager_id);
 
       //console.log(data)
@@ -212,9 +262,9 @@ async function get_all__ag (req,res){
       }
      
     );
-    // //console.log(agreement);
+    // console.log(agreement);
 
-    // ////console.log(data)
+    // console.log(data)
 
     res.send({ success: true, agreement, ids: ids });
   } catch (error) {
@@ -1090,6 +1140,61 @@ async function user_search_manager_inProcess(req, res) {
   }
 }
 
+async function search_in_terminated_ag(req, res) {
+  try {
+    const data = await db("agreements")
+    .select(
+      "landlords.name",
+      "landlords.agreement_id",
+      "landlords.id",
+      "landlords.utr_number",
+      "agreements.*"
+    )
+      .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+      .where((cb) => {
+        cb.whereILike("name", `%${req.body.name}%`);
+        cb.orWhereILike("location", `%${req.body.name}%`);
+        cb.orWhereILike("monthlyRent", `%${req.body.name}%`);
+        cb.orWhereILike("code", `%${req.body.name}%`);
+        cb.orWhereILike("address", `%${req.body.name}%`);
+      })
+      .andWhere(cb=>{
+      cb.orWhere("status","=","Terminated");
+      }
+      ).orderBy('agreements.modify_date',"desc");
+
+    //console.log(data);
+
+    let ids = [];
+    let agreement = {};
+    data.map((row) => {
+        if (ids.includes(row.id)) {
+          agreement = {
+            ...agreement,
+            [row.id]: {
+              ...agreement[row.id],
+              name: [...agreement[row.id].name, row.name],
+              utr_number:[...agreement[row.id].utr_number, row.utr_number]
+            },
+          };
+        } else {
+          ids.push(row.id);
+          agreement = { ...agreement, [row.id]: { ...row, name: [row.name], utr_number: [row.utr_number]  } };
+        }
+    
+  })
+
+    // ////console.log(data)
+
+    res.send({ success: true, agreement, ids });
+  } catch (error) {
+    ////console.log(error);
+    return res.status(500).send();
+  }
+}
+
+
+
 
 async function get_agreement_details(req, res) {
   try {
@@ -1508,6 +1613,7 @@ async function insertAdjustmentAmount (req,res)
 
 
     let unpaid_months = []
+    console.log(">>>")
 
     if(req.body.unpaid)
     {
@@ -1525,7 +1631,7 @@ async function insertAdjustmentAmount (req,res)
     {
       let response = await db('recovery').insert({...req.body.recovery,unpaid_months : JSON.stringify(unpaid_months)})
 
-      //console.log(response)
+      // console.log(response)
 
       if(response){
         
@@ -1751,6 +1857,8 @@ module.exports = {
   get_all_approved_ag,
   get_all__ag,
   user_search_manager_inProcess,
-  get_data_from_recovery_renewal
+  get_data_from_recovery_renewal,
+  get_terminated_agreements,
+  search_in_terminated_ag
 };
 

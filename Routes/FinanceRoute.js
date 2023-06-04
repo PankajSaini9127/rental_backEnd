@@ -15,7 +15,8 @@ const {
   get_monthly_search,
   get_monthly_search_paid,
   convert_to_paid,
-  get_old_agreement_finance
+  get_old_agreement_finance,
+  get_all_agreements_terminated
 } = require("../controller/FinanceControls");
 
 const router = express.Router();
@@ -29,6 +30,9 @@ router.route("/get-agreement/:id").get(getAllAgreement);
 router.route("/in-process/get-agreement/:id").get(get_all_agreements_inProcess);
 
 router.route("/approved/get-agreement/:id").get(get_all_agreements_approved);
+
+
+router.route("/terminated/get-agreement/:id").get(get_all_agreements_terminated);
 
 
 router.route("/search/:id").get(finance_agreement_search);

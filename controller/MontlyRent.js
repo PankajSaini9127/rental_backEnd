@@ -355,6 +355,32 @@ async function invoice_number_verification(req, res) {
   }
 }
 
+
+//update payment status by agreemets id
+async function update_payment_status_termination(req, res) {
+  try {
+    // console.log(req.body)
+    const invoice = await db("monthly_rent")
+      .update(req.body)
+      .where("agreement_id", "=", req.params.id)
+      .andWhereNot("status","=","Paid");
+    if (invoice === 1) {
+      return res.status(200).send({ success: true, message: "Done" });
+    } else {
+      return res.status(203).send({
+        success: false,
+        message: "something Went Wrong Please Try Again Later",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Something Went Wrong Please Try Again Later",
+    });
+  }
+}
+
 module.exports = {
   add_rent,
   get_landlord_id,
@@ -365,5 +391,6 @@ module.exports = {
   invoice_number_verification,
   list_month_rent_paid,
   list_month_rent_paid_search,
-  list_month_rent_search
+  list_month_rent_search,
+  update_payment_status_termination
 };

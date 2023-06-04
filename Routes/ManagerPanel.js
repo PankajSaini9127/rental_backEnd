@@ -37,11 +37,13 @@ const {
   getallManager,
   getAllEmployeeList,
   get_old_ag,
-  get_search_old_ag
+  get_search_old_ag,
+  get_terminated_agreements,
+  search_in_terminated_ag
   
 } = require("../controller/ManagerController");
 
-const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification, list_month_rent_paid, list_month_rent_search, list_month_rent_paid_search} = require("../controller/MontlyRent");
+const { add_rent, get_landlord_id, list_month_rent ,add_invoice, update_payment_status, get_agreements_code, invoice_number_verification, list_month_rent_paid, list_month_rent_search, list_month_rent_paid_search, update_payment_status_termination} = require("../controller/MontlyRent");
 
 // setting up multer for file transport 
 const router = express.Router();
@@ -104,8 +106,12 @@ router.route("/agreements/:manager_id").get(getAllAgreement);
 //approved agreements
 router.route("/agreements/approved/:manager_id").get(get_all_approved_ag)
 
-//toal agreements
+//total agreements
 router.route("/agreements/total/:manager_id").get(get_all__ag)
+
+//get all terminated agreements
+router.route("/agreements/terminated/:manager_id").get(get_terminated_agreements)
+
 
 //old agreements
 router.route("/agreements/old/:manager_id").get(get_old_ag)
@@ -141,6 +147,9 @@ router.route("/send-back/:id").put(send_back)
 // path /api/updateAgreement/:id
 router.route("/updateAgreement/:id").put(updateAgreement);
 
+router.route("/updateAgreement/monthly_rent-status/:id").put(update_payment_status_termination);
+
+
 // delete agreemenet in agreemenets table
 // path /api/delAgreement/:id
 router.route("/delAgreement/:id").delete(deleteAgreement);
@@ -167,6 +176,9 @@ router.route('/search/manager').post(user_search_manager)
 router.route('/search/approved/manager').post(user_search_manager_approved)
 
 router.route('/search/in-process/manager').post(user_search_manager_inProcess)
+
+//get search in all terminated agreements
+router.route('/search/terminated').post(search_in_terminated_ag)
 
 router.route('/search/old/manager').post(get_search_old_ag)
 
@@ -203,7 +215,7 @@ router.route('/get-invoice-number-validate/:invoice').get(invoice_number_verific
 //renewal listing data
 router.route('/get-renewal-list/:id').get(get_renewal_list)
 
-//renewal listing data
+//termination listing data
 router.route('/insertAdjustmentAmount').post(insertAdjustmentAmount)
 
 //list data 

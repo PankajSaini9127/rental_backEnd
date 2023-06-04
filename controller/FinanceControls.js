@@ -258,12 +258,150 @@ const get_all_agreements_approved = async (req, res) => {
   }
 };
 
+const get_all_agreements_terminated = async (req, res) => {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", "=", req.params.id);
+
+    // for getting the name for Sr manager
+    let Sr_names = {};
+    supervisor.map((row) => {
+      Sr_names = { ...Sr_names, [row.id]: row.name };
+    });
+
+    // console.log(Sr_names);
+
+    let data = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        return await db("agreements")
+          .select(
+            "users.name as buh",
+            "landlords.name",
+            "landlords.agreement_id",
+            "landlords.id as landlords",
+            "agreements.*",
+            "landlords.percentage",
+            "landlords.utr_number"
+          )
+          .where("op_id", "=", row.id)
+          .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+          .join("users", "agreements.buh_id", "=", "users.id")
+          // .join("renewal_deposit","agreements.id", "=", "renewal_deposit.agreement_id")
+          .andWhere(cb=>{
+            cb.orWhere("agreements.status","=","Terminated");
+           
+          })
+          .orderBy("agreements.modify_date", "desc");
+      })
+    );
+    let data2 = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        return await db("agreements")
+          .select(
+            "agreements.id",
+            "renewal_deposit.deposited as old_deposit",
+            "renewal_deposit.deposited as new_amount",
+          ).join("renewal_deposit","agreements.id", "=", "renewal_deposit.agreement_id")
+      })
+    );
+
+    data = data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+
+    let depositValue = {}
+    data2[0].status === "fulfilled" ? data2[0].value.map((row, i) => Object.assign(depositValue,{[row.id] : row})) : [];
+
+    // console.log(depositValue)
+
+    data = data.map(row=>{
+      if(depositValue[row.agreement_id])
+      {
+        row.old_deposit = depositValue[row.agreement_id].old_deposit
+        row.new_amount = depositValue[row.agreement_id].new_amount
+      }
+      return row} )
+
+    // let ids = [];
+    // let agreement = {};
+
+    // data.map((row) => {
+    //   if (ids.includes(row.id)) {
+    //     agreement = {
+    //       ...agreement,
+    //       [row.id]: {
+    //         ...agreement[row.id],
+    //         name: [...agreement[row.id].name, row.name],
+    //         sr_manager: supervisor[0].name,
+    //       },
+    //     };
+    //   } else {
+    //     ids.push(row.id);
+    //     agreement = {
+    //       ...agreement,
+    //       [row.id]: { ...row, name: [row.name], sr_manager: Sr_names[row.buh_id] },
+    //     };
+    //   }
+    // });
+
+    console.log('>>>',data)
+
+    return res.send({ success: true, agreement: data });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+};
+
 //search use by field name
 async function finance_agreement_search(req, res) {
   try {
     const supervisor = await db("users")
       .select("*")
       .where("supervisor", req.params.id);
+
+
+      let status;
+      switch (req.query.type) {
+        case "terminated-ag":
+          status = (cb) => {
+            cb.orWhere("agreements.status", "=", "Terminated");
+          };
+          break;
+        case "in-procces-ag":
+          status = (cb) => {
+            cb.orWhere("agreements.status", "=", "Sent To Sr Manager");
+            cb.orWhere("agreements.status", "=", "Sent To BUH");
+            cb.orWhere("agreements.status", "=", "Sent To Operations");
+            cb.orWhere("agreements.status", "=", "Sent To Finance Team");
+            cb.orWhere("agreements.status", "=", "Terminated By Manager");
+            cb.orWhere("agreements.status", "=", "Terminated By Sr Manager");
+          };
+          break;
+        case "approved-ag":
+          status = (cb) => {
+            cb.orWhere("agreements.status", "=", "Approved");
+            cb.orWhere("agreements.status", "=", "Deposited");
+          };
+          break;
+        case "total-ag":
+          status = (cb) => {
+            cb.orWhere("agreements.status", "=", "Approved");
+            cb.orWhere("agreements.status", "=", "Deposited");
+            cb.orWhere("agreements.status", "=", "Sent To Sr Manager");
+            cb.orWhere("agreements.status", "=", "Sent To BUH");
+            cb.orWhere("agreements.status", "=", "Sent To Operations");
+            cb.orWhere("agreements.status", "=", "Sent To Finance Team");
+            cb.orWhere("agreements.status", "=", "Terminated By Manager");
+            cb.orWhere("agreements.status", "=", "Terminated By Sr Manager");
+            cb.orWhere("agreements.status", "=", "Terminated");
+          };
+        default:
+          break;
+      }
+
 
     const data = await db("agreements")
       .select(
@@ -279,6 +417,7 @@ async function finance_agreement_search(req, res) {
       .join("users as srm", "agreements.srm_id", "=", "srm.id")
       .where("op_id", supervisor[0].id)
       .whereNot("agreements.status", "=", "Hold")
+      .andWhere(status)
       .andWhere((cb) => {
         cb.whereILike("landlords.name", `%${req.query.search}%`);
         cb.orWhereILike("agreements.location", `%${req.query.search}%`);
@@ -998,5 +1137,6 @@ module.exports = {
   finance_get_monthly_rent_paid,
   get_monthly_search,
   get_monthly_search_paid,
-  get_old_agreement_finance
+  get_old_agreement_finance,
+  get_all_agreements_terminated
 };

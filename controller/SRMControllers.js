@@ -27,13 +27,13 @@ const getAllAgreement = async (req, res) => {
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .where("manager_id", row.id)
           .whereNot("status", "=", "Hold")
-          .andWhere(cb=>{
-            cb.orWhere("status","=","Sent To Sr Manager");
-            cb.orWhere("status","=","Sent To BUH");
-            cb.orWhere("status","=","Sent To Operations");
-            cb.orWhere("status","=","Sent To Finance Team");
-            cb.orWhere("status","=","Terminated By Manager");
-            cb.orWhere("status","=","Terminated By Sr Manager")
+          .andWhere((cb) => {
+            cb.orWhere("status", "=", "Sent To Sr Manager");
+            cb.orWhere("status", "=", "Sent To BUH");
+            cb.orWhere("status", "=", "Sent To Operations");
+            cb.orWhere("status", "=", "Sent To Finance Team");
+            cb.orWhere("status", "=", "Terminated By Manager");
+            cb.orWhere("status", "=", "Terminated By Sr Manager");
           })
           .orderBy("agreements.modify_date", "desc");
       })
@@ -115,9 +115,92 @@ const getAllApprovedAgreements = async (req, res) => {
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .where("manager_id", row.id)
           .whereNot("status", "=", "Hold")
-          .andWhere(cb=>{
-            cb.orWhere("status","=","Approved");
-            cb.orWhere("status","=","Deposited");
+          .andWhere((cb) => {
+            cb.orWhere("status", "=", "Approved");
+            cb.orWhere("status", "=", "Deposited");
+          })
+          .orderBy("agreements.modify_date", "desc");
+      })
+    );
+
+    // console.log(">>up>",data)
+    data =
+      data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
+
+    // console.log(">>down>",data)
+
+    let ids = [];
+    let agreement = {};
+
+    // if(data[0] === undefined)
+    // return res.send({ success: true, agreement  , ids });
+
+    data.map((row) => {
+      if (ids.includes(row.id)) {
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...agreement[row.id],
+            name: [...agreement[row.id].name, row.name],
+            manager: manager_name[row.manager_id],
+          },
+        };
+      } else {
+        ids.push(row.id);
+        console.log(">>>>>", row.manager_id);
+        agreement = {
+          ...agreement,
+          [row.id]: {
+            ...row,
+            name: [row.name],
+            manager: manager_name[row.manager_id],
+          },
+        };
+      }
+    });
+
+    console.log(">>>", ids, agreement);
+
+    return res.send({ success: true, agreement, ids });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      success: false,
+      message: "something Went Wrong please try again later",
+    });
+  }
+};
+
+// terminated all agreemants list
+const get_terminated_ag = async (req, res) => {
+  try {
+    const supervisor = await db("users")
+      .select("*")
+      .where("supervisor", "=", req.params.id);
+
+    if (supervisor.length === 0) throw new Error();
+
+    // for getting the name for Sr manager
+    let manager_name = {};
+    supervisor.map((row) => {
+      manager_name = { ...manager_name, [row.id]: row.name };
+    });
+
+    let data = await Promise.allSettled(
+      supervisor.map(async (row) => {
+        console.log(row.id);
+        return await db("agreements")
+          .select(
+            "landlords.name",
+            "landlords.agreement_id",
+            "landlords.id ",
+            "agreements.*"
+          )
+          .join("landlords", "agreements.id", "=", "landlords.agreement_id")
+          .where("manager_id", row.id)
+          .whereNot("status", "=", "Hold")
+          .andWhere((cb) => {
+            cb.orWhere("status", "=", "Terminated");
           })
           .orderBy("agreements.modify_date", "desc");
       })
@@ -257,12 +340,50 @@ async function user_search_srmanager(req, res) {
     const supervisor = await db("users")
       .select("*")
       .where("supervisor", "=", req.params.id);
-    // for getting the name for Sr manager
 
     let manager_name = {};
     supervisor.map((row) => {
       manager_name = { ...manager_name, [row.id]: row.name };
     });
+
+    let status;
+    switch (req.body.name.type) {
+      case "terminated-ag":
+        status = (cb) => {
+          cb.orWhere("status", "=", "Terminated");
+        };
+        break;
+      case "in-procces-ag":
+        status = (cb) => {
+          cb.orWhere("status", "=", "Sent To Sr Manager");
+          cb.orWhere("status", "=", "Sent To BUH");
+          cb.orWhere("status", "=", "Sent To Operations");
+          cb.orWhere("status", "=", "Sent To Finance Team");
+          cb.orWhere("status", "=", "Terminated By Manager");
+          cb.orWhere("status", "=", "Terminated By Sr Manager");
+        };
+        break;
+      case "approved-ag":
+        status = (cb) => {
+          cb.orWhere("status", "=", "Approved");
+          cb.orWhere("status", "=", "Deposited");
+        };
+        break;
+      case "total-ag":
+        status = (cb) => {
+          cb.orWhere("status", "=", "Approved");
+          cb.orWhere("status", "=", "Deposited");
+          cb.orWhere("status", "=", "Sent To Sr Manager");
+          cb.orWhere("status", "=", "Sent To BUH");
+          cb.orWhere("status", "=", "Sent To Operations");
+          cb.orWhere("status", "=", "Sent To Finance Team");
+          cb.orWhere("status", "=", "Terminated By Manager");
+          cb.orWhere("status", "=", "Terminated By Sr Manager");
+          cb.orWhere("status", "=", "Terminated");
+        };
+      default:
+        break;
+    }
 
     let data = await Promise.allSettled(
       supervisor.map(async (row) => {
@@ -277,13 +398,15 @@ async function user_search_srmanager(req, res) {
           .join("landlords", "agreements.id", "=", "landlords.agreement_id")
           .where("manager_id", "=", row.id)
           .whereNot("status", "=", "Hold")
+          .andWhere(status)
           .andWhere((cb) => {
-            cb.whereILike("name", `%${req.body.name}%`);
-            cb.orWhereILike("location", `%${req.body.name}%`);
-            cb.orWhereILike("monthlyRent", `%${req.body.name}%`);
-            cb.orWhereILike("code", `%${req.body.name}%`);
-            cb.orWhereILike("address", `%${req.body.name}%`);
-          }).orderBy('agreements.modify_date',"desc");
+            cb.whereILike("name", `%${req.body.name.searchValue}%`);
+            cb.orWhereILike("location", `%${req.body.name.searchValue}%`);
+            cb.orWhereILike("monthlyRent", `%${req.body.name.searchValue}%`);
+            cb.orWhereILike("code", `%${req.body.name.searchValue}%`);
+            cb.orWhereILike("address", `%${req.body.name.searchValue}%`);
+          })
+          .orderBy("agreements.modify_date", "desc");
       })
     );
 
@@ -352,15 +475,15 @@ async function srm_get_monthly_rent(req, res) {
           .select("*")
           .where("manager_id", row.id)
           .whereNot("status", "=", "Hold")
-          .andWhere(cb=>{
-            cb.orWhere('status',"=","Sent To Sr Manager");
-            cb.orWhere('status',"=","Pending");
-            cb.orWhere('status',"=","Sent To Operations");
-            cb.orWhere('status',"=","Sent To Finance ");
+          .andWhere((cb) => {
+            cb.orWhere("status", "=", "Sent To Sr Manager");
+            cb.orWhere("status", "=", "Pending");
+            cb.orWhere("status", "=", "Sent To Operations");
+            cb.orWhere("status", "=", "Sent To Finance ");
           })
           .orderBy("time", "asc")
-    .orderBy("rent_date","asc")
-    .orderBy("code","asc")
+          .orderBy("rent_date", "asc")
+          .orderBy("code", "asc");
       })
     );
 
@@ -402,12 +525,10 @@ async function srm_get_monthly_rent(req, res) {
     return res.send({ success: true, ids, agreement });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .send({
-        success: false,
-        message: "Some Error Occured!! Please Try Again Later.",
-      });
+    return res.status(500).send({
+      success: false,
+      message: "Some Error Occured!! Please Try Again Later.",
+    });
   }
 }
 
@@ -432,13 +553,13 @@ async function srm_get_monthly_rent_paid(req, res) {
           .select("*")
           .where("manager_id", row.id)
           .whereNot("status", "=", "Hold")
-          .andWhere(cb=>{
-            cb.orWhere('status',"=","Approved");
-            cb.orWhere('status',"=","Paid");
+          .andWhere((cb) => {
+            cb.orWhere("status", "=", "Approved");
+            cb.orWhere("status", "=", "Paid");
           })
           .orderBy("time", "asc")
-    .orderBy("rent_date","asc")
-    .orderBy("code","asc")
+          .orderBy("rent_date", "asc")
+          .orderBy("code", "asc");
       })
     );
 
@@ -480,12 +601,10 @@ async function srm_get_monthly_rent_paid(req, res) {
     return res.send({ success: true, ids, agreement });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .send({
-        success: false,
-        message: "Some Error Occured!! Please Try Again Later.",
-      });
+    return res.status(500).send({
+      success: false,
+      message: "Some Error Occured!! Please Try Again Later.",
+    });
   }
 }
 
@@ -499,23 +618,19 @@ async function srm_get_monthly_rent_id(req, res) {
     console.log(data);
 
     if (data.length === 0) {
-      return res
-        .status(404)
-        .send({
-          success: false,
-          message: "Some Error Occured!! Please Try Again Later.",
-        });
+      return res.status(404).send({
+        success: false,
+        message: "Some Error Occured!! Please Try Again Later.",
+      });
     } else {
       return res.send({ succes: true, data });
     }
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .send({
-        success: false,
-        message: "Some Error Occured!! Please Try Again Later.",
-      });
+    return res.status(500).send({
+      success: false,
+      message: "Some Error Occured!! Please Try Again Later.",
+    });
   }
 }
 
@@ -625,12 +740,12 @@ async function get_search_renewal_srm(req, res) {
 //search in onthly rent in process payment
 async function get_search_monthlyrent_srm(req, res) {
   try {
-    console.log(">>>body>>",req.query)
+    console.log(">>>body>>", req.query);
     const supervisor = await db("users")
       .select("*")
       .where("supervisor", "=", req.query.id);
- 
-      console.log(supervisor)
+
+    console.log(supervisor);
 
     if (supervisor.length === 0) throw new Error();
 
@@ -638,8 +753,8 @@ async function get_search_monthlyrent_srm(req, res) {
     supervisor.map((row) => {
       manager_name = { ...manager_name, [row.id]: row.name };
     });
-    
-    console.log(">>>>",supervisor)
+
+    console.log(">>>>", supervisor);
     let data = await Promise.allSettled(
       supervisor.map(async (row) => {
         console.log(row.id);
@@ -647,16 +762,16 @@ async function get_search_monthlyrent_srm(req, res) {
           .select("*")
           .where("manager_id", row.id)
           .whereNot("status", "=", "Hold")
-         
-          .andWhere(cb=>{
-            cb.orWhere("status","=","Sent To Sr Manager");
-            cb.orWhere("status","=","Sent To Operations");
-            cb.orWhere("status","=","Sent To Finance");
-            cb.orWhere("status","=","Pending");
-            cb.orWhere("status","=","Sent Back From Finance");
-            cb.orWhere("status","=","Sent Back From Operations");
-            cb.orWhere("status","=","Sent Back From Sr Manager");
-            cb.orWhere("status","=","Hold");
+
+          .andWhere((cb) => {
+            cb.orWhere("status", "=", "Sent To Sr Manager");
+            cb.orWhere("status", "=", "Sent To Operations");
+            cb.orWhere("status", "=", "Sent To Finance");
+            cb.orWhere("status", "=", "Pending");
+            cb.orWhere("status", "=", "Sent Back From Finance");
+            cb.orWhere("status", "=", "Sent Back From Operations");
+            cb.orWhere("status", "=", "Sent Back From Sr Manager");
+            cb.orWhere("status", "=", "Hold");
           })
           .andWhere((cb) => {
             cb.whereILike("landlord_name", `%${req.query.search}%`);
@@ -666,15 +781,14 @@ async function get_search_monthlyrent_srm(req, res) {
             cb.orWhereILike("status", `%${req.query.search}%`);
           })
           .orderBy("time", "asc")
-    .orderBy("rent_date","asc")
-    .orderBy("code","asc")
+          .orderBy("rent_date", "asc")
+          .orderBy("code", "asc");
       })
     );
 
     console.log(">>up>", data);
     data =
       data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
-
 
     let ids = [];
     let agreement = {};
@@ -709,24 +823,22 @@ async function get_search_monthlyrent_srm(req, res) {
     return res.send({ success: true, ids, agreement });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .send({
-        success: false,
-        message: "Some Error Occured!! Please Try Again Later.",
-      });
+    return res.status(500).send({
+      success: false,
+      message: "Some Error Occured!! Please Try Again Later.",
+    });
   }
 }
 
 //searcgh in monthly rent paid rent
 async function get_search_monthlyrent_srm_paid(req, res) {
   try {
-    console.log(">>>body>>",req.query)
+    console.log(">>>body>>", req.query);
     const supervisor = await db("users")
       .select("*")
       .where("supervisor", "=", req.query.id);
- 
-      console.log(supervisor)
+
+    console.log(supervisor);
 
     if (supervisor.length === 0) throw new Error();
 
@@ -734,8 +846,8 @@ async function get_search_monthlyrent_srm_paid(req, res) {
     supervisor.map((row) => {
       manager_name = { ...manager_name, [row.id]: row.name };
     });
-    
-    console.log(">>>>",supervisor)
+
+    console.log(">>>>", supervisor);
     let data = await Promise.allSettled(
       supervisor.map(async (row) => {
         console.log(row.id);
@@ -750,19 +862,18 @@ async function get_search_monthlyrent_srm_paid(req, res) {
             cb.orWhereILike("code", `%${req.query.search}%`);
             cb.orWhereILike("gst", `%${req.query.search}%`);
           })
-          .andWhere(cb=>{
-            cb.orWhere("status","=","Paid");
+          .andWhere((cb) => {
+            cb.orWhere("status", "=", "Paid");
           })
           .orderBy("time", "asc")
-    .orderBy("rent_date","asc")
-    .orderBy("code","asc")
+          .orderBy("rent_date", "asc")
+          .orderBy("code", "asc");
       })
     );
 
     console.log(">>up>", data);
     data =
       data[0].status === "fulfilled" ? data[0].value.map((row, i) => row) : [];
-
 
     let ids = [];
     let agreement = {};
@@ -797,24 +908,21 @@ async function get_search_monthlyrent_srm_paid(req, res) {
     return res.send({ success: true, ids, agreement });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .send({
-        success: false,
-        message: "Some Error Occured!! Please Try Again Later.",
-      });
+    return res.status(500).send({
+      success: false,
+      message: "Some Error Occured!! Please Try Again Later.",
+    });
   }
 }
-
 
 //dashboard  item
 async function get_dashboard_data(req, res) {
   try {
+    let status = await db("users")
+      .select("users.id", "agreements.status")
+      .where("supervisor", "=", req.params.id)
+      .join("agreements", "agreements.manager_id", "=", "users.id");
 
-    let status = await db("users").select('users.id',"agreements.status")
-    .where("supervisor","=",req.params.id)
-    .join("agreements","agreements.manager_id","=","users.id")
-    
     // let  = await db("agreements").select("status");
 
     let meta = {
@@ -831,37 +939,36 @@ async function get_dashboard_data(req, res) {
         // console.log()
         meta.totalAgreement += 1;
 
-        switch(row.status)
-        {
-          case "Sent Back From Sr Manager" : 
-          meta.Send_Back += 1;
-          break;
-          case "Sent To Sr Manager" : 
-          meta.Pending += 1;
-          break;
-          case "Sent To Finance Team" : 
-          meta.Approved += 1;
-          break;
-          case "Sent To BHU" :
-          meta.Approved += 1;
-          break;
-          case "Sent To Operations" :
-          meta.Approved += 1;
-          break;
-          case "Deposited" : 
-          meta.Approved += 1;
-          break;
+        switch (row.status) {
+          case "Sent Back From Sr Manager":
+            meta.Send_Back += 1;
+            break;
+          case "Sent To Sr Manager":
+            meta.Pending += 1;
+            break;
+          case "Sent To Finance Team":
+            meta.Approved += 1;
+            break;
+          case "Sent To BHU":
+            meta.Approved += 1;
+            break;
+          case "Sent To Operations":
+            meta.Approved += 1;
+            break;
+          case "Deposited":
+            meta.Approved += 1;
+            break;
           default:
-           break
+            break;
         }
       });
     }
 
-    console.log(meta)
+    console.log(meta);
 
     res.send(meta);
   } catch (err) {
-    console.log(err)
+    console.log(err);
     res.status(500).send("something went wrong");
   }
 }
@@ -878,5 +985,6 @@ module.exports = {
   getAllApprovedAgreements,
   srm_get_monthly_rent_paid,
   get_total_agreements,
-  get_search_monthlyrent_srm_paid
+  get_search_monthlyrent_srm_paid,
+  get_terminated_ag,
 };
