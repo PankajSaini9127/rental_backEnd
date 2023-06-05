@@ -9,7 +9,7 @@ exports.seed = async function() {
   // ]);
   
   // Deletes ALL existing entries
-  // const res = await db('agreements').columnInfo()
+  const res = await db('renewal_deposit').columnInfo()
   // const res = await db('agreements').select("payment_date")
   // console.log(res)
   // await db('users').del()
@@ -20,7 +20,7 @@ exports.seed = async function() {
   //  res2= await db.table('monthly_rent').truncate()
   //  res2= await db.table('	recovery').truncate()
   //  res2= await db.table('	recovery_logs').truncate()
-  //  console.log(res,res2)
+   console.log(res)
   // console.log("Seed Response>>>",res,res)
 // const arr = [
 // {id : 1,  city :'North and Middle, Andaman', state_id :  32},
